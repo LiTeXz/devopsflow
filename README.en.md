@@ -24,7 +24,7 @@ Do not treat Plan mode as optional; it is the entry guard for the DevFlow workfl
 Install all skills from the repository root:
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router ddd-event-storming-design ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
+npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
 ```
 
 Install a single skill:
@@ -38,6 +38,7 @@ Restart Codex after installation so the new skills are loaded.
 ## Skills
 
 - `engineering-workflow-router`: entry router for development, refactor, bug fix, modeling, review, verification, and branch finishing.
+- `resumable-workflow-guard`: creates checkpoints, resume cursors, and handoff notes for long-running, resumed, or interruption-prone work.
 - `ddd-event-storming-design`: pure DDD modeling from Event Storming and CQRS.
 - `ddd-to-tdd-handoff`: converts confirmed DDD outputs into executable TDD slices.
 - `implementation-planning`: writes small, verifiable implementation plans before coding.
@@ -56,6 +57,7 @@ Restart Codex after installation so the new skills are loaded.
 ```text
 user request
   -> engineering-workflow-router
+    -> long-running/resumed/interruption-prone: resumable-workflow-guard
     -> domain complexity: ddd-event-storming-design
     -> confirmed design to implementation: ddd-to-tdd-handoff
     -> multi-step work: implementation-planning
@@ -73,6 +75,7 @@ user request
 
 ```text
 engineering-workflow-router/
+resumable-workflow-guard/
 ddd-event-storming-design/
 ddd-to-tdd-handoff/
 implementation-planning/

@@ -1,0 +1,4 @@
+interface:
+  display_name: "可恢复工作流守卫"
+  short_description: "为长任务建立检查点、恢复入口和交接记录，防止中断后从头开始。"
+  default_prompt: "Use $resumable-workflow-guard to decide whether this task needs checkpointed execution, create or update a resume file, and continue from the next incomplete step instead of restarting."

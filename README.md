@@ -24,7 +24,7 @@ DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、TD
 从仓库根目录安装全部 skills：
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router ddd-event-storming-design ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
+npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
 ```
 
 安装单个 skill：
@@ -38,6 +38,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 ## Skills
 
 - `engineering-workflow-router`：开发、重构、修 bug、建模、评审、验证、分支收尾的入口调度器。
+- `resumable-workflow-guard`：为长任务、续跑和易中断工作建立检查点、恢复入口和交接记录。
 - `ddd-event-storming-design`：从事件风暴和 CQRS 出发做纯 DDD 领域建模。
 - `ddd-to-tdd-handoff`：把已确认的 DDD 产物转换成可执行 TDD 切片。
 - `implementation-planning`：编码前生成小步、可验证的实现计划。
@@ -56,6 +57,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 ```text
 用户提出需求
   -> engineering-workflow-router
+    -> 长任务/续跑/易中断：resumable-workflow-guard
     -> 领域复杂：ddd-event-storming-design
     -> 设计已确认且要实现：ddd-to-tdd-handoff
     -> 多步骤实现：implementation-planning
@@ -73,6 +75,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 
 ```text
 engineering-workflow-router/
+resumable-workflow-guard/
 ddd-event-storming-design/
 ddd-to-tdd-handoff/
 implementation-planning/

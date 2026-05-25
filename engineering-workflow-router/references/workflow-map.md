@@ -3,6 +3,7 @@
 ```text
 用户提出需求
   -> engineering-workflow-router
+    -> 长任务/续跑/易中断：resumable-workflow-guard
     -> 需求模糊或领域复杂：ddd-event-storming-design
     -> 设计已确认且要实现：ddd-to-tdd-handoff
     -> 多步骤实现：implementation-planning
@@ -21,6 +22,7 @@ Default minimal chain for complex domain implementation:
 
 ```text
 engineering-workflow-router
+  -> resumable-workflow-guard
   -> ddd-event-storming-design
   -> ddd-to-tdd-handoff
   -> implementation-planning

@@ -1,6 +1,6 @@
 ---
 name: engineering-workflow-router
-description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as ddd-event-storming-design, ddd-to-tdd-handoff, implementation-planning, executing-implementation-plan, tdd-skill, spring-web-boundaries, systematic-debugging, requesting-code-review, receiving-code-review, verification-before-completion, finishing-development-branch, or parallel-agent-orchestration."
+description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as resumable-workflow-guard, ddd-event-storming-design, ddd-to-tdd-handoff, implementation-planning, executing-implementation-plan, tdd-skill, spring-web-boundaries, systematic-debugging, requesting-code-review, receiving-code-review, verification-before-completion, finishing-development-branch, or parallel-agent-orchestration."
 ---
 
 # Engineering Workflow Router
@@ -28,12 +28,14 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
    - persistence, transactions, ordering, pagination, external side effects
    - failing tests, production bug, or unclear root cause
    - multi-module work that can be split
+   - long-running, multi-turn, interruption-prone, or resumed work
 3. Select the required skills.
 4. State the selected workflow before proceeding.
 5. If a selected skill is unavailable, say which one is missing and use the closest available workflow.
 
 ## Skill Selection
 
+- Use `resumable-workflow-guard` when the task may span multiple turns or sessions, exceed about 30 minutes, resume after interruption, approach context limits, involve several workflow stages, or need checkpoint/handoff evidence.
 - Use `ddd-event-storming-design` when requirements contain non-trivial business language, domain events, commands, policies, aggregates, read models, or unclear business boundaries.
 - Use `ddd-to-tdd-handoff` after a DDD design is confirmed and the user wants implementation slices, tests, or development planning.
 - Use `implementation-planning` for multi-step implementation, refactoring, risky changes, or any task whose safe execution needs more than one red/green slice.
@@ -66,6 +68,7 @@ Keep the routing concise. After routing, immediately follow the selected skills.
 
 ## Default Chains
 
+- Long or resumed task: `resumable-workflow-guard` -> selected inner workflow -> checkpoint updates -> `verification-before-completion`.
 - New domain feature: `ddd-event-storming-design` -> `ddd-to-tdd-handoff` -> `implementation-planning` -> `executing-implementation-plan` with `tdd-skill` -> `verification-before-completion`.
 - Bug fix: `systematic-debugging` -> `tdd-skill` -> `verification-before-completion`.
 - Pure refactor: `implementation-planning` -> `tdd-skill` characterization -> `executing-implementation-plan` -> `verification-before-completion`.
