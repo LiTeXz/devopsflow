@@ -22,6 +22,7 @@ Answer every item:
 9. If TDD was required, is there RED/GREEN/REFACTOR evidence?
 10. If DDD modeling was required, were conclusions confirmed before persistence?
 11. If Spring Web boundaries changed, were endpoint contracts and service boundary scans covered?
+12. If Glue Coding was required, which local target pattern was used, which delta was implemented, and should any new rule, knowledge, pattern, or track be persisted? For refactors, which legacy patterns or anti-patterns were avoided, and what characterization evidence protected behavior?
 
 ## Evidence Standard
 

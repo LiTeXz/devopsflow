@@ -2,7 +2,7 @@
 
 简体中文 | [English](README.en.md)
 
-DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
+DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、Glue Coding、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
 
 ## 重要：必须开启 Plan 模式
 
@@ -24,7 +24,7 @@ DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、TD
 从仓库根目录安装全部 skills：
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
+npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
 ```
 
 安装单个 skill：
@@ -40,6 +40,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 - `engineering-workflow-router`：开发、重构、修 bug、建模、评审、验证、分支收尾的入口调度器。
 - `resumable-workflow-guard`：为长任务、续跑和易中断工作建立检查点、恢复入口和交接记录。
 - `ddd-event-storming-design`：从事件风暴和 CQRS 出发做纯 DDD 领域建模。
+- `glue-coding`：在领域结论清楚后，先查找本项目样板间、相似实现和规范，只实现差异点。
 - `ddd-to-tdd-handoff`：把已确认的 DDD 产物转换成可执行 TDD 切片。
 - `implementation-planning`：编码前生成小步、可验证的实现计划。
 - `executing-implementation-plan`：先复核计划，再一次执行一个任务并记录验证证据。
@@ -59,6 +60,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
   -> engineering-workflow-router
     -> 长任务/续跑/易中断：resumable-workflow-guard
     -> 领域复杂：ddd-event-storming-design
+    -> 领域已清楚且存在相似实现：glue-coding
     -> 设计已确认且要实现：ddd-to-tdd-handoff
     -> 多步骤实现：implementation-planning
     -> 开始编码：executing-implementation-plan
@@ -77,6 +79,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 engineering-workflow-router/
 resumable-workflow-guard/
 ddd-event-storming-design/
+glue-coding/
 ddd-to-tdd-handoff/
 implementation-planning/
 executing-implementation-plan/

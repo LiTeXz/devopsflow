@@ -1,0 +1,4 @@
+interface:
+  display_name: "Glue Coding"
+  short_description: "Reuse local code patterns before implementation"
+  default_prompt: "Use $glue-coding after domain conclusions are clear to find local code patterns, preserve project conventions, and implement only the required delta."

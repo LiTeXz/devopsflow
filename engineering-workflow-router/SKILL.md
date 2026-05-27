@@ -1,6 +1,6 @@
 ---
 name: engineering-workflow-router
-description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as resumable-workflow-guard, ddd-event-storming-design, ddd-to-tdd-handoff, implementation-planning, executing-implementation-plan, tdd-skill, spring-web-boundaries, systematic-debugging, requesting-code-review, receiving-code-review, verification-before-completion, finishing-development-branch, or parallel-agent-orchestration."
+description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, glue coding, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as resumable-workflow-guard, ddd-event-storming-design, glue-coding, ddd-to-tdd-handoff, implementation-planning, executing-implementation-plan, tdd-skill, spring-web-boundaries, systematic-debugging, requesting-code-review, receiving-code-review, verification-before-completion, finishing-development-branch, or parallel-agent-orchestration."
 ---
 
 # Engineering Workflow Router
@@ -14,6 +14,7 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
    - `bug_fix`
    - `pure_refactor`
    - `domain_modeling`
+   - `glue_coding`
    - `design_review`
    - `code_review`
    - `review_feedback`
@@ -22,6 +23,7 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
    - `commit_or_pr`
 2. Identify risk dimensions:
    - domain ambiguity or business rules
+   - glue-coding fit: existing CRUD/page/endpoint/adapter/pattern likely covers most structure
    - behavior change
    - existing behavior preservation
    - public API, HTTP, security, validation, or serialization boundary
@@ -37,6 +39,7 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
 
 - Use `resumable-workflow-guard` when the task may span multiple turns or sessions, exceed about 30 minutes, resume after interruption, approach context limits, involve several workflow stages, or need checkpoint/handoff evidence.
 - Use `ddd-event-storming-design` when requirements contain non-trivial business language, domain events, commands, policies, aggregates, read models, or unclear business boundaries.
+- Use `glue-coding` after domain ambiguity is resolved or intentionally thin, when implementation should reuse local project material such as CRUD/page patterns, reference examples, endpoints, adapters, handlers, projections, tests, imports/exports, or other repeatable structures.
 - Use `ddd-to-tdd-handoff` after a DDD design is confirmed and the user wants implementation slices, tests, or development planning.
 - Use `implementation-planning` for multi-step implementation, refactoring, risky changes, or any task whose safe execution needs more than one red/green slice.
 - Use `executing-implementation-plan` when following an existing plan or after writing one.
@@ -69,7 +72,8 @@ Keep the routing concise. After routing, immediately follow the selected skills.
 ## Default Chains
 
 - Long or resumed task: `resumable-workflow-guard` -> selected inner workflow -> checkpoint updates -> `verification-before-completion`.
-- New domain feature: `ddd-event-storming-design` -> `ddd-to-tdd-handoff` -> `implementation-planning` -> `executing-implementation-plan` with `tdd-skill` -> `verification-before-completion`.
+- New domain feature: `ddd-event-storming-design` -> `glue-coding` when local patterns exist -> `ddd-to-tdd-handoff` -> `implementation-planning` -> `executing-implementation-plan` with `tdd-skill` -> `verification-before-completion`.
+- Glue-style implementation: DDD gate if business meaning is unclear -> `glue-coding` -> `implementation-planning` -> `executing-implementation-plan` with `tdd-skill` when behavior changes -> `verification-before-completion`.
 - Bug fix: `systematic-debugging` -> `tdd-skill` -> `verification-before-completion`.
 - Pure refactor: `implementation-planning` -> `tdd-skill` characterization -> `executing-implementation-plan` -> `verification-before-completion`.
 - Spring endpoint change: `tdd-skill` + `spring-web-boundaries` -> `verification-before-completion`.
@@ -81,6 +85,8 @@ Keep the routing concise. After routing, immediately follow the selected skills.
 - Do not skip routing because a task looks small unless it is documentation-only, formatting-only, or a direct question.
 - Do not begin production-code edits when routing selected modeling, planning, TDD, or debugging first.
 - Do not use DDD as a coding plan by itself; bridge confirmed domain design through `ddd-to-tdd-handoff`.
+- Do not let Glue Coding bypass DDD. If a CRUD-looking task hides business rules, use local patterns only as discovery input until the DDD gate is confirmed.
+- Do not invent structure for glue-style work before checking local patterns and recording the selected pattern plus delta.
 - Do not claim completion without `verification-before-completion` for engineering changes.
 - Respect user-owned changes in the worktree. Never revert unrelated edits.
 
