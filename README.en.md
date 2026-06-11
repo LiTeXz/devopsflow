@@ -24,7 +24,7 @@ Do not treat Plan mode as optional; it is the entry guard for the DevFlow workfl
 Install all skills from the repository root:
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
+npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries repository-tooling-hygiene
 ```
 
 Install a single skill:
@@ -52,6 +52,7 @@ Restart Codex after installation so the new skills are loaded.
 - `parallel-agent-orchestration`: splits independent work across agents with non-overlapping ownership.
 - `tdd-skill`: project-agnostic RED/GREEN/REFACTOR TDD workflow and protocol validation.
 - `spring-web-boundaries`: Spring Web boundary guardrails for controllers, endpoints, validation, security, uploads/downloads, exports, and service layering.
+- `repository-tooling-hygiene`: moves human helper scripts, one-off maintenance tools, and Gradle init scripts out of repository roots into docs or skills.
 
 ## Workflow Map
 
@@ -91,6 +92,7 @@ finishing-development-branch/
 parallel-agent-orchestration/
 tdd-skill/
 spring-web-boundaries/
+repository-tooling-hygiene/
 ```
 
 Each directory is an independent Codex skill with a required `SKILL.md` and optional `agents/`, `references/`, `scripts/`, and `templates/`.

@@ -24,7 +24,7 @@ DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、Gl
 从仓库根目录安装全部 skills：
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries
+npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries repository-tooling-hygiene
 ```
 
 安装单个 skill：
@@ -52,6 +52,7 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 - `parallel-agent-orchestration`：在文件范围不重叠时拆分并行 agent 工作。
 - `tdd-skill`：项目无关的 RED/GREEN/REFACTOR TDD 工作流和协议校验。
 - `spring-web-boundaries`：Spring Web controller、endpoint、validation、security、上传下载、导出和 service 边界规则。
+- `repository-tooling-hygiene`：将人工辅助脚本、一次性维护工具和 Gradle init script 从仓库根目录迁入 docs 或 skills。
 
 ## 技能组合图
 
@@ -91,6 +92,7 @@ finishing-development-branch/
 parallel-agent-orchestration/
 tdd-skill/
 spring-web-boundaries/
+repository-tooling-hygiene/
 ```
 
 每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，以及可选的 `agents/`、`references/`、`scripts/`、`templates/`。
