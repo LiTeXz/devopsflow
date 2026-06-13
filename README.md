@@ -1,8 +1,11 @@
 # DevFlow Skills
 
-简体中文 | [English](README.en.md)
-
 DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、Glue Coding、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
+
+插件还包含一个 Git push 保护 hook：阻止直接推送到 `main`、`dev`、
+`develop`、`devlop` 等常见集成分支，并提示改用新分支和 PR 流程。
+hook 配置位于 `hooks/hooks.codex.json`，并由 `.codex-plugin/plugin.json`
+声明为插件 companion。
 
 ## 重要：必须开启 Plan 模式
 
@@ -19,21 +22,42 @@ DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、Gl
 
 不要把 Plan 模式当成可选步骤；它是 DevFlow 工作流的入口保护。
 
-## 安装
+## 安装为 Codex Plugin
 
-从仓库根目录安装全部 skills：
+推荐以 Codex Plugin 方式安装整套 DevFlow Skills。插件入口建议从
+`engineering-workflow-router` 开始，让它根据任务类型选择后续 workflow skill。
 
-```bash
-npx skills add https://github.com/LiTeXz/devflow-skills.git -g -a codex --skill engineering-workflow-router resumable-workflow-guard ddd-event-storming-design glue-coding ddd-to-tdd-handoff implementation-planning executing-implementation-plan systematic-debugging verification-before-completion requesting-code-review receiving-code-review finishing-development-branch parallel-agent-orchestration tdd-skill spring-web-boundaries repository-tooling-hygiene
+本仓库只支持 Codex Plugin 安装方式，避免独立 skill 安装命令与插件目录结构漂移。
+插件 manifest 位于：
+
+```text
+.codex-plugin/plugin.json
+skills/
 ```
 
-安装单个 skill：
+### 从 Codex App 安装
+
+在 Codex App 的 Plugins 页面中找到 `devflow-skills`，然后点击安装。
+
+安装完成后，开启新线程以加载新的 plugin skills 和 hook。
+
+### 从 Codex CLI 添加 marketplace
+
+如果使用本地或团队 marketplace，先添加 marketplace 根目录：
 
 ```bash
-npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-workflow-router -g -a codex
+codex plugin marketplace add <marketplace-root>
 ```
 
-安装完成后，重启 Codex 才会加载新的 skill。
+后续更新 marketplace 缓存：
+
+```bash
+codex plugin marketplace upgrade <marketplace-name>
+```
+
+确认 marketplace 中包含 `devflow-skills` 后，在 Codex App 的 Plugins 页面安装该插件。
+
+安装完成后，开启新线程以加载新的 plugin skills 和 hook。
 
 ## Skills
 
@@ -77,44 +101,59 @@ npx skills add https://github.com/LiTeXz/devflow-skills/tree/main/engineering-wo
 ## 仓库结构
 
 ```text
-engineering-workflow-router/
-resumable-workflow-guard/
-ddd-event-storming-design/
-glue-coding/
-ddd-to-tdd-handoff/
-implementation-planning/
-executing-implementation-plan/
-systematic-debugging/
-verification-before-completion/
-requesting-code-review/
-receiving-code-review/
-finishing-development-branch/
-parallel-agent-orchestration/
-tdd-skill/
-spring-web-boundaries/
-repository-tooling-hygiene/
+.codex-plugin/plugin.json
+hooks/
+scripts/
+skills/
+  engineering-workflow-router/
+  resumable-workflow-guard/
+  ddd-event-storming-design/
+  glue-coding/
+  ddd-to-tdd-handoff/
+  implementation-planning/
+  executing-implementation-plan/
+  systematic-debugging/
+  verification-before-completion/
+  requesting-code-review/
+  receiving-code-review/
+  finishing-development-branch/
+  parallel-agent-orchestration/
+  tdd-skill/
+  spring-web-boundaries/
+  repository-tooling-hygiene/
 ```
 
-每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，以及可选的 `agents/`、`references/`、`scripts/`、`templates/`。
+`skills/` 下的每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，
+以及可选的 `agents/`、`references/`、`scripts/`、`templates/`。
 
 ## 校验
+
+当前本地 `plugin-creator/scripts/validate_plugin.py` 仍拒绝 `plugin.json` 的
+`hooks` 字段；但 Codex 已安装插件中存在相同的 `hooks` manifest 形态。
+因此带 hook 的插件校验以 JSON 校验、hook 回归和 Codex 实际加载为准。
 
 格式校验：
 
 ```bash
-python -X utf8 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py engineering-workflow-router
+python3 -X utf8 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/engineering-workflow-router
 ```
 
 TDD 协议回归：
 
 ```bash
-python -X utf8 tdd-skill/scripts/run_protocol_examples.py
+python3 -X utf8 skills/tdd-skill/scripts/run_protocol_examples.py
 ```
 
 DDD 设计校验回归：
 
 ```bash
-python -X utf8 ddd-event-storming-design/scripts/run_design_examples.py
+python3 -X utf8 skills/ddd-event-storming-design/scripts/run_design_examples.py
+```
+
+Hook 回归：
+
+```bash
+python3 -X utf8 scripts/test-prevent-protected-branch-push.py
 ```
 
 ## Commit Message

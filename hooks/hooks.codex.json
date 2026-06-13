@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|shell|exec|exec_command|unified_exec",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-protected-branch-push.py\"",
+            "statusMessage": "devflow-skills: checking protected branch push"
+          }
+        ]
+      }
+    ]
+  }
+}
