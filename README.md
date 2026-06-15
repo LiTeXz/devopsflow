@@ -24,59 +24,40 @@ hook 配置位于 `hooks/hooks.codex.json`，并由 `.codex-plugin/plugin.json`
 
 ## 安装为 Codex Plugin
 
-推荐以 Codex Plugin 方式安装整套 DevFlow Skills。插件入口建议从
-`engineering-workflow-router` 开始，让它根据任务类型选择后续 workflow skill。
-
 本仓库只支持 Codex Plugin 安装方式，避免独立 skill 安装命令与插件目录结构漂移。
-插件 manifest 位于：
+Marketplace 和插件 manifest 位于：
 
 ```text
+.codex-plugin/marketplace.json
 .codex-plugin/plugin.json
 skills/
 ```
 
-### 从 Codex App 安装
-
-在 Codex App 的 Plugins 页面中找到 `devflow-skills`，然后点击安装。
-
-安装完成后，开启新线程以加载新的 plugin skills 和 hook。
-
-### 从 Codex CLI 添加 marketplace
-
-如果使用本地或团队 marketplace，先添加 marketplace 根目录：
+从远程仓库添加 marketplace：
 
 ```bash
-codex plugin marketplace add <marketplace-root>
+codex plugin marketplace add LiTeXz/devflow-skills
 ```
 
-后续更新 marketplace 缓存：
+<details>
+<summary>本地开发安装</summary>
+
+> [!NOTE]
+> 只有在开发或调试当前 checkout 时，才需要从仓库根目录添加本地 marketplace。
 
 ```bash
-codex plugin marketplace upgrade <marketplace-name>
+codex plugin marketplace add .
 ```
 
-确认 marketplace 中包含 `devflow-skills` 后，在 Codex App 的 Plugins 页面安装该插件。
+</details>
 
-安装完成后，开启新线程以加载新的 plugin skills 和 hook。
+更新 marketplace 缓存：
 
-## Skills
+```bash
+codex plugin marketplace upgrade devflow-skills
+```
 
-- `engineering-workflow-router`：开发、重构、修 bug、建模、评审、验证、分支收尾的入口调度器。
-- `resumable-workflow-guard`：为长任务、续跑和易中断工作建立检查点、恢复入口和交接记录。
-- `ddd-event-storming-design`：从事件风暴和 CQRS 出发做纯 DDD 领域建模。
-- `glue-coding`：在领域结论清楚后，先查找本项目样板间、相似实现和规范，只实现差异点。
-- `ddd-to-tdd-handoff`：把已确认的 DDD 产物转换成可执行 TDD 切片。
-- `implementation-planning`：编码前生成小步、可验证的实现计划。
-- `executing-implementation-plan`：先复核计划，再一次执行一个任务并记录验证证据。
-- `systematic-debugging`：先复现，再定位根因，最后用回归测试保护修复。
-- `verification-before-completion`：完成前检查用户要求、变更文件、命令证据、未跑检查、剩余风险。
-- `requesting-code-review`：实现完成后做以 bug 和测试缺口为中心的自查。
-- `receiving-code-review`：逐条处理 review feedback，分类、修复、验证。
-- `finishing-development-branch`：提交、推送、PR 或交接前检查工作区和中文 Conventional Commit。
-- `parallel-agent-orchestration`：在文件范围不重叠时拆分并行 agent 工作。
-- `tdd-skill`：项目无关的 RED/GREEN/REFACTOR TDD 工作流和协议校验。
-- `spring-web-boundaries`：Spring Web controller、endpoint、validation、security、上传下载、导出和 service 边界规则。
-- `repository-tooling-hygiene`：将人工辅助脚本、一次性维护工具和 Gradle init script 从仓库根目录迁入 docs 或 skills。
+然后在 Codex App 的 Plugins 页面安装 `devflow-skills`。安装完成后，开启新线程以加载新的 plugin skills 和 hook。
 
 ## 技能组合图
 
@@ -105,22 +86,6 @@ codex plugin marketplace upgrade <marketplace-name>
 hooks/
 scripts/
 skills/
-  engineering-workflow-router/
-  resumable-workflow-guard/
-  ddd-event-storming-design/
-  glue-coding/
-  ddd-to-tdd-handoff/
-  implementation-planning/
-  executing-implementation-plan/
-  systematic-debugging/
-  verification-before-completion/
-  requesting-code-review/
-  receiving-code-review/
-  finishing-development-branch/
-  parallel-agent-orchestration/
-  tdd-skill/
-  spring-web-boundaries/
-  repository-tooling-hygiene/
 ```
 
 `skills/` 下的每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，
