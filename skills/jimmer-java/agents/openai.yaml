@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jimmer Java"
+  short_description: "Build Java Jimmer SQL code with APT and DSL guardrails"
+  default_prompt: "Use $jimmer-java when changing Java Jimmer SQL entities, queries, DTOs, or Spring Boot integration."
