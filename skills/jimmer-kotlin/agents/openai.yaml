@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jimmer Kotlin"
+  short_description: "Build Kotlin Jimmer SQL code with KSP and DSL guardrails"
+  default_prompt: "Use $jimmer-kotlin when changing Kotlin Jimmer SQL entities, queries, DTOs, or Spring Boot integration."

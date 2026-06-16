@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jimmer"
+  short_description: "Use Jimmer ORM with compile-time DSL guardrails"
+  default_prompt: "Use $jimmer when changing Jimmer ORM entities, queries, DTOs, saves, or Spring Boot integration."
