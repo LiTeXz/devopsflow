@@ -5,8 +5,13 @@
     "hooks": [
       {
       "type": "command",
-      "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-protected-branch-push.py\"",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-protected-branch-push.py\"",
       "statusMessage": "devflow-skills: checking protected branch session"
+      },
+      {
+      "type": "command",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
+      "statusMessage": "devflow-skills: showing coordinator-only mode"
       }
     ]
     }
@@ -16,7 +21,7 @@
     "hooks": [
       {
       "type": "command",
-      "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
       "statusMessage": "devflow-skills: registering worker session"
       }
     ]
@@ -27,7 +32,7 @@
     "hooks": [
       {
       "type": "command",
-      "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
       "statusMessage": "devflow-skills: unregistering worker session"
       }
     ]
@@ -39,12 +44,12 @@
     "hooks": [
       {
       "type": "command",
-      "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-protected-branch-push.py\"",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-protected-branch-push.py\"",
       "statusMessage": "devflow-skills: checking protected branch writes"
       },
       {
       "type": "command",
-      "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
+      "command": "python3 \"${PLUGIN_ROOT}/scripts/prevent-main-agent-write.py\"",
       "statusMessage": "devflow-skills: checking main-agent writes"
       }
     ]

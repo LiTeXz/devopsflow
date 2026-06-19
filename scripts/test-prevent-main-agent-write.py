@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from io import StringIO
 
 
 SCRIPT = Path(__file__).with_name("prevent-main-agent-write.py")
@@ -73,13 +74,45 @@ class MainAgentWriteGuardTest(unittest.TestCase):
     self.assert_blocked_tool("Bash", {"command": "pnpm run build"})
 
   def test_allows_main_agent_read_status_and_test_commands(self) -> None:
+    self.assert_allowed_tool("Bash", {"command": "cat README.md"})
+    self.assert_allowed_tool("Bash", {"command": "sed -n '1,20p' README.md"})
+    self.assert_allowed_tool("Bash", {"command": "sed -n 1,20p README.md"})
+    self.assert_allowed_tool("Bash", {"command": "sed --quiet '1,20p' README.md"})
+    self.assert_allowed_tool("Bash", {"command": "sed --silent '1,20p' README.md"})
     self.assert_allowed_tool("Bash", {"command": "rg -n DevFlow README.md"})
     self.assert_allowed_tool("Bash", {"command": "git status --short"})
     self.assert_allowed_tool("Bash", {"command": "python3 -X utf8 scripts/test-prevent-main-agent-write.py"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -X utf8 scripts/run_design_examples.py"})
+    self.assert_allowed_tool(
+      "Bash",
+      {"command": "python3 -X utf8 skills/tdd-skill/scripts/run_protocol_examples.py"},
+    )
+    self.assert_allowed_tool("Bash", {"command": "python3 -m unittest"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -m pytest"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -m py_compile scripts/prevent-main-agent-write.py"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -m json.tool hooks/hooks.codex.json"})
     self.assert_allowed_tool("Bash", {"command": "pnpm test"})
     self.assert_allowed_tool("Bash", {"command": "pnpm run test"})
     self.assert_allowed_tool("Bash", {"command": "pnpm run typecheck"})
     self.assert_allowed_tool("Bash", {"command": "pnpm run lint"})
+
+  def test_blocks_main_agent_mutating_sed_and_unsafe_python_commands(self) -> None:
+    self.assert_blocked_tool("Bash", {"command": "sed -i 's/a/b/' README.md"})
+    self.assert_blocked_tool("Bash", {"command": "sed --in-place 's/a/b/' README.md"})
+    self.assert_blocked_tool("Bash", {"command": "sed 's/a/b/' README.md"})
+    self.assert_blocked_tool("Bash", {"command": "sed -n 's/a/b/p' README.md"})
+    self.assert_blocked_tool("Bash", {"command": "python3 -c 'print(1)'"})
+    self.assert_blocked_tool("Bash", {"command": "python3 scripts/update_readme.py"})
+
+  def test_session_start_prints_coordinator_status_and_allows_session(self) -> None:
+    payload = {"hook_event_name": "SessionStart", "session_id": "main-session"}
+    with patch("sys.stdin", StringIO("{}")), patch("sys.stdout", new_callable=StringIO) as stdout:
+      self.assertEqual(HOOK._handle_session_start(payload), 0)
+    message = stdout.getvalue()
+    self.assertIn("DevFlow mode: coordinator-only", message)
+    self.assertIn("Main agent may coordinate, review, and verify only.", message)
+    self.assertIn("Worker/subagent sessions may write files.", message)
+    self.assertIn("Read-only inspection commands are allowed.", message)
 
   def test_allows_registered_subagent_write(self) -> None:
     self.start_subagent("worker-1")
@@ -109,6 +142,13 @@ class MainAgentWriteGuardTest(unittest.TestCase):
     self.stop_subagent("worker-1")
     self.assert_blocked_tool("Write", session_id="worker-1")
     self.assert_allowed_tool("Write", session_id="worker-2")
+
+  def test_hook_manifest_uses_codex_plugin_root_variable(self) -> None:
+    manifest = Path(__file__).parents[1] / "hooks" / "hooks.codex.json"
+    hooks = manifest.read_text(encoding="utf-8")
+    self.assertIn("${PLUGIN_ROOT}", hooks)
+    self.assertNotIn("CLAUDE_PLUGIN_ROOT", hooks)
+    self.assertNotIn("CODEX_PLUGIN_ROOT", hooks)
 
 
 if __name__ == "__main__":

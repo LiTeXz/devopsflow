@@ -16,6 +16,7 @@ from typing import Any
 
 SUBAGENT_START_EVENTS = {"SubagentStart", "subagent_start", "subagentStart"}
 SUBAGENT_STOP_EVENTS = {"SubagentStop", "subagent_stop", "subagentStop"}
+SESSION_START_EVENTS = {"SessionStart", "session_start", "sessionStart"}
 PRE_TOOL_USE_EVENTS = {"PreToolUse", "pre_tool_use", "preToolUse", ""}
 SHELL_TOOL_NAMES = {"Bash", "shell", "exec", "exec_command", "unified_exec"}
 DIRECT_WRITE_TOOL_NAMES = {
@@ -88,6 +89,8 @@ def main() -> int:
 
   event = _find_hook_event(payload)
   session_id = _find_session_id(payload)
+  if event in SESSION_START_EVENTS:
+    return _handle_session_start(payload)
   if event in SUBAGENT_START_EVENTS:
     return _handle_subagent_start(payload, session_id)
   if event in SUBAGENT_STOP_EVENTS:
@@ -147,6 +150,21 @@ def _handle_subagent_stop(session_id: str | None) -> int:
   return 0
 
 
+def _handle_session_start(_payload: dict[str, Any]) -> int:
+  sys.stdout.write(
+    "\n".join(
+      [
+        "DevFlow mode: coordinator-only",
+        "Main agent may coordinate, review, and verify only.",
+        "Worker/subagent sessions may write files.",
+        "Read-only inspection commands are allowed.",
+      ]
+    )
+  )
+  sys.stdout.write("\n")
+  return 0
+
+
 def _write_reason_for_tool(tool_name: str, tool_input: dict[str, Any]) -> str | None:
   if tool_name in DIRECT_WRITE_TOOL_NAMES:
     return f"`{tool_name}` 是直接写入工具"
@@ -174,6 +192,8 @@ def _write_reason_for_command(command: str) -> str | None:
       continue
     if normalized[0] in PACKAGE_MANAGERS and _package_command_writes(normalized):
       return f"`{normalized[0]} {' '.join(normalized[1:3])}` 可能修改依赖或锁文件"
+    if normalized[0] == "sed" and _is_safe_read_only_sed(normalized):
+      continue
     if normalized[0] in SHELL_WRITE_COMMANDS:
       return f"`{normalized[0]}` 是写入型 shell 命令"
   return None
@@ -329,6 +349,29 @@ def _package_command_writes(tokens: list[str]) -> bool:
   return False
 
 
+def _is_safe_read_only_sed(tokens: list[str]) -> bool:
+  args = tokens[1:]
+  if any(_is_sed_in_place_option(token) for token in args):
+    return False
+  quiet_indices = [
+    index for index, token in enumerate(args) if token in {"-n", "--quiet", "--silent"}
+  ]
+  if len(quiet_indices) != 1:
+    return False
+  script_index = quiet_indices[0] + 1
+  if script_index >= len(args):
+    return False
+  return _is_safe_sed_print_script(args[script_index])
+
+
+def _is_sed_in_place_option(token: str) -> bool:
+  return token == "-i" or token.startswith("-i") or token == "--in-place" or token.startswith("--in-place=")
+
+
+def _is_safe_sed_print_script(script: str) -> bool:
+  return re.fullmatch(r"(?:\d+|\$)?(?:,(?:\d+|\$))?p", script) is not None
+
+
 def _is_test_command(tokens: list[str]) -> bool:
   command = tokens[0]
   args = tokens[1:]
@@ -375,8 +418,14 @@ def _is_python_safe_test_command(args: list[str]) -> bool:
     return False
   if filtered[0] == "-m" and len(filtered) >= 2:
     return filtered[1] in {"pytest", "unittest", "py_compile", "json.tool"}
-  script = Path(filtered[0]).name
-  return script.startswith("test-") or script.startswith("test_")
+  script_path = Path(filtered[0])
+  script = script_path.name
+  normalized_path = script_path.as_posix()
+  if script.startswith("test-") or script.startswith("test_"):
+    return True
+  if script.startswith("run_") and script.endswith("examples.py"):
+    return True
+  return normalized_path == "skills/tdd-skill/scripts/run_protocol_examples.py"
 
 
 def _strip_python_runtime_options(args: list[str]) -> list[str]:

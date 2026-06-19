@@ -43,7 +43,6 @@ OPTIONS_WITH_VALUE = {
 }
 SHELL_WRITE_COMMANDS = {
   "apply_patch",
-  "cat",
   "chmod",
   "chown",
   "cp",
@@ -292,6 +291,8 @@ def _analyze_shell_write(tokens: list[str], cwd: str) -> BlockDecision | None:
     return _analyze_git_write(tokens, cwd)
   if tokens[0] in PACKAGE_MANAGERS and _package_command_writes(tokens):
     return _block_current_branch_write(cwd, f"`{tokens[0]} {' '.join(tokens[1:3])}` 可能修改依赖或锁文件")
+  if tokens[0] == "sed" and _is_safe_read_only_sed(tokens):
+    return None
   if tokens[0] in SHELL_WRITE_COMMANDS:
     return _block_current_branch_write(cwd, f"`{tokens[0]}` 是写入型 shell 命令")
   return None
@@ -330,6 +331,29 @@ def _package_command_writes(tokens: list[str]) -> bool:
   if manager == "go":
     return command in {"get", "mod", "work"}
   return False
+
+
+def _is_safe_read_only_sed(tokens: list[str]) -> bool:
+  args = tokens[1:]
+  if any(_is_sed_in_place_option(token) for token in args):
+    return False
+  quiet_indices = [
+    index for index, token in enumerate(args) if token in {"-n", "--quiet", "--silent"}
+  ]
+  if len(quiet_indices) != 1:
+    return False
+  script_index = quiet_indices[0] + 1
+  if script_index >= len(args):
+    return False
+  return _is_safe_sed_print_script(args[script_index])
+
+
+def _is_sed_in_place_option(token: str) -> bool:
+  return token == "-i" or token.startswith("-i") or token == "--in-place" or token.startswith("--in-place=")
+
+
+def _is_safe_sed_print_script(script: str) -> bool:
+  return re.fullmatch(r"(?:\d+|\$)?(?:,(?:\d+|\$))?p", script) is not None
 
 
 def _block_current_branch_write(cwd: str, reason: str) -> BlockDecision | None:

@@ -106,8 +106,19 @@ class ProtectedBranchPushHookTest(unittest.TestCase):
 
   def test_allows_read_only_commands_on_protected_branch(self) -> None:
     with patch.object(HOOK, "_current_branch", return_value="main"):
+      self.assertIsNone(HOOK.should_block("cat README.md", "/repo"))
+      self.assertIsNone(HOOK.should_block("sed -n '1,20p' README.md", "/repo"))
+      self.assertIsNone(HOOK.should_block("sed -n 1,20p README.md", "/repo"))
+      self.assertIsNone(HOOK.should_block("sed --quiet '1,20p' README.md", "/repo"))
+      self.assertIsNone(HOOK.should_block("sed --silent '1,20p' README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("rg -n DevFlow README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("git status --short", "/repo"))
+
+  def test_blocks_mutating_sed_on_protected_branch(self) -> None:
+    self.assert_blocked("sed -i 's/a/b/' README.md", "main")
+    self.assert_blocked("sed --in-place 's/a/b/' README.md", "main")
+    self.assert_blocked("sed 's/a/b/' README.md", "main")
+    self.assert_blocked("sed -n 's/a/b/p' README.md", "main")
 
 
 if __name__ == "__main__":
