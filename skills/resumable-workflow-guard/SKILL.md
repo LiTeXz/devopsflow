@@ -77,11 +77,11 @@ Use this skill before selecting the inner workflow, then keep it active as a che
 ```text
 engineering-workflow-router
   -> resumable-workflow-guard
-    -> implementation-planning
-    -> executing-implementation-plan
-      -> tdd-skill / systematic-debugging / spring-web-boundaries
-    -> requesting-code-review
-    -> verification-before-completion
+  -> implementation-planning
+  -> executing-implementation-plan
+    -> tdd-skill / systematic-debugging / spring-web-boundaries
+  -> requesting-code-review
+  -> verification-before-completion
 ```
 
 For DDD work:

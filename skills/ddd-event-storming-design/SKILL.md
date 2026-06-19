@@ -176,7 +176,7 @@ event-storming/
   relationships.md
   completeness-check.md
   aggregates/
-    <aggregate-name>.md
+  <aggregate-name>.md
 ```
 
 Treat these files as ordered design artifacts, not as a checklist to complete immediately:

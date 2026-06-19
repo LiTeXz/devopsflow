@@ -1,4 +1,4 @@
 interface:
   display_name: "Draw.io"
-  short_description: "Author maintainable diagrams.net .drawio XML"
-  default_prompt: "Use $drawio to create, edit, or review .drawio / diagrams.net diagram files."
+  short_description: "Author maintainable diagrams.net .drawio.svg files"
+  default_prompt: "Use $drawio to create, edit, or review .drawio.svg / diagrams.net diagram files."

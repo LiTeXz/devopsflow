@@ -14,39 +14,39 @@ EXAMPLES = ROOT / "examples"
 
 
 CASES = [
-    ("valid_finish", "finish", EXAMPLES / "valid_finish.md", 0),
-    ("structured_finish", "finish", EXAMPLES / "structured_finish.md", 0),
-    ("greenfield_finish", "finish", EXAMPLES / "greenfield_finish.md", 0),
-    ("missing_start", "before_edit", EXAMPLES / "missing_start.md", 1),
-    ("vague_red", "state", EXAMPLES / "vague_red.md", 1),
+  ("valid_finish", "finish", EXAMPLES / "valid_finish.md", 0),
+  ("structured_finish", "finish", EXAMPLES / "structured_finish.md", 0),
+  ("greenfield_finish", "finish", EXAMPLES / "greenfield_finish.md", 0),
+  ("missing_start", "before_edit", EXAMPLES / "missing_start.md", 1),
+  ("vague_red", "state", EXAMPLES / "vague_red.md", 1),
 ]
 
 
 def main() -> int:
-    failures: list[str] = []
+  failures: list[str] = []
 
-    for name, stage, input_path, expected in CASES:
-        result = subprocess.run(
-            [sys.executable, str(VALIDATOR), "--stage", stage, "--input", str(input_path)],
-            text=True,
-            capture_output=True,
-        )
-        ok = result.returncode == expected
-        status = "PASS" if ok else "FAIL"
-        print(f"{status} {name}: expected {expected}, got {result.returncode}")
-        if not ok:
-            if result.stdout:
-                print(result.stdout.strip())
-            if result.stderr:
-                print(result.stderr.strip())
-            failures.append(name)
+  for name, stage, input_path, expected in CASES:
+    result = subprocess.run(
+      [sys.executable, str(VALIDATOR), "--stage", stage, "--input", str(input_path)],
+      text=True,
+      capture_output=True,
+    )
+    ok = result.returncode == expected
+    status = "PASS" if ok else "FAIL"
+    print(f"{status} {name}: expected {expected}, got {result.returncode}")
+    if not ok:
+      if result.stdout:
+        print(result.stdout.strip())
+      if result.stderr:
+        print(result.stderr.strip())
+      failures.append(name)
 
-    if failures:
-        print("Failed cases: " + ", ".join(failures), file=sys.stderr)
-        return 1
+  if failures:
+    print("Failed cases: " + ", ".join(failures), file=sys.stderr)
+    return 1
 
-    return 0
+  return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+  raise SystemExit(main())

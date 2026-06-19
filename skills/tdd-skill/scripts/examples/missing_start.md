@@ -5,7 +5,7 @@ tdd_finish:
   green_reached: true
   refactor_performed: false
   tests_run:
-    - "targeted test passed"
+  - "targeted test passed"
   current_contract_wrong: false
   wrong_contract_characterized: false
   wrong_contract_fixed: false

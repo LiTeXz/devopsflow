@@ -1,33 +1,36 @@
 ---
 name: drawio
-description: "Draw.io / diagrams.net diagram authoring and maintenance. Use when Codex needs to create, edit, review, repair, or explain .drawio files, mxfile XML, mxGraphModel, mxCell nodes/edges, architecture diagrams, flowcharts, sequence-like diagrams, data-flow diagrams, deployment diagrams, or repository documentation diagrams that should open cleanly in diagrams.net."
+description: "Draw.io / diagrams.net diagram authoring and maintenance. Use when Codex needs to create, edit, review, repair, or explain .drawio.svg files, .drawio files, mxfile XML, mxGraphModel, mxCell nodes/edges, architecture diagrams, flowcharts, sequence-like diagrams, data-flow diagrams, deployment diagrams, or repository documentation diagrams that should open cleanly in diagrams.net."
 ---
 
 # Draw.io
 
-Use this skill to author and maintain `.drawio` / diagrams.net diagrams. Prefer readable, diffable, uncompressed XML that opens cleanly in diagrams.net instead of screenshots or Mermaid-only output.
+Use this skill to author and maintain `.drawio.svg` / diagrams.net diagrams. Prefer a single editable SVG file that renders directly in Markdown and still opens cleanly in diagrams.net, instead of screenshots or Mermaid-only output.
 
 ## When To Use
 
-- Use this skill when the user explicitly asks for `.drawio`, draw.io, diagrams.net, mxGraphModel, architecture diagrams, flowcharts, deployment diagrams, or data-flow diagrams.
-- If the repository already has `.drawio` files, reuse the existing XML indentation, colors, page size, and layout style.
-- Mermaid is often faster for lightweight explanatory sketches. Use `.drawio` when the diagram should be edited visually, committed to documentation, or maintained over time.
-- Do not treat `.drawio` as a binary image. It is XML and should be edited structurally.
+- Use this skill when the user explicitly asks for `.drawio.svg`, `.drawio`, draw.io, diagrams.net, mxGraphModel, architecture diagrams, flowcharts, deployment diagrams, or data-flow diagrams.
+- For new committed documentation diagrams, default to the `.drawio.svg` suffix.
+- If the repository already has `.drawio` files, maintain them in place and reuse the existing XML indentation, colors, page size, and layout style.
+- Mermaid is often faster for lightweight explanatory sketches. Use `.drawio.svg` when the diagram should render directly in Markdown, be edited visually, committed to documentation, or maintained over time.
+- Do not treat `.drawio.svg` as a hand-written SVG or binary image. It is SVG XML with embedded diagrams.net data and should be edited structurally.
 
 ## File Structure
 
-Prefer full uncompressed XML:
+Prefer editable `.drawio.svg` files exported from diagrams.net with embedded diagram data. The SVG must remain valid XML and preserve the diagrams.net metadata needed for visual editing.
+
+When the project still uses plain `.drawio` sources, prefer full uncompressed XML:
 
 ```xml
 <mxfile host="app.diagrams.net">
   <diagram id="diagram-id" name="Diagram Name">
-    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
-      <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-        <!-- vertices and edges -->
-      </root>
-    </mxGraphModel>
+  <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- vertices and edges -->
+    </root>
+  </mxGraphModel>
   </diagram>
 </mxfile>
 ```
@@ -38,7 +41,7 @@ Core conventions:
 - Nodes use `mxCell vertex="1"` with `<mxGeometry x="..." y="..." width="..." height="..." as="geometry"/>`.
 - Edges use `mxCell edge="1"` with `source="node_id"` and `target="node_id"`.
 - Use `&lt;br&gt;` for line breaks in labels. XML-escape special characters.
-- Do not generate compressed diagram payloads unless the project already uses compressed `.drawio` files and the user asks to preserve that style.
+- Do not generate compressed diagram payloads unless the project already uses compressed `.drawio` or `.drawio.svg` files and the user asks to preserve that style.
 
 ## Drawing Workflow
 
@@ -64,7 +67,7 @@ Core conventions:
 
 ## Editing Existing Diagrams
 
-- Read the full `.drawio` file first. Do not edit by blind text replacement.
+- Read the full `.drawio.svg` or `.drawio` file first. Do not edit by blind text replacement.
 - Preserve the existing `mxfile`, `diagram`, and `mxGraphModel` structure, indentation, page size, and style family.
 - Reuse nearby node styles when adding nodes, and choose coordinates that do not overlap existing nodes.
 - When changing edges, verify that `source` and `target` IDs exist. When deleting a node, delete its associated edges too.
@@ -72,11 +75,11 @@ Core conventions:
 
 ## Verification
 
-- Run an XML well-formedness check such as `xmllint --noout file.drawio`; if `xmllint` is unavailable, use any available XML parser.
+- Run an XML well-formedness check such as `xmllint --noout file.drawio.svg`; if `xmllint` is unavailable, use any available XML parser.
 - Check for duplicate IDs. `mxCell id` and `diagram id` values should be unique within the file.
 - Check for orphan edges. Every edge `source` and `target` should point to an existing node.
 - Open or export the diagram with diagrams.net or an available draw.io export tool to confirm it is not blank, nodes do not overlap, and labels are readable.
-- If the repository requires exported PNG/SVG companions, generate them with the existing project script. Without an explicit convention, commit only the `.drawio` source file.
+- Without an explicit separate source/export convention, commit only the `.drawio.svg` file. If the repository requires separate exported PNG/SVG companions, generate them with the existing project script.
 
 ## Official Sources
 

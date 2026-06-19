@@ -2,10 +2,12 @@
 
 DevFlow Skills 是一组面向 Codex 的工程工作流 skills。它把 DDD、Glue Coding、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
 
-插件还包含一个 Git push 保护 hook：阻止直接推送到 `main`、`dev`、
-`develop`、`devlop` 等常见集成分支，并提示改用新分支和 PR 流程。
-hook 配置位于 `hooks/hooks.codex.json`，并由 `.codex-plugin/plugin.json`
-声明为插件 companion。
+插件还包含一个保护分支 hook：在 `main`、`dev`、`develop`、`devlop`
+等常见集成分支上启动会话时提醒切换新分支；在这些分支上拦截写文件、
+修改索引、提交、重置、依赖安装和直接 push 等污染操作，并提示改用新分支
+和 PR 流程。hook 配置位于 `hooks/hooks.codex.json`，并由
+`.codex-plugin/plugin.json` 声明为插件 companion。
+另有主 Agent 禁写 hook：所有分支上主 Agent 只能协调、审查和验证，代码写入必须交给 worker/subagent。
 
 ## 重要：必须开启 Plan 模式
 
@@ -64,19 +66,19 @@ codex plugin marketplace upgrade devflow-skills
 ```text
 用户提出需求
   -> engineering-workflow-router
-    -> 长任务/续跑/易中断：resumable-workflow-guard
-    -> 领域复杂：ddd-event-storming-design
-    -> 领域已清楚且存在相似实现：glue-coding
-    -> 设计已确认且要实现：ddd-to-tdd-handoff
-    -> 多步骤实现：implementation-planning
-    -> 开始编码：executing-implementation-plan
-      -> 每个行为切片：tdd-skill
-      -> Spring Web 变更：spring-web-boundaries
-      -> 失败/异常：systematic-debugging
-    -> 完成实现：requesting-code-review
-    -> 修 review：receiving-code-review
-    -> 最终声明完成：verification-before-completion
-    -> 提交/PR：finishing-development-branch
+  -> 长任务/续跑/易中断：resumable-workflow-guard
+  -> 领域复杂：ddd-event-storming-design
+  -> 领域已清楚且存在相似实现：glue-coding
+  -> 设计已确认且要实现：ddd-to-tdd-handoff
+  -> 多步骤实现：implementation-planning
+  -> 开始编码：executing-implementation-plan
+    -> 每个行为切片：tdd-skill
+    -> Spring Web 变更：spring-web-boundaries
+    -> 失败/异常：systematic-debugging
+  -> 完成实现：requesting-code-review
+  -> 修 review：receiving-code-review
+  -> 最终声明完成：verification-before-completion
+  -> 提交/PR：finishing-development-branch
 ```
 
 ## 仓库结构

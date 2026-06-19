@@ -4,10 +4,10 @@ tdd_finish:
   green_reached: true
   refactor_performed: true | false
   tests_run:
-    - phase: red | green | final
-      command: "..."
-      exit_code: 0
-      evidence: "..."
+  - phase: red | green | final
+    command: "..."
+    exit_code: 0
+    evidence: "..."
   current_contract_wrong: true | false
   wrong_contract_characterized: true | false
   wrong_contract_fixed: true | false
