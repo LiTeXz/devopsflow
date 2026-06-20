@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Block writes on protected integration branches.
+"""Block all Git push commands and protected-branch writes.
 
-The hook keeps integration branches clean in two layers:
+The hook keeps integration branches clean in three layers:
 
 * block sessions that start directly on a protected branch;
 * block write-capable tool calls while the current branch is protected.
+* block every Git push attempt, including pushes to topic branches.
 
-It also keeps the older direct-push guard so explicit pushes into protected
-branches are blocked even when the current checkout is on a feature branch.
+Proxy wrappers are escalated before normal command analysis because they can
+indicate an agent is trying to route around an active hook or permission policy.
 """
 
 from __future__ import annotations
@@ -33,14 +34,8 @@ DIRECT_WRITE_TOOL_NAMES = {
   "apply_patch",
 }
 COMMAND_KEYS = ("command", "cmd")
-REMOTE_LIKE_RE = re.compile(r"^(?:[\w.-]+|[\w.-]+:.+|https?://.+|ssh://.+)$")
-OPTIONS_WITH_VALUE = {
-  "--exec",
-  "--receive-pack",
-  "--repo",
-  "--push-option",
-  "-o",
-}
+GIT_GLOBAL_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
+GIT_GLOBAL_OPTIONS_WITH_OPTIONAL_VALUE = {"--config-env"}
 SHELL_WRITE_COMMANDS = {
   "apply_patch",
   "chmod",
@@ -52,11 +47,7 @@ SHELL_WRITE_COMMANDS = {
   "mkdir",
   "mv",
   "patch",
-  "perl",
-  "python",
-  "python3",
   "rm",
-  "sed",
   "tee",
   "touch",
   "truncate",
@@ -137,13 +128,14 @@ def should_block_tool(tool_name: str, tool_input: dict[str, Any], cwd: str) -> B
 
 def should_block(command: str, cwd: str) -> BlockDecision | None:
   for segment in _command_segments(command):
+    proxy_decision = _proxy_escalation_decision(segment)
+    if proxy_decision is not None:
+      return proxy_decision
     normalized = _normalize_command_prefix(segment)
-    if len(normalized) < 2 or normalized[0] != "git" or normalized[1] != "push":
-      decision = _analyze_shell_write(normalized, cwd)
-      if decision is not None:
-        return decision
-      continue
-    decision = _analyze_git_push(normalized[2:], cwd)
+    decision = _analyze_git_push(normalized)
+    if decision is not None:
+      return decision
+    decision = _analyze_shell_write(normalized, cwd)
     if decision is not None:
       return decision
   return None
@@ -214,15 +206,42 @@ def _command_segments(command: str) -> list[list[str]]:
 
 
 def _normalize_command_prefix(tokens: list[str]) -> list[str]:
-  normalized = list(tokens)
-  while normalized and _is_env_assignment(normalized[0]):
-    normalized.pop(0)
-  while normalized and normalized[0] in {"command", "builtin", "exec", "env"}:
-    normalized.pop(0)
+  normalized = _strip_launcher_prefix(tokens)
   if normalized and normalized[0] == "rtk":
     normalized.pop(0)
     if normalized and normalized[0] == "proxy":
       normalized.pop(0)
+  return normalized
+
+
+def _proxy_escalation_decision(tokens: list[str]) -> BlockDecision | None:
+  normalized = _strip_launcher_prefix(tokens)
+  if normalized and normalized[0] == "proxy":
+    return BlockDecision(
+      "*",
+      "二级警告：检测到 `proxy` 代理执行，疑似在尝试绕过既有权限或 hook 限制",
+      "escalation",
+    )
+  if len(normalized) >= 2 and normalized[0] == "rtk" and normalized[1] == "proxy":
+    return BlockDecision(
+      "*",
+      "二级警告：检测到 `rtk proxy` 代理执行，疑似在尝试绕过既有权限或 hook 限制",
+      "escalation",
+    )
+  return None
+
+
+def _strip_launcher_prefix(tokens: list[str]) -> list[str]:
+  normalized = list(tokens)
+  changed = True
+  while changed:
+    changed = False
+    while normalized and _is_env_assignment(normalized[0]):
+      normalized.pop(0)
+      changed = True
+    while normalized and normalized[0] in {"command", "builtin", "exec", "env"}:
+      normalized.pop(0)
+      changed = True
   return normalized
 
 
@@ -233,20 +252,28 @@ def _is_env_assignment(token: str) -> bool:
   return bool(name) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name) is not None
 
 
-def _analyze_git_push(args: list[str], cwd: str) -> BlockDecision | None:
-  positionals: list[str] = []
-  block_all_branches = False
+def _analyze_git_push(tokens: list[str]) -> BlockDecision | None:
+  if not tokens or tokens[0] != "git":
+    return None
+  subcommand = _git_subcommand(tokens[1:])
+  if subcommand == "push":
+    return BlockDecision("*", "`git push` 已被全场拦截；Agent 不允许执行任何推送")
+  return None
+
+
+def _git_subcommand(args: list[str]) -> str | None:
   index = 0
   while index < len(args):
     token = args[index]
     if token == "--":
-      positionals.extend(args[index + 1 :])
-      break
-    if token in {"--all", "--mirror"}:
-      block_all_branches = True
+      return args[index + 1] if index + 1 < len(args) else None
+    if token in GIT_GLOBAL_OPTIONS_WITH_VALUE:
+      index += 2
+      continue
+    if any(token.startswith(f"{option}=") for option in GIT_GLOBAL_OPTIONS_WITH_VALUE):
       index += 1
       continue
-    if token in OPTIONS_WITH_VALUE:
+    if token in GIT_GLOBAL_OPTIONS_WITH_OPTIONAL_VALUE:
       index += 2
       continue
     if token.startswith("--") and "=" in token:
@@ -255,28 +282,7 @@ def _analyze_git_push(args: list[str], cwd: str) -> BlockDecision | None:
     if token.startswith("-"):
       index += 1
       continue
-    positionals.append(token)
-    index += 1
-
-  if block_all_branches:
-    return BlockDecision("*", "`git push --all` 或 `git push --mirror` 可能推送保护分支")
-
-  refspecs = _extract_refspecs(positionals)
-  if not refspecs:
-    current_branch = _current_branch(cwd)
-    if current_branch in PROTECTED_BRANCHES:
-      return BlockDecision(current_branch, "当前分支是保护分支，普通 `git push` 会直接推送它")
-    return None
-
-  current_branch: str | None = None
-  for refspec in refspecs:
-    branch = _protected_destination_branch(refspec)
-    if branch is not None:
-      return BlockDecision(branch, f"refspec `{refspec}` 指向保护分支")
-    if refspec in {"HEAD", "@"}:
-      current_branch = current_branch or _current_branch(cwd)
-      if current_branch in PROTECTED_BRANCHES:
-        return BlockDecision(current_branch, f"refspec `{refspec}` 会推送当前保护分支")
+    return token
   return None
 
 
@@ -291,7 +297,15 @@ def _analyze_shell_write(tokens: list[str], cwd: str) -> BlockDecision | None:
     return _analyze_git_write(tokens, cwd)
   if tokens[0] in PACKAGE_MANAGERS and _package_command_writes(tokens):
     return _block_current_branch_write(cwd, f"`{tokens[0]} {' '.join(tokens[1:3])}` 可能修改依赖或锁文件")
-  if tokens[0] == "sed" and _is_safe_read_only_sed(tokens):
+  if tokens[0] == "sed":
+    reason = _sed_write_reason(tokens)
+    if reason is not None:
+      return _block_current_branch_write(cwd, reason)
+    return None
+  if tokens[0] in {"python", "python3"}:
+    reason = _python_write_reason(tokens)
+    if reason is not None:
+      return _block_current_branch_write(cwd, reason)
     return None
   if tokens[0] in SHELL_WRITE_COMMANDS:
     return _block_current_branch_write(cwd, f"`{tokens[0]}` 是写入型 shell 命令")
@@ -311,7 +325,7 @@ def _has_shell_redirection(tokens: list[str]) -> bool:
 def _analyze_git_write(tokens: list[str], cwd: str) -> BlockDecision | None:
   if len(tokens) < 2:
     return None
-  subcommand = tokens[1]
+  subcommand = _git_subcommand(tokens[1:])
   if subcommand in GIT_WRITE_SUBCOMMANDS:
     return _block_current_branch_write(cwd, f"`git {subcommand}` 会修改工作区、索引或提交历史")
   return None
@@ -333,27 +347,69 @@ def _package_command_writes(tokens: list[str]) -> bool:
   return False
 
 
-def _is_safe_read_only_sed(tokens: list[str]) -> bool:
+def _sed_write_reason(tokens: list[str]) -> str | None:
   args = tokens[1:]
   if any(_is_sed_in_place_option(token) for token in args):
-    return False
-  quiet_indices = [
-    index for index, token in enumerate(args) if token in {"-n", "--quiet", "--silent"}
-  ]
-  if len(quiet_indices) != 1:
-    return False
-  script_index = quiet_indices[0] + 1
-  if script_index >= len(args):
-    return False
-  return _is_safe_sed_print_script(args[script_index])
+    return "`sed -i` 会原地修改文件"
+  return None
 
 
 def _is_sed_in_place_option(token: str) -> bool:
   return token == "-i" or token.startswith("-i") or token == "--in-place" or token.startswith("--in-place=")
 
 
-def _is_safe_sed_print_script(script: str) -> bool:
-  return re.fullmatch(r"(?:\d+|\$)?(?:,(?:\d+|\$))?p", script) is not None
+def _python_write_reason(tokens: list[str]) -> str | None:
+  filtered = _strip_python_runtime_options(tokens[1:])
+  if not filtered:
+    return None
+  if filtered[0] == "-c":
+    code = " ".join(filtered[1:])
+    if _python_inline_code_writes(code):
+      return "`python -c` 内联代码包含明显文件写入调用"
+    return None
+  script = filtered[0].rsplit("/", 1)[-1].lower()
+  if any(marker in script for marker in ("write", "update", "generate", "codegen", "modify", "migrate")):
+    return f"`python {' '.join(tokens[1:])}` 可能执行写入型脚本"
+  return None
+
+
+def _strip_python_runtime_options(args: list[str]) -> list[str]:
+  filtered = list(args)
+  index = 0
+  while index < len(filtered):
+    token = filtered[index]
+    if token == "-m":
+      return filtered[index:]
+    if token in {"-X", "-W"}:
+      index += 2
+      continue
+    if token.startswith(("-X", "-W")) and len(token) > 2:
+      index += 1
+      continue
+    if token == "-c":
+      return filtered[index:]
+    if token.startswith("-c") and len(token) > 2:
+      return ["-c", token[2:], *filtered[index + 1 :]]
+    if token.startswith("-"):
+      index += 1
+      continue
+    return filtered[index:]
+  return []
+
+
+def _python_inline_code_writes(code: str) -> bool:
+  if re.search(r"open\([^)]*,\s*['\"][^'\"]*[wax+][^'\"]*['\"]", code):
+    return True
+  return any(
+    marker in code
+    for marker in (
+      ".write(",
+      ".write_text(",
+      ".write_bytes(",
+      "os.remove(",
+      "shutil.",
+    )
+  )
 
 
 def _block_current_branch_write(cwd: str, reason: str) -> BlockDecision | None:
@@ -361,45 +417,6 @@ def _block_current_branch_write(cwd: str, reason: str) -> BlockDecision | None:
   if current_branch in PROTECTED_BRANCHES:
     return BlockDecision(current_branch, reason)
   return None
-
-
-def _extract_refspecs(positionals: list[str]) -> list[str]:
-  if not positionals:
-    return []
-  first = positionals[0]
-  if len(positionals) == 1 and _looks_like_single_remote(first):
-    return []
-  if _looks_like_remote(first):
-    return positionals[1:]
-  return positionals
-
-
-def _looks_like_single_remote(value: str) -> bool:
-  if ":" in value:
-    return False
-  return REMOTE_LIKE_RE.fullmatch(value) is not None
-
-
-def _looks_like_remote(value: str) -> bool:
-  if ":" in value:
-    return False
-  if _branch_name(value) in PROTECTED_BRANCHES:
-    return False
-  return REMOTE_LIKE_RE.fullmatch(value) is not None
-
-
-def _protected_destination_branch(refspec: str) -> str | None:
-  normalized = refspec.lstrip("+")
-  destination = normalized.split(":", 1)[1] if ":" in normalized else normalized
-  branch = _branch_name(destination)
-  return branch if branch in PROTECTED_BRANCHES else None
-
-
-def _branch_name(ref: str) -> str:
-  for prefix in ("refs/heads/", "origin/"):
-    if ref.startswith(prefix):
-      return ref[len(prefix) :]
-  return ref.rsplit("/", 1)[-1]
 
 
 def _current_branch(cwd: str) -> str | None:
@@ -420,18 +437,16 @@ def _current_branch(cwd: str) -> str | None:
 
 
 def _write_block_message(decision: BlockDecision) -> None:
-  branch = "受保护分支" if decision.branch == "*" else f"`{decision.branch}`"
-  action = "当前会话" if decision.action == "session" else "写操作"
+  branch = "所有分支" if decision.branch == "*" else f"`{decision.branch}`"
+  action = "当前会话" if decision.action == "session" else "代理绕过" if decision.action == "escalation" else "写操作"
   sys.stderr.write(
     "\n".join(
       [
         f"DevFlow 已阻止在 {branch} 上进行{action}。",
         f"原因：{decision.reason}。",
         "",
-        "请先切到新的工作分支，再通过 PR 合并：",
+        "请停止推送尝试，保留本地分支和验证结果，交由人工或受信任流程推送并创建 PR：",
         "  git switch -c codex/<task-name>",
-        "  git push -u origin codex/<task-name>",
-        "  gh pr create --base <target-branch> --head codex/<task-name>",
       ]
     )
   )

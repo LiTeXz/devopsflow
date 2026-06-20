@@ -25,34 +25,55 @@ class ProtectedBranchPushHookTest(unittest.TestCase):
     self.assertIsNotNone(decision)
     self.assertEqual(decision.branch, branch)
 
+  def assert_push_blocked_globally(self, command: str) -> None:
+    with patch.object(HOOK, "_current_branch", return_value="feature/demo"):
+      decision = HOOK.should_block(command, "/repo")
+    self.assertIsNotNone(decision)
+    self.assertEqual(decision.branch, "*")
+    self.assertIn("全场拦截", decision.reason)
+
   def assert_allowed(self, command: str, current_branch: str = "feature/demo") -> None:
     with patch.object(HOOK, "_current_branch", return_value=current_branch):
       self.assertIsNone(HOOK.should_block(command, "/repo"))
 
   def test_blocks_direct_main_push(self) -> None:
-    self.assert_blocked("git push origin main")
+    self.assert_push_blocked_globally("git push origin main")
 
   def test_blocks_explicit_destination(self) -> None:
-    self.assert_blocked("git push origin HEAD:main")
-    self.assert_blocked("git push origin feature:refs/heads/dev", "dev")
+    self.assert_push_blocked_globally("git push origin HEAD:main")
+    self.assert_push_blocked_globally("git push origin feature:refs/heads/dev")
 
   def test_blocks_common_develop_typo(self) -> None:
-    self.assert_blocked("git push origin devlop", "devlop")
+    self.assert_push_blocked_globally("git push origin devlop")
 
   def test_blocks_plain_push_from_protected_current_branch(self) -> None:
     with patch.object(HOOK, "_current_branch", return_value="develop"):
       decision = HOOK.should_block("git push origin", "/repo")
     self.assertIsNotNone(decision)
-    self.assertEqual(decision.branch, "develop")
+    self.assertEqual(decision.branch, "*")
 
-  def test_allows_feature_branch_push(self) -> None:
-    self.assert_allowed("git push -u origin codex/convert-to-plugin")
+  def test_blocks_feature_branch_push(self) -> None:
+    self.assert_push_blocked_globally("git push -u origin codex/convert-to-plugin")
 
-  def test_allows_feature_branch_destination(self) -> None:
-    self.assert_allowed("git push origin HEAD:codex/convert-to-plugin")
+  def test_blocks_feature_branch_destination(self) -> None:
+    self.assert_push_blocked_globally("git push origin HEAD:codex/convert-to-plugin")
 
-  def test_blocks_rtk_wrapped_command(self) -> None:
-    self.assert_blocked("rtk proxy git push origin main")
+  def test_blocks_wrapped_git_push_forms(self) -> None:
+    self.assert_push_blocked_globally("command git push origin feature/demo")
+    self.assert_push_blocked_globally("env GIT_SSH_COMMAND=ssh git push origin feature/demo")
+    self.assert_push_blocked_globally("git -C ../repo push origin feature/demo")
+    self.assert_push_blocked_globally("git -c credential.helper= push origin feature/demo")
+
+  def test_escalates_proxy_bypass_attempts(self) -> None:
+    decision = HOOK.should_block("rtk proxy git push origin main", "/repo")
+    self.assertIsNotNone(decision)
+    self.assertEqual(decision.branch, "*")
+    self.assertEqual(decision.action, "escalation")
+    self.assertIn("二级警告", decision.reason)
+
+    decision = HOOK.should_block("proxy sed -n '1,20p' README.md", "/repo")
+    self.assertIsNotNone(decision)
+    self.assertEqual(decision.action, "escalation")
 
   def test_blocks_all_branch_push(self) -> None:
     decision = HOOK.should_block("git push --all origin", "/repo")
@@ -111,14 +132,16 @@ class ProtectedBranchPushHookTest(unittest.TestCase):
       self.assertIsNone(HOOK.should_block("sed -n 1,20p README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("sed --quiet '1,20p' README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("sed --silent '1,20p' README.md", "/repo"))
+      self.assertIsNone(HOOK.should_block("sed 's/a/b/' README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("rg -n DevFlow README.md", "/repo"))
       self.assertIsNone(HOOK.should_block("git status --short", "/repo"))
+      self.assertIsNone(HOOK.should_block("python3 -c 'print(1)'", "/repo"))
+      self.assertIsNone(HOOK.should_block("python3 -c 'open(\"README.md\").read()'", "/repo"))
 
   def test_blocks_mutating_sed_on_protected_branch(self) -> None:
     self.assert_blocked("sed -i 's/a/b/' README.md", "main")
     self.assert_blocked("sed --in-place 's/a/b/' README.md", "main")
-    self.assert_blocked("sed 's/a/b/' README.md", "main")
-    self.assert_blocked("sed -n 's/a/b/p' README.md", "main")
+    self.assert_blocked("python3 -c 'open(\"README.md\", \"w\").write(\"x\")'", "main")
 
 
 if __name__ == "__main__":

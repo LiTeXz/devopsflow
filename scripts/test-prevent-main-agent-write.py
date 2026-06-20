@@ -69,6 +69,7 @@ class MainAgentWriteGuardTest(unittest.TestCase):
     self.assert_blocked_tool("Bash", {"command": "printf hi > README.md"})
     self.assert_blocked_tool("Bash", {"command": "rm -rf build"})
     self.assert_blocked_tool("Bash", {"command": "git add README.md"})
+    self.assert_blocked_tool("Bash", {"command": "git push origin feature/demo"})
     self.assert_blocked_tool("Bash", {"command": "pnpm add zod"})
     self.assert_blocked_tool("Bash", {"command": "pnpm run generate"})
     self.assert_blocked_tool("Bash", {"command": "pnpm run build"})
@@ -79,8 +80,11 @@ class MainAgentWriteGuardTest(unittest.TestCase):
     self.assert_allowed_tool("Bash", {"command": "sed -n 1,20p README.md"})
     self.assert_allowed_tool("Bash", {"command": "sed --quiet '1,20p' README.md"})
     self.assert_allowed_tool("Bash", {"command": "sed --silent '1,20p' README.md"})
+    self.assert_allowed_tool("Bash", {"command": "sed 's/a/b/' README.md"})
     self.assert_allowed_tool("Bash", {"command": "rg -n DevFlow README.md"})
     self.assert_allowed_tool("Bash", {"command": "git status --short"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -c 'print(1)'"})
+    self.assert_allowed_tool("Bash", {"command": "python3 -c 'open(\"README.md\").read()'"})
     self.assert_allowed_tool("Bash", {"command": "python3 -X utf8 scripts/test-prevent-main-agent-write.py"})
     self.assert_allowed_tool("Bash", {"command": "python3 -X utf8 scripts/run_design_examples.py"})
     self.assert_allowed_tool(
@@ -99,10 +103,44 @@ class MainAgentWriteGuardTest(unittest.TestCase):
   def test_blocks_main_agent_mutating_sed_and_unsafe_python_commands(self) -> None:
     self.assert_blocked_tool("Bash", {"command": "sed -i 's/a/b/' README.md"})
     self.assert_blocked_tool("Bash", {"command": "sed --in-place 's/a/b/' README.md"})
-    self.assert_blocked_tool("Bash", {"command": "sed 's/a/b/' README.md"})
-    self.assert_blocked_tool("Bash", {"command": "sed -n 's/a/b/p' README.md"})
-    self.assert_blocked_tool("Bash", {"command": "python3 -c 'print(1)'"})
+    self.assert_blocked_tool("Bash", {"command": "python3 -c 'open(\"README.md\", \"w\").write(\"x\")'"})
     self.assert_blocked_tool("Bash", {"command": "python3 scripts/update_readme.py"})
+
+  def test_escalates_proxy_bypass_attempts(self) -> None:
+    decision = HOOK.should_block_tool(
+      "Bash",
+      {"command": "rtk proxy sed -n '1,20p' README.md"},
+      "worker-1",
+    )
+    self.assertIsNotNone(decision)
+    self.assertTrue(decision.escalation)
+    self.assertIn("二级警告", decision.reason)
+
+    decision = HOOK.should_block_tool(
+      "Bash",
+      {"command": "proxy python3 -c 'print(1)'"},
+      "worker-1",
+    )
+    self.assertIsNotNone(decision)
+    self.assertTrue(decision.escalation)
+
+  def test_blocks_git_push_even_for_registered_subagent(self) -> None:
+    self.start_subagent("worker-1")
+    self.assert_blocked_tool(
+      "Bash",
+      {"command": "git push -u origin codex/task"},
+      session_id="worker-1",
+    )
+    self.assert_blocked_tool(
+      "Bash",
+      {"command": "command git push origin codex/task"},
+      session_id="worker-1",
+    )
+    self.assert_blocked_tool(
+      "Bash",
+      {"command": "git -C ../repo push origin codex/task"},
+      session_id="worker-1",
+    )
 
   def test_session_start_prints_coordinator_status_and_allows_session(self) -> None:
     payload = {"hook_event_name": "SessionStart", "session_id": "main-session"}

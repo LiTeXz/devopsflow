@@ -48,11 +48,7 @@ SHELL_WRITE_COMMANDS = {
   "mkdir",
   "mv",
   "patch",
-  "perl",
-  "python",
-  "python3",
   "rm",
-  "sed",
   "tee",
   "touch",
   "truncate",
@@ -75,11 +71,14 @@ GIT_WRITE_SUBCOMMANDS = {
   "stash",
 }
 PACKAGE_MANAGERS = {"npm", "pnpm", "yarn", "bun", "pip", "pip3", "uv", "cargo", "go"}
+GIT_GLOBAL_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
+GIT_GLOBAL_OPTIONS_WITH_OPTIONAL_VALUE = {"--config-env"}
 
 
 @dataclass(frozen=True)
 class BlockDecision:
   reason: str
+  escalation: bool = False
 
 
 def main() -> int:
@@ -114,15 +113,19 @@ def should_block_tool(
   tool_input: dict[str, Any],
   session_id: str | None,
 ) -> BlockDecision | None:
-  write_reason = _write_reason_for_tool(tool_name, tool_input)
-  if write_reason is None:
+  decision = _decision_for_tool(tool_name, tool_input)
+  if decision is None:
     return None
+  if decision.escalation:
+    return decision
+  if _is_global_git_push_decision(decision):
+    return decision
   if not session_id:
     return BlockDecision(
-      f"{write_reason}，但 payload 缺少 session_id，无法证明这是 worker/subagent 写入"
+      f"{decision.reason}，但 payload 缺少 session_id，无法证明这是 worker/subagent 写入"
     )
   if not is_registered_subagent_session(session_id):
-    return BlockDecision(f"{write_reason}，当前 session `{session_id}` 未登记为 worker/subagent")
+    return BlockDecision(f"{decision.reason}，当前 session `{session_id}` 未登记为 worker/subagent")
   return None
 
 
@@ -165,37 +168,51 @@ def _handle_session_start(_payload: dict[str, Any]) -> int:
   return 0
 
 
-def _write_reason_for_tool(tool_name: str, tool_input: dict[str, Any]) -> str | None:
+def _decision_for_tool(tool_name: str, tool_input: dict[str, Any]) -> BlockDecision | None:
   if tool_name in DIRECT_WRITE_TOOL_NAMES:
-    return f"`{tool_name}` 是直接写入工具"
+    return BlockDecision(f"`{tool_name}` 是直接写入工具")
   if tool_name and tool_name not in SHELL_TOOL_NAMES:
     return None
   command = _find_command(tool_input)
   if not command:
     return None
-  return _write_reason_for_command(command)
+  return _decision_for_command(command)
 
 
-def _write_reason_for_command(command: str) -> str | None:
+def _decision_for_command(command: str) -> BlockDecision | None:
   for segment in _command_segments(command):
+    proxy_reason = _proxy_escalation_reason(segment)
+    if proxy_reason is not None:
+      return BlockDecision(proxy_reason, escalation=True)
     normalized = _normalize_command_prefix(segment)
     if not normalized:
       continue
     if _is_test_command(normalized):
       continue
     if _has_shell_redirection(normalized):
-      return "shell 重定向会写入文件"
+      return BlockDecision("shell 重定向会写入文件")
     if normalized[0] == "git":
+      reason = _git_push_reason(normalized)
+      if reason is not None:
+        return BlockDecision(reason)
       reason = _git_write_reason(normalized)
       if reason is not None:
-        return reason
+        return BlockDecision(reason)
       continue
     if normalized[0] in PACKAGE_MANAGERS and _package_command_writes(normalized):
-      return f"`{normalized[0]} {' '.join(normalized[1:3])}` 可能修改依赖或锁文件"
-    if normalized[0] == "sed" and _is_safe_read_only_sed(normalized):
+      return BlockDecision(f"`{normalized[0]} {' '.join(normalized[1:3])}` 可能修改依赖或锁文件")
+    if normalized[0] == "sed":
+      reason = _sed_write_reason(normalized)
+      if reason is not None:
+        return BlockDecision(reason)
+      continue
+    if normalized[0] in {"python", "python3"}:
+      reason = _python_write_reason(normalized)
+      if reason is not None:
+        return BlockDecision(reason)
       continue
     if normalized[0] in SHELL_WRITE_COMMANDS:
-      return f"`{normalized[0]}` 是写入型 shell 命令"
+      return BlockDecision(f"`{normalized[0]}` 是写入型 shell 命令")
   return None
 
 
@@ -275,15 +292,34 @@ def _command_segments(command: str) -> list[list[str]]:
 
 
 def _normalize_command_prefix(tokens: list[str]) -> list[str]:
-  normalized = list(tokens)
-  while normalized and _is_env_assignment(normalized[0]):
-    normalized.pop(0)
-  while normalized and normalized[0] in {"command", "builtin", "exec", "env"}:
-    normalized.pop(0)
+  normalized = _strip_launcher_prefix(tokens)
   if normalized and normalized[0] == "rtk":
     normalized.pop(0)
     if normalized and normalized[0] == "proxy":
       normalized.pop(0)
+  return normalized
+
+
+def _proxy_escalation_reason(tokens: list[str]) -> str | None:
+  normalized = _strip_launcher_prefix(tokens)
+  if normalized and normalized[0] == "proxy":
+    return "二级警告：检测到 `proxy` 代理执行，疑似在尝试绕过既有权限或 hook 限制"
+  if len(normalized) >= 2 and normalized[0] == "rtk" and normalized[1] == "proxy":
+    return "二级警告：检测到 `rtk proxy` 代理执行，疑似在尝试绕过既有权限或 hook 限制"
+  return None
+
+
+def _strip_launcher_prefix(tokens: list[str]) -> list[str]:
+  normalized = list(tokens)
+  changed = True
+  while changed:
+    changed = False
+    while normalized and _is_env_assignment(normalized[0]):
+      normalized.pop(0)
+      changed = True
+    while normalized and normalized[0] in {"command", "builtin", "exec", "env"}:
+      normalized.pop(0)
+      changed = True
   return normalized
 
 
@@ -302,10 +338,46 @@ def _has_shell_redirection(tokens: list[str]) -> bool:
 
 
 def _git_write_reason(tokens: list[str]) -> str | None:
-  subcommand = _first_non_option(tokens[1:])
+  subcommand = _git_subcommand(tokens[1:])
   if subcommand in GIT_WRITE_SUBCOMMANDS:
     return f"`git {subcommand}` 会修改工作区、索引或提交历史"
   return None
+
+
+def _git_push_reason(tokens: list[str]) -> str | None:
+  subcommand = _git_subcommand(tokens[1:])
+  if subcommand == "push":
+    return "`git push` 已被全场拦截；Agent 不允许执行任何推送"
+  return None
+
+
+def _git_subcommand(args: list[str]) -> str | None:
+  index = 0
+  while index < len(args):
+    token = args[index]
+    if token == "--":
+      return args[index + 1] if index + 1 < len(args) else None
+    if token in GIT_GLOBAL_OPTIONS_WITH_VALUE:
+      index += 2
+      continue
+    if any(token.startswith(f"{option}=") for option in GIT_GLOBAL_OPTIONS_WITH_VALUE):
+      index += 1
+      continue
+    if token in GIT_GLOBAL_OPTIONS_WITH_OPTIONAL_VALUE:
+      index += 2
+      continue
+    if token.startswith("--") and "=" in token:
+      index += 1
+      continue
+    if token.startswith("-"):
+      index += 1
+      continue
+    return token
+  return None
+
+
+def _is_global_git_push_decision(decision: BlockDecision) -> bool:
+  return decision.reason.startswith("`git push` 已被全场拦截")
 
 
 def _first_non_option(tokens: list[str]) -> str | None:
@@ -349,27 +421,15 @@ def _package_command_writes(tokens: list[str]) -> bool:
   return False
 
 
-def _is_safe_read_only_sed(tokens: list[str]) -> bool:
+def _sed_write_reason(tokens: list[str]) -> str | None:
   args = tokens[1:]
   if any(_is_sed_in_place_option(token) for token in args):
-    return False
-  quiet_indices = [
-    index for index, token in enumerate(args) if token in {"-n", "--quiet", "--silent"}
-  ]
-  if len(quiet_indices) != 1:
-    return False
-  script_index = quiet_indices[0] + 1
-  if script_index >= len(args):
-    return False
-  return _is_safe_sed_print_script(args[script_index])
+    return "`sed -i` 会原地修改文件"
+  return None
 
 
 def _is_sed_in_place_option(token: str) -> bool:
   return token == "-i" or token.startswith("-i") or token == "--in-place" or token.startswith("--in-place=")
-
-
-def _is_safe_sed_print_script(script: str) -> bool:
-  return re.fullmatch(r"(?:\d+|\$)?(?:,(?:\d+|\$))?p", script) is not None
 
 
 def _is_test_command(tokens: list[str]) -> bool:
@@ -426,6 +486,36 @@ def _is_python_safe_test_command(args: list[str]) -> bool:
   if script.startswith("run_") and script.endswith("examples.py"):
     return True
   return normalized_path == "skills/tdd-skill/scripts/run_protocol_examples.py"
+
+
+def _python_write_reason(tokens: list[str]) -> str | None:
+  filtered = _strip_python_runtime_options(tokens[1:])
+  if not filtered:
+    return None
+  if filtered[0] == "-c":
+    code = " ".join(filtered[1:])
+    if _python_inline_code_writes(code):
+      return "`python -c` 内联代码包含明显文件写入调用"
+    return None
+  script = Path(filtered[0]).name.lower()
+  if any(marker in script for marker in ("write", "update", "generate", "codegen", "modify", "migrate")):
+    return f"`python {' '.join(tokens[1:])}` 可能执行写入型脚本"
+  return None
+
+
+def _python_inline_code_writes(code: str) -> bool:
+  if re.search(r"open\([^)]*,\s*['\"][^'\"]*[wax+][^'\"]*['\"]", code):
+    return True
+  return any(
+    marker in code
+    for marker in (
+      ".write(",
+      ".write_text(",
+      ".write_bytes(",
+      "os.remove(",
+      "shutil.",
+    )
+  )
 
 
 def _strip_python_runtime_options(args: list[str]) -> list[str]:
