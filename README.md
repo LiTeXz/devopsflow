@@ -88,39 +88,55 @@ codex plugin marketplace upgrade devflow-skills
 hooks/
 scripts/
 skills/
+src/shared/          # 共享工具库
+package.json
+tsconfig.json
+bunfig.toml
 ```
+
+本仓库使用 TypeScript + Bun 运行时，通过 pnpm 管理依赖。
 
 `skills/` 下的每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，
 以及可选的 `agents/`、`references/`、`scripts/`、`templates/`。
 
-## 校验
+## 开发
 
-当前本地 `plugin-creator/scripts/validate_plugin.py` 仍拒绝 `plugin.json` 的
-`hooks` 字段；但 Codex 已安装插件中存在相同的 `hooks` manifest 形态。
-因此带 hook 的插件校验以 JSON 校验、hook 回归和 Codex 实际加载为准。
-
-格式校验：
+### 安装依赖
 
 ```bash
-python3 -X utf8 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/engineering-workflow-router
+pnpm install
 ```
+
+### 运行测试
+
+```bash
+pnpm test
+```
+
+### 类型检查
+
+```bash
+pnpm typecheck
+```
+
+### 校验
 
 TDD 协议回归：
 
 ```bash
-python3 -X utf8 skills/tdd-skill/scripts/run_protocol_examples.py
+bun test skills/tdd-skill/scripts/
 ```
 
 DDD 设计校验回归：
 
 ```bash
-python3 -X utf8 skills/ddd-event-storming-design/scripts/run_design_examples.py
+bun test skills/ddd-event-storming-design/scripts/
 ```
 
 Hook 回归：
 
 ```bash
-python3 -X utf8 scripts/test-prevent-protected-branch-push.py
+bun test scripts/
 ```
 
 ## Commit Message
