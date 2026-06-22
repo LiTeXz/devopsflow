@@ -1,0 +1,4 @@
+interface:
+  display_name: "Google AIP API Design"
+  short_description: "Design and review APIs using Google AIP rules."
+  default_prompt: "Use $google-aip-api-design to design or review an HTTP API against Google AIP guidance."
