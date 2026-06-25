@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { containsBlockedGitGh } from "@/shared/command-parser";
 import {
@@ -19,19 +19,55 @@ import {
 } from "@/shared/payload";
 import { isDfPublisherSession } from "@/shared/state-store";
 
+function readPluginVersion(pluginRoot?: string): string | undefined {
+	if (!pluginRoot) return undefined;
+	try {
+		const pkg = JSON.parse(
+			readFileSync(join(pluginRoot, "package.json"), "utf-8"),
+		);
+		return typeof pkg.version === "string" ? pkg.version : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+function readTomlVersion(path: string): string | undefined {
+	try {
+		const content = readFileSync(path, "utf-8");
+		const match = content.match(/^version\s*=\s*"([^"]+)"/m);
+		return match?.[1];
+	} catch {
+		return undefined;
+	}
+}
+
 export function ensureDfPublisherAgent(
 	cwd: string,
 	pluginRoot?: string,
 ): string | undefined {
 	const agentsDir = join(cwd, ".codex", "agents");
 	const dfPublisherToml = join(agentsDir, "df-publisher.toml");
-	if (existsSync(dfPublisherToml)) return undefined;
+	const expectedVersion = readPluginVersion(pluginRoot);
 
+	// File exists — check version
+	if (existsSync(dfPublisherToml) && expectedVersion) {
+		const installedVersion = readTomlVersion(dfPublisherToml);
+		if (installedVersion === expectedVersion) return undefined;
+		// Version mismatch — fall through to re-install
+	} else if (existsSync(dfPublisherToml) && !expectedVersion) {
+		// Can't determine expected version — assume OK
+		return undefined;
+	}
+
+	// File missing or outdated — try auto-install
 	if (pluginRoot) {
 		const sourceToml = join(pluginRoot, "agents", "df-publisher.toml");
 		if (existsSync(sourceToml)) {
 			mkdirSync(agentsDir, { recursive: true });
 			copyFileSync(sourceToml, dfPublisherToml);
+			if (expectedVersion) {
+				return `DevFlow: df-publisher 子代理定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
+			}
 			return `DevFlow: 已自动安装 df-publisher 子代理定义到 ${dfPublisherToml}`;
 		}
 	}
