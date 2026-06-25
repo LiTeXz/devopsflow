@@ -1,18 +1,18 @@
 {
-  "name": "devflow-skills",
-  "version": "0.2.2",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "test": "bun test",
-    "test:hooks": "bun test scripts/",
-    "test:validators": "bun test skills/tdd-skill/scripts/ skills/ddd-event-storming-design/scripts/",
-    "typecheck": "bunx tsc --noEmit",
-    "lint": "bunx biome check ."
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^6.0.3",
-    "@biomejs/biome": "latest"
-  }
+	"name": "devflow-skills",
+	"version": "0.2.3",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"test": "bun test",
+		"test:hooks": "bun test scripts/",
+		"test:validators": "bun test skills/tdd-skill/scripts/ skills/ddd-event-storming-design/scripts/",
+		"typecheck": "bunx tsc --noEmit",
+		"lint": "bunx biome check ."
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"typescript": "^6.0.3",
+		"@biomejs/biome": "latest"
+	}
 }

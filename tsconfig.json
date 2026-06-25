@@ -1,15 +1,23 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["bun"]
-  },
-  "include": ["src/**/*.ts", "scripts/**/*.ts", "skills/**/*.ts", ".opencode/**/*.ts"],
-  "exclude": ["node_modules"]
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"types": ["bun"]
+	},
+	"include": [
+		"src/**/*.ts",
+		"scripts/**/*.ts",
+		"skills/**/*.ts",
+		".opencode/**/*.ts"
+	],
+	"exclude": ["node_modules"]
 }
