@@ -1,6 +1,13 @@
 #!/usr/bin/env bun
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import {
+	copyFileSync,
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	statSync,
+	unlinkSync,
+} from "node:fs";
 import { join } from "node:path";
 import { containsBlockedGitGh } from "@/shared/command-parser";
 import {
@@ -31,13 +38,21 @@ function readPluginVersion(pluginRoot?: string): string | undefined {
 	}
 }
 
-function readTomlVersion(path: string): string | undefined {
+function readTomlVersionMarker(path: string): string | undefined {
 	try {
 		const content = readFileSync(path, "utf-8");
-		const match = content.match(/^version\s*=\s*"([^"]+)"/m);
+		const match = content.match(/^#\s*devflow-version\s*=\s*"([^"]+)"/m);
 		return match?.[1];
 	} catch {
 		return undefined;
+	}
+}
+
+function hasLegacyTopLevelVersionField(path: string): boolean {
+	try {
+		return /^version\s*=/.test(readFileSync(path, "utf-8"));
+	} catch {
+		return false;
 	}
 }
 
@@ -46,13 +61,19 @@ export function ensureDfPublisherAgent(
 	pluginRoot?: string,
 ): string | undefined {
 	const agentsDir = join(cwd, ".codex", "agents");
+	const codexPath = join(cwd, ".codex");
 	const dfPublisherToml = join(agentsDir, "df-publisher.toml");
 	const expectedVersion = readPluginVersion(pluginRoot);
 
 	// File exists — check version
 	if (existsSync(dfPublisherToml) && expectedVersion) {
-		const installedVersion = readTomlVersion(dfPublisherToml);
-		if (installedVersion === expectedVersion) return undefined;
+		const installedVersion = readTomlVersionMarker(dfPublisherToml);
+		if (
+			installedVersion === expectedVersion &&
+			!hasLegacyTopLevelVersionField(dfPublisherToml)
+		) {
+			return undefined;
+		}
 		// Version mismatch — fall through to re-install
 	} else if (existsSync(dfPublisherToml) && !expectedVersion) {
 		// Can't determine expected version — assume OK
@@ -63,6 +84,9 @@ export function ensureDfPublisherAgent(
 	if (pluginRoot) {
 		const sourceToml = join(pluginRoot, "agents", "df-publisher.toml");
 		if (existsSync(sourceToml)) {
+			if (existsSync(codexPath) && statSync(codexPath).isFile()) {
+				unlinkSync(codexPath);
+			}
 			mkdirSync(agentsDir, { recursive: true });
 			copyFileSync(sourceToml, dfPublisherToml);
 			if (expectedVersion) {

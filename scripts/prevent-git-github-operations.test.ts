@@ -11,6 +11,7 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
+	statSync,
 	unlinkSync,
 	writeFileSync,
 } from "node:fs";
@@ -126,7 +127,7 @@ describe("containsBlockedGitGh", () => {
 });
 
 describe("GitGhOperationsHook SessionStart", () => {
-	it("returns undefined when df-publisher.toml exists with matching version", () => {
+	it("returns undefined when df-publisher.toml exists with matching devflow-version marker", () => {
 		const projectDir = mkdtempSync(join(tempDir, "has-matching-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-matching-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
@@ -137,20 +138,20 @@ describe("GitGhOperationsHook SessionStart", () => {
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'version = "1.0.0"\nname = "df-publisher"',
+			'# devflow-version = "1.0.0"\nname = "df-publisher"',
 		);
 
 		const agentsDir = join(projectDir, ".codex", "agents");
 		mkdirSync(agentsDir, { recursive: true });
 		writeFileSync(
 			join(agentsDir, "df-publisher.toml"),
-			'version = "1.0.0"\nname = "df-publisher"',
+			'# devflow-version = "1.0.0"\nname = "df-publisher"',
 		);
 
 		expect(ensureDfPublisherAgent(projectDir, pluginDir)).toBeUndefined();
 	});
 
-	it("re-installs when installed version does not match plugin version", () => {
+	it("re-installs when installed devflow-version marker does not match plugin version", () => {
 		const projectDir = mkdtempSync(join(tempDir, "version-mismatch-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-v2-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
@@ -161,14 +162,14 @@ describe("GitGhOperationsHook SessionStart", () => {
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'version = "2.0.0"\nname = "df-publisher"',
+			'# devflow-version = "2.0.0"\nname = "df-publisher"',
 		);
 
 		const agentsDir = join(projectDir, ".codex", "agents");
 		mkdirSync(agentsDir, { recursive: true });
 		writeFileSync(
 			join(agentsDir, "df-publisher.toml"),
-			'version = "1.0.0"\nname = "df-publisher"',
+			'# devflow-version = "1.0.0"\nname = "df-publisher"',
 		);
 
 		const message = ensureDfPublisherAgent(projectDir, pluginDir);
@@ -180,6 +181,34 @@ describe("GitGhOperationsHook SessionStart", () => {
 			"utf-8",
 		);
 		expect(installedContent).toInclude("2.0.0");
+		expect(installedContent).not.toMatch(/^version\s*=/m);
+	});
+
+	it("re-installs when installed TOML still has legacy top-level version field", () => {
+		const projectDir = mkdtempSync(join(tempDir, "legacy-version-field-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-legacy-clean-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = '# devflow-version = "2.0.0"\nname = "df-publisher"';
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "2.0.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		writeFileSync(
+			join(agentsDir, "df-publisher.toml"),
+			'version = "2.0.0"\nname = "df-publisher"',
+		);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("2.0.0");
+		expect(readFileSync(join(agentsDir, "df-publisher.toml"), "utf-8")).toBe(
+			sourceContent,
+		);
 	});
 
 	it("auto-installs when file is missing and pluginRoot source exists", () => {
@@ -193,7 +222,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'version = "1.0.0"\nname = "df-publisher"',
+			'# devflow-version = "1.0.0"\nname = "df-publisher"',
 		);
 
 		const message = ensureDfPublisherAgent(projectDir, pluginDir);
@@ -207,7 +236,37 @@ describe("GitGhOperationsHook SessionStart", () => {
 			"df-publisher.toml",
 		);
 		expect(existsSync(installedPath)).toBe(true);
-		expect(readFileSync(installedPath, "utf-8")).toInclude("df-publisher");
+		const installedContent = readFileSync(installedPath, "utf-8");
+		expect(installedContent).toInclude("df-publisher");
+		expect(installedContent).not.toMatch(/^version\s*=/m);
+	});
+
+	it("replaces a file at .codex before auto-installing df-publisher", () => {
+		const projectDir = mkdtempSync(join(tempDir, "codex-file-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-codex-file-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = '# devflow-version = "3.0.0"\nname = "df-publisher"';
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "3.0.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+		writeFileSync(join(projectDir, ".codex"), "blocking file");
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(statSync(join(projectDir, ".codex")).isDirectory()).toBe(true);
+		const installedPath = join(
+			projectDir,
+			".codex",
+			"agents",
+			"df-publisher.toml",
+		);
+		expect(existsSync(installedPath)).toBe(true);
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("3.0.0");
 	});
 
 	it("warns with copy commands when pluginRoot source does not exist", () => {

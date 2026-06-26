@@ -10,13 +10,20 @@ jobs:
   version-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: latest
       - name: Check version alignment
         run: |
           set -e
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          PLUGIN_VERSION=$(node -p "require('./.codex-plugin/plugin.json').version")
-          AGENT_VERSION=$(grep '^version' agents/df-publisher.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          PKG_VERSION=$(bun -e "console.log(require('./package.json').version)")
+          PLUGIN_VERSION=$(bun -e "console.log(require('./.codex-plugin/plugin.json').version)")
+          if grep -q '^version[[:space:]]*=' agents/df-publisher.toml; then
+            echo "::error::agents/df-publisher.toml must not use top-level version = because Codex agent TOML reserves that field; use # devflow-version = \"...\" instead"
+            exit 1
+          fi
+          AGENT_VERSION=$(grep '^#[[:space:]]*devflow-version[[:space:]]*=' agents/df-publisher.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
 
           echo "package.json:       $PKG_VERSION"
           echo "plugin.json:        $PLUGIN_VERSION"

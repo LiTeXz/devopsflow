@@ -1,6 +1,6 @@
 {
 	"name": "devflow-skills",
-	"version": "0.2.5",
+	"version": "0.2.6",
 	"description": "DevFlow engineering workflow skills for Codex: routing, DDD, TDD, planning, execution, debugging, review, verification, and branch finishing.",
 	"composerIcon": "./assets/app-icon-small.svg",
 	"logo": "./assets/app-icon.png",
