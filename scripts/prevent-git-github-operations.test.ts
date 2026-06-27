@@ -53,6 +53,16 @@ function stopSubagent(sessionId: string): void {
 	saveState(state);
 }
 
+function validDfPublisherToml(version: string): string {
+	return `# devflow-version = "${version}"
+name = "df-publisher"
+description = "Publish git and GitHub changes"
+nickname_candidates = ["df-publisher", "publisher"]
+developer_instructions = """
+Publish through trusted git and gh workflows.
+"""`;
+}
+
 describe("containsGitOrGh", () => {
 	it("detects plain git and gh commands", () => {
 		expect(containsGitOrGh("git status")).toBe(true);
@@ -131,24 +141,23 @@ describe("GitGhOperationsHook SessionStart", () => {
 		const projectDir = mkdtempSync(join(tempDir, "has-matching-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-matching-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = validDfPublisherToml("1.0.0");
 		mkdirSync(pluginAgentsDir, { recursive: true });
 		writeFileSync(
 			join(pluginDir, "package.json"),
 			JSON.stringify({ version: "1.0.0" }),
 		);
-		writeFileSync(
-			join(pluginAgentsDir, "df-publisher.toml"),
-			'# devflow-version = "1.0.0"\nname = "df-publisher"',
-		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
 
 		const agentsDir = join(projectDir, ".codex", "agents");
 		mkdirSync(agentsDir, { recursive: true });
-		writeFileSync(
-			join(agentsDir, "df-publisher.toml"),
-			'# devflow-version = "1.0.0"\nname = "df-publisher"',
-		);
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		writeFileSync(installedPath, sourceContent);
+		const before = statSync(installedPath).mtimeMs;
 
 		expect(ensureDfPublisherAgent(projectDir, pluginDir)).toBeUndefined();
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+		expect(statSync(installedPath).mtimeMs).toBe(before);
 	});
 
 	it("re-installs when installed devflow-version marker does not match plugin version", () => {
@@ -162,7 +171,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'# devflow-version = "2.0.0"\nname = "df-publisher"',
+			validDfPublisherToml("2.0.0"),
 		);
 
 		const agentsDir = join(projectDir, ".codex", "agents");
@@ -188,7 +197,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		const projectDir = mkdtempSync(join(tempDir, "legacy-version-field-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-legacy-clean-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
-		const sourceContent = '# devflow-version = "2.0.0"\nname = "df-publisher"';
+		const sourceContent = validDfPublisherToml("2.0.0");
 		mkdirSync(pluginAgentsDir, { recursive: true });
 		writeFileSync(
 			join(pluginDir, "package.json"),
@@ -222,7 +231,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'# devflow-version = "1.0.0"\nname = "df-publisher"',
+			validDfPublisherToml("1.0.0"),
 		);
 
 		const message = ensureDfPublisherAgent(projectDir, pluginDir);
@@ -245,7 +254,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		const projectDir = mkdtempSync(join(tempDir, "codex-file-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-codex-file-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
-		const sourceContent = '# devflow-version = "3.0.0"\nname = "df-publisher"';
+		const sourceContent = validDfPublisherToml("3.0.0");
 		mkdirSync(pluginAgentsDir, { recursive: true });
 		writeFileSync(
 			join(pluginDir, "package.json"),
@@ -267,6 +276,151 @@ describe("GitGhOperationsHook SessionStart", () => {
 		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
 		expect(message).not.toBeUndefined();
 		expect(message).toInclude("3.0.0");
+	});
+
+	it("self-heals when installed TOML is invalid even with matching version marker", () => {
+		const projectDir = mkdtempSync(join(tempDir, "invalid-toml-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-invalid-target-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = validDfPublisherToml("4.0.0");
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "4.0.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		writeFileSync(
+			installedPath,
+			'# devflow-version = "4.0.0"\nname = "df-publisher"\ninvalid = "',
+		);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("自愈重装");
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+	});
+
+	it("self-heals when installed TOML has unsupported fields", () => {
+		const projectDir = mkdtempSync(join(tempDir, "unsupported-field-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-unsupported-field-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = validDfPublisherToml("4.1.0");
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "4.1.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		writeFileSync(
+			installedPath,
+			`${sourceContent}
+agent_type = "df-publisher"`,
+		);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("自愈重装");
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+	});
+
+	it("self-heals when installed TOML misses required fields", () => {
+		const projectDir = mkdtempSync(join(tempDir, "missing-required-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-missing-required-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = validDfPublisherToml("4.2.0");
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "4.2.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		writeFileSync(
+			installedPath,
+			`# devflow-version = "4.2.0"
+name = "df-publisher"
+description = "Publish git and GitHub changes"`,
+		);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("自愈重装");
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+	});
+
+	it("self-heals when installed TOML hash differs from plugin source", () => {
+		const projectDir = mkdtempSync(join(tempDir, "hash-mismatch-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-hash-source-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		const sourceContent = validDfPublisherToml("4.3.0");
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "4.3.0" }),
+		);
+		writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		writeFileSync(
+			installedPath,
+			sourceContent.replace(
+				"Publish through trusted git and gh workflows.",
+				"Publish through stale local instructions.",
+			),
+		);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("hash 不一致");
+		expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
+	});
+
+	it("fails closed when plugin source TOML is invalid", () => {
+		const projectDir = mkdtempSync(join(tempDir, "invalid-source-"));
+		const pluginDir = mkdtempSync(join(tempDir, "plugin-invalid-source-"));
+		const pluginAgentsDir = join(pluginDir, "agents");
+		mkdirSync(pluginAgentsDir, { recursive: true });
+		writeFileSync(
+			join(pluginDir, "package.json"),
+			JSON.stringify({ version: "4.3.0" }),
+		);
+		writeFileSync(
+			join(pluginAgentsDir, "df-publisher.toml"),
+			'# devflow-version = "4.3.0"\nname = "df-publisher"\ninvalid = "',
+		);
+
+		const agentsDir = join(projectDir, ".codex", "agents");
+		mkdirSync(agentsDir, { recursive: true });
+		const installedPath = join(agentsDir, "df-publisher.toml");
+		const installedContent = validDfPublisherToml("4.3.0").replace(
+			"developer_instructions",
+			"agent_type",
+		);
+		writeFileSync(installedPath, installedContent);
+
+		const message = ensureDfPublisherAgent(projectDir, pluginDir);
+
+		expect(message).not.toBeUndefined();
+		expect(message).toInclude("插件不完整");
+		expect(message).toInclude("源文件无效");
+		expect(readFileSync(installedPath, "utf-8")).toBe(installedContent);
 	});
 
 	it("warns with copy commands when pluginRoot source does not exist", () => {

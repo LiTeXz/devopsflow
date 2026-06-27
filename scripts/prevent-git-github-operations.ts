@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { createHash } from "node:crypto";
 import {
 	copyFileSync,
 	existsSync,
@@ -56,6 +57,97 @@ function hasLegacyTopLevelVersionField(path: string): boolean {
 	}
 }
 
+const AGENT_TOML_ALLOWED_FIELDS = new Set([
+	"name",
+	"description",
+	"nickname_candidates",
+	"developer_instructions",
+]);
+
+type AgentTomlValidation =
+	| { valid: true; versionMarker: string | undefined }
+	| { valid: false; reason: string; versionMarker: string | undefined };
+
+function validateDfPublisherToml(path: string): AgentTomlValidation {
+	const versionMarker = readTomlVersionMarker(path);
+	let parsed: unknown;
+	try {
+		parsed = Bun.TOML.parse(readFileSync(path, "utf-8"));
+	} catch (error) {
+		return {
+			valid: false,
+			versionMarker,
+			reason: `TOML 解析失败：${errorMessage(error)}`,
+		};
+	}
+
+	if (!isRecord(parsed)) {
+		return { valid: false, versionMarker, reason: "TOML 顶层必须是对象" };
+	}
+
+	for (const field of Object.keys(parsed)) {
+		if (!AGENT_TOML_ALLOWED_FIELDS.has(field)) {
+			return {
+				valid: false,
+				versionMarker,
+				reason: `包含不支持字段：${field}`,
+			};
+		}
+	}
+
+	for (const field of ["name", "developer_instructions"]) {
+		if (!isNonEmptyString(parsed[field])) {
+			return {
+				valid: false,
+				versionMarker,
+				reason: `缺少必需字符串字段：${field}`,
+			};
+		}
+	}
+
+	if ("description" in parsed && !isNonEmptyString(parsed.description)) {
+		return {
+			valid: false,
+			versionMarker,
+			reason: "description 必须是非空字符串",
+		};
+	}
+
+	if (
+		"nickname_candidates" in parsed &&
+		(!Array.isArray(parsed.nickname_candidates) ||
+			!parsed.nickname_candidates.every(isNonEmptyString))
+	) {
+		return {
+			valid: false,
+			versionMarker,
+			reason: "nickname_candidates 必须是非空字符串数组",
+		};
+	}
+
+	return { valid: true, versionMarker };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+	return typeof value === "string" && value.trim().length > 0;
+}
+
+function errorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
+
+function fileHash(path: string): string | undefined {
+	try {
+		return createHash("sha256").update(readFileSync(path)).digest("hex");
+	} catch {
+		return undefined;
+	}
+}
+
 export function ensureDfPublisherAgent(
 	cwd: string,
 	pluginRoot?: string,
@@ -65,16 +157,21 @@ export function ensureDfPublisherAgent(
 	const dfPublisherToml = join(agentsDir, "df-publisher.toml");
 	const expectedVersion = readPluginVersion(pluginRoot);
 
-	// File exists — check version
+	let reinstallReason: string | undefined;
+	let targetCanBeHashChecked = false;
+
+	// File exists — check version and schema
 	if (existsSync(dfPublisherToml) && expectedVersion) {
-		const installedVersion = readTomlVersionMarker(dfPublisherToml);
-		if (
-			installedVersion === expectedVersion &&
-			!hasLegacyTopLevelVersionField(dfPublisherToml)
-		) {
-			return undefined;
+		const installedValidation = validateDfPublisherToml(dfPublisherToml);
+		if (!installedValidation.valid) {
+			reinstallReason = `目标 agent TOML 无效，已自愈重装（${installedValidation.reason}）`;
+		} else if (hasLegacyTopLevelVersionField(dfPublisherToml)) {
+			reinstallReason = "目标 agent TOML 含旧版顶层 version 字段，已自愈重装";
+		} else if (installedValidation.versionMarker === expectedVersion) {
+			if (!pluginRoot) return undefined;
+			targetCanBeHashChecked = true;
 		}
-		// Version mismatch — fall through to re-install
+		// Version mismatch or invalid schema — fall through to re-install
 	} else if (existsSync(dfPublisherToml) && !expectedVersion) {
 		// Can't determine expected version — assume OK
 		return undefined;
@@ -84,12 +181,37 @@ export function ensureDfPublisherAgent(
 	if (pluginRoot) {
 		const sourceToml = join(pluginRoot, "agents", "df-publisher.toml");
 		if (existsSync(sourceToml)) {
+			const sourceValidation = validateDfPublisherToml(sourceToml);
+			if (!sourceValidation.valid) {
+				return invalidSourceMessage(
+					dfPublisherToml,
+					pluginRoot,
+					sourceToml,
+					sourceValidation.reason,
+				);
+			}
+			if (targetCanBeHashChecked) {
+				const installedHash = fileHash(dfPublisherToml);
+				const sourceHash = fileHash(sourceToml);
+				if (installedHash && sourceHash && installedHash !== sourceHash) {
+					reinstallReason =
+						"目标 agent TOML 与插件源文件 hash 不一致，已自愈重装";
+				} else {
+					return undefined;
+				}
+			}
 			if (existsSync(codexPath) && statSync(codexPath).isFile()) {
 				unlinkSync(codexPath);
 			}
 			mkdirSync(agentsDir, { recursive: true });
+			if (existsSync(dfPublisherToml) && reinstallReason) {
+				unlinkSync(dfPublisherToml);
+			}
 			copyFileSync(sourceToml, dfPublisherToml);
 			if (expectedVersion) {
+				if (reinstallReason) {
+					return `DevFlow: ${reinstallReason}至 v${expectedVersion}（${dfPublisherToml}）`;
+				}
 				return `DevFlow: df-publisher 子代理定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
 			}
 			return `DevFlow: 已自动安装 df-publisher 子代理定义到 ${dfPublisherToml}`;
@@ -118,6 +240,23 @@ export function ensureDfPublisherAgent(
 		);
 	}
 	return lines.join("\n");
+}
+
+function invalidSourceMessage(
+	dfPublisherToml: string,
+	pluginRoot: string,
+	sourceToml: string,
+	reason: string,
+): string {
+	return [
+		"DevFlow 插件不完整：df-publisher 子代理源文件无效。",
+		`源文件：${sourceToml}`,
+		`原因：${reason}`,
+		`目标位置：${dfPublisherToml}`,
+		`插件根目录：${pluginRoot}`,
+		"",
+		"请更新或重新安装 DevFlow 插件后重试，避免复制无法被 Codex 稳定识别的 agent TOML。",
+	].join("\n");
 }
 
 export function shouldBlockTool(
