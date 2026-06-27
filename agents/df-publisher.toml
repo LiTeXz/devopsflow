@@ -1,4 +1,4 @@
-# devflow-version = "0.2.6"
+# devflow-version = "0.2.7"
 name = "df-publisher"
 description = "唯一被授权执行 git 和 gh 命令的子代理。负责提交、推送、PR、合并、发布等全部 git/github 操作。遵守保护分支规则。"
 nickname_candidates = ["df-publisher", "publisher"]

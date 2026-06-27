@@ -3,6 +3,12 @@ import type { Payload, ToolInput } from "@/shared/types";
 
 const COMMAND_KEYS = ["command", "cmd"] as const;
 const SESSION_KEYS = ["session_id", "sessionId"] as const;
+const WRITABLE_AGENT_TOKENS = [
+	"worker",
+	"subagent",
+	"fork",
+	"background",
+] as const;
 
 export const SESSION_HOOK_NAMES = new Set([
 	"SessionStart",
@@ -125,4 +131,56 @@ export function findAgentName(payload: Payload): string {
 		.filter((v): v is string => typeof v === "string")
 		.join(" ")
 		.trim();
+}
+
+export function isWritableAgentContext(payload: Payload): boolean {
+	return collectAgentContextValues(payload).some((value) => {
+		const normalized = value.toLowerCase();
+		return WRITABLE_AGENT_TOKENS.some((token) => normalized.includes(token));
+	});
+}
+
+function collectAgentContextValues(payload: Payload): string[] {
+	const values = [
+		payload.agent_type,
+		payload.agentType,
+		payload.agentName,
+		payload.agentDisplayName,
+	];
+
+	const agent = objectValue(payload.agent);
+	if (agent) {
+		values.push(
+			stringValue(agent.mode),
+			stringValue(agent.name),
+			stringValue(agent.type),
+		);
+	}
+
+	const session = objectValue(payload.session);
+	if (session) {
+		values.push(stringValue(session.agentMode), stringValue(session.agentName));
+		const sessionAgent = objectValue(session.agent);
+		if (sessionAgent) {
+			values.push(
+				stringValue(sessionAgent.mode),
+				stringValue(sessionAgent.name),
+			);
+		}
+	}
+
+	return values.filter(
+		(value): value is string =>
+			typeof value === "string" && value.trim().length > 0,
+	);
+}
+
+function objectValue(value: unknown): Record<string, unknown> | undefined {
+	return value && typeof value === "object" && !Array.isArray(value)
+		? (value as Record<string, unknown>)
+		: undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+	return typeof value === "string" ? value : undefined;
 }

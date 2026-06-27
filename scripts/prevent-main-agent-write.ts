@@ -26,6 +26,7 @@ import {
 	findToolName,
 	findToolWorkdir,
 	findWorkdir,
+	isWritableAgentContext,
 	PRE_TOOL_USE_EVENTS,
 	readPayload,
 	SESSION_HOOK_NAMES,
@@ -48,6 +49,7 @@ export function shouldBlockTool(
 	toolInput: ToolInput,
 	sessionId?: string,
 	cwd?: string,
+	hasWritableAgentContext = false,
 ): BlockDecision | undefined {
 	const decision = decisionForTool(toolName, toolInput);
 	if (!decision) return undefined;
@@ -67,16 +69,16 @@ export function shouldBlockTool(
 		return decision;
 	}
 
-	if (!sessionId) {
+	const isRegisteredSession = sessionId
+		? isRegisteredSubagentSession(sessionId)
+		: false;
+	if (!isRegisteredSession && !hasWritableAgentContext) {
+		const sessionReason = sessionId
+			? `当前 session \`${sessionId}\` 未登记`
+			: "payload 缺少 session_id";
 		return createBlockDecision(
 			"unknown",
-			`${decision.reason}，但 payload 缺少 session_id，无法证明这是 worker/subagent 写入`,
-		);
-	}
-	if (!isRegisteredSubagentSession(sessionId)) {
-		return createBlockDecision(
-			"unknown",
-			`${decision.reason}，当前 session \`${sessionId}\` 未登记为 worker/subagent`,
+			`${decision.reason}，${sessionReason}且 payload 未显示受支持的 worker/subagent/fork/background 上下文`,
 		);
 	}
 
@@ -336,7 +338,13 @@ function main(): number {
 
 	const toolInput = findToolInput(payload) ?? {};
 	const cwd = findWorkdir(payload, toolInput);
-	const decision = shouldBlockTool(toolName, toolInput, sessionId, cwd);
+	const decision = shouldBlockTool(
+		toolName,
+		toolInput,
+		sessionId,
+		cwd,
+		isWritableAgentContext(payload),
+	);
 
 	if (decision) {
 		writeBlockMessage(decision);

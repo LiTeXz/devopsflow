@@ -60,6 +60,7 @@ function cleanupState(): void {
 	}
 }
 
+import { isWritableAgentContext } from "@/shared/payload";
 import { loadState, saveState } from "@/shared/state-store";
 import { shouldBlockTool } from "./prevent-main-agent-write";
 
@@ -296,6 +297,124 @@ describe("MainAgentWriteGuard", () => {
 			stopSubagent("worker-1");
 			expect(shouldBlockTool("Write", {}, "worker-1")).not.toBeNull();
 			expect(shouldBlockTool("Write", {}, "worker-2")).toBeUndefined();
+		});
+
+		it("allows unregistered direct write when payload declares worker context", () => {
+			expect(
+				shouldBlockTool(
+					"Write",
+					{},
+					undefined,
+					undefined,
+					isWritableAgentContext({
+						agent_type: "worker",
+					}),
+				),
+			).toBeUndefined();
+		});
+
+		it("allows unregistered shell write when nested agent declares subagent worker context", () => {
+			expect(
+				shouldBlockTool(
+					"Bash",
+					{ command: "touch marker" },
+					"unregistered-worker",
+					undefined,
+					isWritableAgentContext({
+						agent: { mode: "subagent", name: "worker" },
+					}),
+				),
+			).toBeUndefined();
+		});
+
+		it("allows unregistered writes when agent names declare fork or background context", () => {
+			expect(
+				shouldBlockTool(
+					"Write",
+					{},
+					"fork-worker",
+					undefined,
+					isWritableAgentContext({
+						agentName: "Codex App Fork Worker",
+					}),
+				),
+			).toBeUndefined();
+			expect(
+				shouldBlockTool(
+					"Bash",
+					{ command: "touch marker" },
+					"background-worker",
+					undefined,
+					isWritableAgentContext({
+						agentDisplayName: "background task runner",
+					}),
+				),
+			).toBeUndefined();
+		});
+
+		it("blocks unregistered writes when payload declares primary, build, or main context", () => {
+			const primaryDecision = shouldBlockTool(
+				"Write",
+				{},
+				"primary-agent",
+				undefined,
+				isWritableAgentContext({
+					agent_type: "primary",
+				}),
+			);
+			const buildDecision = shouldBlockTool(
+				"Write",
+				{},
+				"build-agent",
+				undefined,
+				isWritableAgentContext({
+					agentName: "build",
+				}),
+			);
+			const mainDecision = shouldBlockTool(
+				"Write",
+				{},
+				"main-agent",
+				undefined,
+				isWritableAgentContext({
+					session: { agentMode: "main" },
+				}),
+			);
+
+			expect(primaryDecision).not.toBeNull();
+			expect(buildDecision).not.toBeNull();
+			expect(mainDecision).not.toBeNull();
+			expect(primaryDecision?.reason).toInclude("payload 未显示受支持");
+		});
+
+		it("blocks git push even for unregistered worker context", () => {
+			const decision = shouldBlockTool(
+				"Bash",
+				{ command: "git push -u origin codex/task" },
+				"unregistered-worker",
+				undefined,
+				isWritableAgentContext({ agent_type: "worker" }),
+			);
+
+			expect(decision).not.toBeNull();
+			expect(decision?.reason).toInclude("git push");
+		});
+
+		it("blocks unregistered worker write on protected branch via workdir", () => {
+			const protectedRoot = join(tempDir, "payload-worker-pb-root");
+			initGitRepo(protectedRoot, "dev");
+
+			const decision = shouldBlockTool(
+				"Bash",
+				{ command: "touch marker", workdir: protectedRoot },
+				"unregistered-worker",
+				undefined,
+				isWritableAgentContext({ agent_type: "worker" }),
+			);
+
+			expect(decision).not.toBeNull();
+			expect(decision?.reason).toInclude("受保护");
+			expect(decision?.reason).toInclude(protectedRoot);
 		});
 	});
 
