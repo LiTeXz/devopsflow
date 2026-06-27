@@ -1,4 +1,0 @@
-interface:
-  display_name: "Finish Development Branch"
-  short_description: "Prepare tested changes for commit or PR"
-  default_prompt: "Use $finishing-development-branch to inspect status, confirm verification evidence, and prepare a Chinese Conventional Commit."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Implementation Planning"
-  short_description: "Write small verifiable implementation plans"
-  default_prompt: "Use $implementation-planning to produce a step-by-step implementation plan with files, commands, and expected results."

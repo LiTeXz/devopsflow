@@ -1,4 +1,0 @@
-interface:
-  display_name: "Receiving Code Review"
-  short_description: "Resolve review feedback with verification"
-  default_prompt: "Use $receiving-code-review to classify review comments, apply focused fixes, and verify each resolved issue."

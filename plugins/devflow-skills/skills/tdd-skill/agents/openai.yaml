@@ -1,4 +1,0 @@
-interface:
-  display_name: "TDD Skill"
-  short_description: "Build, fix, or refactor with a strict red-green-refactor loop"
-  default_prompt: "Use $tdd-skill to define the next behavior, write the failing test first, go green, and refactor only after green."

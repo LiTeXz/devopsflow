@@ -1,4 +1,0 @@
-interface:
-  display_name: "Engineering Workflow Router"
-  short_description: "Choose mandatory engineering workflows before coding"
-  default_prompt: "Use $engineering-workflow-router to classify this engineering task and select the mandatory skills before starting work."

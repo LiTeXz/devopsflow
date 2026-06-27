@@ -1,4 +1,0 @@
-﻿interface:
-  display_name: "Systematic Debugging"
-  short_description: "Find root cause before changing code"
-  default_prompt: "Use $systematic-debugging to reproduce the failure, gather evidence, find root cause, and fix it with regression coverage."

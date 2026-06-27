@@ -1,4 +1,0 @@
-interface:
-  display_name: "DDD to TDD Handoff"
-  short_description: "Convert traceable DDD artifacts into language-agnostic TDD slices"
-  default_prompt: "Use $ddd-to-tdd-handoff to turn the confirmed DDD design and requirement traceability into small, language-agnostic TDD implementation slices."

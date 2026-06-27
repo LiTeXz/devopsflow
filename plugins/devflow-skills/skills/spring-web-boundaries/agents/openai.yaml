@@ -1,4 +1,0 @@
-interface:
-  display_name: "Spring Web Boundaries"
-  short_description: "Keep Spring HTTP concerns at the web adapter edge"
-  default_prompt: "Use $spring-web-boundaries when changing Spring controllers, endpoints, or service/controller boundaries."

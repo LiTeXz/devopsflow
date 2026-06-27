@@ -1,7 +1,0 @@
-interface:
-  display_name: "DDD Event Storming"
-  short_description: "Requirements intake and pure DDD modeling from actors and events"
-  default_prompt: "Use $ddd-event-storming-design to clarify raw business requirements, split requirement items, analyze with event storming, identify actors, commands, events, policies, aggregates, and read models, and produce a traceable behavior-first DDD domain design specification."
-
-policy:
-  allow_implicit_invocation: true

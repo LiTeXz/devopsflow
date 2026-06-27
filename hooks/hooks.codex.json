@@ -5,6 +5,11 @@
 				"hooks": [
 					{
 						"type": "command",
+						"command": "PLUGIN_ROOT=\"${PLUGIN_ROOT}\" bun \"${PLUGIN_ROOT}/skills/df-codex-assets/scripts/df-codex-assets.ts\" hydrate",
+						"statusMessage": "devflow-skills: hydrating managed Codex assets"
+					},
+					{
+						"type": "command",
 						"command": "PLUGIN_ROOT=\"${PLUGIN_ROOT}\" bun \"${PLUGIN_ROOT}/scripts/prevent-git-github-operations.ts\"",
 						"statusMessage": "devflow-skills: checking df-publisher agent installation"
 					},

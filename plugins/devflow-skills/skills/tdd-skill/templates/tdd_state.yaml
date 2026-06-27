@@ -1,5 +1,0 @@
-tdd_state:
-  phase: test_written | red_observed | green_reached | refactor_done
-  command: "..."
-  exit_code: 0 | 1 | null
-  evidence: "..."

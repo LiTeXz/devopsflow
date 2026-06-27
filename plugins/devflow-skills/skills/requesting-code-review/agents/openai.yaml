@@ -1,4 +1,0 @@
-interface:
-  display_name: "Requesting Code Review"
-  short_description: "Self-review implementation before external review"
-  default_prompt: "Use $requesting-code-review to inspect the completed change for bugs, regressions, and missing tests before review."

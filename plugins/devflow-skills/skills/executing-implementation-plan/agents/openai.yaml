@@ -1,4 +1,0 @@
-interface:
-  display_name: "Execute Implementation Plan"
-  short_description: "Execute implementation plans one checked step at a time"
-  default_prompt: "Use $executing-implementation-plan to review the plan, execute one task at a time, and record verification evidence."

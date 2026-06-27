@@ -1,4 +1,0 @@
-interface:
-  display_name: "Repository Tooling Hygiene"
-  short_description: "Move noisy helper scripts out of repo roots"
-  default_prompt: "Use $repository-tooling-hygiene to clean human-only scripts and Gradle init files out of a repository root."

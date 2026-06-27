@@ -8,7 +8,7 @@
 			"name": "devflow-skills",
 			"source": {
 				"source": "local",
-				"path": "./plugins/devflow-skills"
+				"path": "."
 			},
 			"policy": {
 				"installation": "AVAILABLE",

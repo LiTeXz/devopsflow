@@ -39,3 +39,63 @@ jobs:
           fi
 
           echo "All versions aligned: $PKG_VERSION"
+      - name: Check managed Codex asset hash
+        run: |
+          set -euo pipefail
+          HASH_FILE="skills/df-codex-assets/assets/hash.txt"
+          COMPUTED_HASH=$(bun skills/df-codex-assets/scripts/df-codex-assets.ts compute)
+          STORED_HASH=$(tr -d '[:space:]' < "$HASH_FILE")
+
+          echo "stored hash:  $STORED_HASH"
+          echo "computed hash: $COMPUTED_HASH"
+
+          if [ "$COMPUTED_HASH" != "$STORED_HASH" ]; then
+            echo "::error::Managed Codex asset hash is stale."
+            echo "::error::Correct hash: $COMPUTED_HASH"
+            echo "::error::Update with: bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > $HASH_FILE"
+            exit 1
+          fi
+      - name: Check managed Codex assets on version tag
+        run: |
+          set -euo pipefail
+          VERSION=$(bun -e "console.log(require('./package.json').version)")
+          TAG="v${VERSION}"
+          REPO=$(bun -e "const p=require('./.codex-plugin/plugin.json'); const repo=String(p.repository||'https://github.com/LiTeXz/devflow-skills'); const m=repo.match(/github\\.com[:/]([^/]+\\/[^/.#]+)(?:\\.git)?/); console.log(m ? m[1] : 'LiTeXz/devflow-skills')")
+          HASH_FILE="skills/df-codex-assets/assets/hash.txt"
+          STORED_HASH=$(tr -d '[:space:]' < "$HASH_FILE")
+
+          if ! git ls-remote --exit-code --tags "https://github.com/${REPO}.git" "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "::error::Required managed asset tag ${TAG} does not exist in ${REPO}."
+            exit 1
+          fi
+
+          TMP_DIR=$(mktemp -d)
+          cleanup() {
+            rm -rf "$TMP_DIR"
+          }
+          trap cleanup EXIT
+
+          while IFS= read -r path; do
+            mkdir -p "$TMP_DIR/$(dirname "$path")"
+            url="https://raw.githubusercontent.com/${REPO}/${TAG}/${path}"
+            if ! curl --fail --show-error --location "$url" --output "$TMP_DIR/$path"; then
+              echo "::error::Missing managed asset on ${TAG}: ${path}"
+              exit 1
+            fi
+          done < <(bun -e "import { MANAGED_ASSET_PATHS } from './skills/df-codex-assets/scripts/df-codex-assets.ts'; console.log(MANAGED_ASSET_PATHS.join('\\n'))")
+
+          mkdir -p "$TMP_DIR/skills/df-codex-assets/scripts" "$TMP_DIR/skills/df-codex-assets/assets"
+          cp skills/df-codex-assets/scripts/df-codex-assets.ts "$TMP_DIR/skills/df-codex-assets/scripts/df-codex-assets.ts"
+          cp "$HASH_FILE" "$TMP_DIR/$HASH_FILE"
+
+          TAG_HASH=$(PLUGIN_ROOT="$TMP_DIR" bun "$TMP_DIR/skills/df-codex-assets/scripts/df-codex-assets.ts" compute)
+          echo "tag:         $TAG"
+          echo "tag hash:    $TAG_HASH"
+          echo "stored hash: $STORED_HASH"
+
+          if [ "$TAG_HASH" != "$STORED_HASH" ]; then
+            echo "::error::Managed Codex assets on ${TAG} do not match ${HASH_FILE}."
+            echo "::error::Tag hash: $TAG_HASH"
+            echo "::error::Stored hash: $STORED_HASH"
+            exit 1
+          fi
