@@ -13,6 +13,8 @@
 - Combined outcome event: merge different facts such as `已停用或解散` into one event even though they can trigger different policies or actor consequences.
 - Upsert sync modeling: treat external master-data synchronization as a simple create/update when the business cares about dependency ordering, conflict handling, missing parent records, retries, or failure status.
 - Read model leakage: add page/report fields to aggregate state only because a query needs them.
+- Unjustified aggregate state: keep an aggregate state field that is not read or changed by a business method, does not protect an invariant, does not affect event production, and does not represent a lifecycle transition.
+- Fake lifecycle state: add status/source/type fields to an aggregate when no command/event changes them and no rule branches on them.
 - Projection-driven event: create a domain event only because a read model, page, report, cache, or projection needs a field refreshed.
 - Framework-shaped domain: treat controllers, DTOs, repositories, or packages as the domain model.
 - Unproduced event: keep a domain event without a command, policy, process, or external fact that can produce it.

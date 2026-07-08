@@ -50,6 +50,16 @@ const CASES = [
 		file: "artifact_flooding.md",
 		expectErrors: true,
 	},
+	{
+		name: "unjustified_aggregate_state",
+		file: "unjustified_aggregate_state.md",
+		expectErrors: true,
+	},
+	{
+		name: "aggregate_state_justified",
+		file: "aggregate_state_justified.md",
+		expectErrors: false,
+	},
 ];
 
 describe("DDD Design Validation", () => {

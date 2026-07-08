@@ -127,6 +127,63 @@ function findConfirmationGateViolations(text: string): string[] {
 	return findings;
 }
 
+function findAggregateStateViolations(text: string): string[] {
+	const findings: string[] = [];
+	const hasAggregateSection = hasAny(text, [
+		"聚合设计|#\\s*聚合|##\\s*聚合|Aggregate",
+	]);
+	const hasStateSection = hasAny(text, [
+		"聚合.*(属性|状态|state)|状态字段|聚合属性|state fields?",
+	]);
+
+	if (!hasAggregateSection || !hasStateSection) {
+		return findings;
+	}
+
+	const hasStateJustification = hasAny(text, [
+		"业务方法.*(读取|读|改变|修改|写入|使用)",
+		"(读取|改变|修改|写入|使用).*业务方法",
+		"(不变量|唯一性|资格|准入|规则|生命周期|事件.*产生|事件.*决策)",
+		"(business method|invariant|uniqueness|eligibility|lifecycle|event decision)",
+	]);
+
+	if (!hasStateJustification) {
+		findings.push(
+			"aggregate_state_without_behavior_evidence: aggregate state fields are listed without business-method, invariant, lifecycle, or event-decision evidence",
+		);
+	}
+
+	const persistenceOnlyEvidence = hasAny(text, [
+		"(snapshot|快照|mapper|映射|repository|仓储|persistence|持久化|projection|投影|read model|读模型|display|展示|page|页面|export|导出|report|报表).*" +
+			"(所以|因此|用于|作为|需要).*(聚合.*(属性|状态)|状态字段|聚合属性)",
+		"(聚合.*(属性|状态)|状态字段|聚合属性).*" +
+			"(snapshot|快照|mapper|映射|repository|仓储|persistence|持久化|projection|投影|read model|读模型|display|展示|page|页面|export|导出|report|报表)",
+	]);
+
+	if (persistenceOnlyEvidence) {
+		findings.push(
+			"aggregate_state_justified_by_projection_or_persistence: aggregate state appears justified only by snapshot, mapping, persistence, projection, or display concerns",
+		);
+	}
+
+	const fakeLifecycleState =
+		hasAny(text, [
+			"(状态|来源|类型|status|source|type).*(聚合.*(属性|状态)|状态字段|聚合属性)",
+		]) &&
+		!hasAny(text, [
+			"(状态|来源|类型|status|source|type).*(命令|事件|业务方法|规则|分支|改变|切换|停用|启用|恢复)",
+			"(命令|事件|业务方法|规则|分支|改变|切换|停用|启用|恢复).*(状态|来源|类型|status|source|type)",
+		]);
+
+	if (fakeLifecycleState) {
+		findings.push(
+			"fake_lifecycle_state: status/source/type state is present without commands, events, or rules that change or branch on it",
+		);
+	}
+
+	return findings;
+}
+
 export function validateDesign(
 	text: string,
 	requireSections: boolean = false,
@@ -142,6 +199,7 @@ export function validateDesign(
 	}
 
 	findings.push(...findConfirmationGateViolations(text));
+	findings.push(...findAggregateStateViolations(text));
 
 	if (requireSections) {
 		for (const section of REQUIRED_SECTIONS) {

@@ -409,18 +409,33 @@ An aggregate is defined by a cohesive group of long-lived business capabilities,
 For each aggregate, specify:
 
 - name and identity
-- state needed by its behavior
+- state needed by its behavior, with a justification row for each state field
 - actors allowed to issue its commands, when actor-specific rules matter
 - commands it handles
 - events it publishes
 - rules and invariants it protects
 - why commands/events belong here
 
+For each aggregate state field, record the gate evidence explicitly:
+
+- which business method reads it
+- which business method changes it
+- which invariant, uniqueness boundary, or eligibility rule it protects
+- whether it decides that a domain event should or should not be produced
+- whether it represents a real lifecycle transition with commands/events that can change it
+
+If a state field is only used by snapshots, mappers, repositories, persistence records,
+read-model projections, page display, audit/log output, or export/report fields, reject it as
+aggregate state. Move it to a read model, event metadata, persistence-only mapping, external
+source payload, or leave it out until a business method needs it.
+
 Rules:
 
 - Current-domain state-changing events should normally be published by aggregates.
 - A process manager may trigger commands; it should not replace aggregates as the source of core state-change events.
 - Aggregate state must be reconstructable from its historical events when using an event-sourcing view.
+- A proposed aggregate state field must be justified by behavior, rules, event production decisions, or lifecycle transitions, not by database columns or query needs.
+- Status/source/type fields require extra proof: keep them only when commands and events actually change them or rules branch on them.
 - If a proposed aggregate name is the same as a noun from the user prompt or a CRUD page, prove it is a consistency/lifecycle boundary. If you cannot prove that, mark it as a candidate read model, reference data, or unresolved concept instead of finalizing it as an aggregate.
 - Do not merge aggregates because fields look similar.
 - Do not split aggregates so finely that coupling leaks into services or handlers.
@@ -536,6 +551,8 @@ Before finalizing, check:
 - Every command has the information it needs from command fields plus aggregate state/history.
 - Meaningful command outcomes are represented as events.
 - Generic events such as `信息已变更` have been replaced by specific facts or explicitly justified.
+- Every aggregate state field has evidence from at least one business method, invariant, event production decision, or lifecycle transition.
+- No aggregate state field is justified only by snapshots, mappers, repositories, persistence records, read-model projections, page display, audit/log output, exports, reports, or database columns.
 - Every read model records whether each field comes from accepted events, current-state lookup, query-side joins, technical projection inputs, enriched payloads, or external read sources.
 - Every read-model-only field is marked as query-side data, technical projection input, current-state lookup, audit/log material, or external-source data instead of being promoted to a domain event.
 - Policies do not hide aggregate invariants.
@@ -560,6 +577,7 @@ Refuse or correct these patterns:
 - Treating external master-data sync as a simple upsert when ordering, dependency, failure, or conflict resolution has business meaning.
 - Creating domain events for technical actions the business does not care about.
 - Creating domain events only because a read model, page, report, cache, or projection needs a field refreshed.
+- Keeping aggregate state fields that are not read or changed by business methods and only exist for snapshots, persistence mapping, projections, or display.
 - Putting report/page/query fields into aggregates for convenience.
 - Putting most business rules into command handlers, application services, listeners, repositories, or policies.
 - Splitting bounded contexts before understanding the current problem domain.
