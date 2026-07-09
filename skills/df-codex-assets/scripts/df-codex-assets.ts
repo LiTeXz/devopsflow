@@ -96,7 +96,7 @@ export function writeStoredHash(pluginRoot: string, hash: string): void {
 }
 
 export function assetHashUpdateCommand(): string {
-	return `bun ${join("skills", "df-codex-assets", "scripts", "df-codex-assets.ts")} compute > ${HASH_FILE_PATH}`;
+	return `bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > ${HASH_FILE_PATH}`;
 }
 
 export function checkManagedAssetHash(

@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 export const GIT_GLOBAL_OPTIONS_WITH_VALUE = new Set([
 	"-C",
 	"-c",
@@ -107,8 +109,14 @@ function shellTokenize(command: string): string[] {
 			let token = "";
 			while (i < command.length && command[i] !== '"') {
 				if (command[i] === "\\" && i + 1 < command.length) {
-					token += command[i + 1];
-					i += 2;
+					const next = command[i + 1];
+					if (next === '"' || next === "\\") {
+						token += next;
+						i += 2;
+					} else {
+						token += command[i];
+						i++;
+					}
 				} else {
 					token += command[i];
 					i++;
@@ -214,6 +222,57 @@ export function gitSubcommand(args: string[]): string | undefined {
 		return token;
 	}
 	return undefined;
+}
+
+export function gitEffectiveCwd(tokens: string[], cwd: string): string {
+	let effectiveCwd = cwd;
+	let index = tokens[0] === "git" ? 1 : 0;
+	while (index < tokens.length) {
+		const token = tokens[index];
+		if (token === "--") return effectiveCwd;
+		if (token === "-C") {
+			const next = tokens[index + 1];
+			if (next) effectiveCwd = resolve(effectiveCwd, next);
+			index += 2;
+			continue;
+		}
+		if (token.startsWith("-C=")) {
+			effectiveCwd = resolve(effectiveCwd, token.slice(3));
+			index += 1;
+			continue;
+		}
+		if (token.startsWith("-C") && token.length > 2) {
+			effectiveCwd = resolve(effectiveCwd, token.slice(2));
+			index += 1;
+			continue;
+		}
+		if (GIT_GLOBAL_OPTIONS_WITH_VALUE.has(token)) {
+			index += 2;
+			continue;
+		}
+		if (
+			GIT_GLOBAL_OPTIONS_WITH_VALUE.values().some((opt) =>
+				token.startsWith(`${opt}=`),
+			)
+		) {
+			index += 1;
+			continue;
+		}
+		if (GIT_GLOBAL_OPTIONS_WITH_OPTIONAL_VALUE.has(token)) {
+			index += 2;
+			continue;
+		}
+		if (token.startsWith("--") && token.includes("=")) {
+			index += 1;
+			continue;
+		}
+		if (token.startsWith("-")) {
+			index += 1;
+			continue;
+		}
+		return effectiveCwd;
+	}
+	return effectiveCwd;
 }
 
 export function firstNonOption(tokens: string[]): string | undefined {

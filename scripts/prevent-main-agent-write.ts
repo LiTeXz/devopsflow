@@ -5,6 +5,7 @@ import {
 	commandSegments,
 	containsBlockedGitGh,
 	GIT_WRITE_SUBCOMMANDS,
+	gitEffectiveCwd,
 	gitSubcommand,
 	hasShellRedirection,
 	isPackageCommandWrites,
@@ -44,6 +45,10 @@ import {
 import type { Payload, ToolInput } from "@/shared/types";
 import { type BlockDecision, createBlockDecision } from "@/shared/types";
 
+interface ToolDecision extends BlockDecision {
+	readonly cwd?: string;
+}
+
 export function shouldBlockTool(
 	toolName: string,
 	toolInput: ToolInput,
@@ -51,12 +56,12 @@ export function shouldBlockTool(
 	cwd?: string,
 	hasWritableAgentContext = false,
 ): BlockDecision | undefined {
-	const decision = decisionForTool(toolName, toolInput);
+	const decision = decisionForTool(toolName, toolInput, cwd);
 	if (!decision) return undefined;
 	if (decision.escalation) return decision;
 	if (isGlobalGitPushDecision(decision)) {
 		if (sessionId && isDfPublisherSession(sessionId)) {
-			const effectiveCwd = cwd ?? findToolWorkdir(toolInput);
+			const effectiveCwd = decision.cwd ?? cwd ?? findToolWorkdir(toolInput);
 			if (effectiveCwd) {
 				const pbDecision = protectedBranchWriteDecision(
 					effectiveCwd,
@@ -78,11 +83,11 @@ export function shouldBlockTool(
 			: "payload 缺少 session_id";
 		return createBlockDecision(
 			"unknown",
-			`${decision.reason}，${sessionReason}且 payload 未显示受支持的 worker/subagent/fork/background 上下文`,
+			`${decision.reason}，${sessionReason}且 payload 未显示受支持的 Codex worker/fork/background 上下文`,
 		);
 	}
 
-	const effectiveCwd = cwd ?? findToolWorkdir(toolInput);
+	const effectiveCwd = decision.cwd ?? cwd ?? findToolWorkdir(toolInput);
 	if (effectiveCwd) {
 		const protectedBranchDecision = protectedBranchWriteDecision(
 			effectiveCwd,
@@ -115,16 +120,20 @@ export function shouldBlockOpenCodeTool(
 		}
 		return createBlockDecision(
 			"unknown",
-			"git push/commit/gh issue/gh pr 操作已被禁止；请委托 df-publisher 子代理完成",
+			"git push/commit/gh issue/gh pr 操作已被禁止；请委托 df-publisher Codex worker session 完成",
 		);
 	}
-	const decision = decisionForTool(toolName, toolInput);
+	const decision = decisionForTool(toolName, toolInput, cwd);
 	if (!decision) return undefined;
 	if (decision.escalation) return decision;
 	if (isGlobalGitPushDecision(decision)) {
 		if (isDfPublisher) {
-			if (cwd) {
-				const pbDecision = protectedBranchWriteDecision(cwd, decision.reason);
+			const effectiveCwd = decision.cwd ?? cwd;
+			if (effectiveCwd) {
+				const pbDecision = protectedBranchWriteDecision(
+					effectiveCwd,
+					decision.reason,
+				);
 				if (pbDecision) return pbDecision;
 			}
 			return undefined;
@@ -135,11 +144,11 @@ export function shouldBlockOpenCodeTool(
 	if (!isSubagent) {
 		return createBlockDecision(
 			"unknown",
-			`${decision.reason}，当前 OpenCode agent 不是 subagent，主 Agent 禁止写入`,
+			`${decision.reason}，当前 OpenCode agent 不是兼容适配器识别的写入会话，main Codex session 禁止写入`,
 		);
 	}
 
-	const effectiveCwd = cwd ?? findToolWorkdir(toolInput);
+	const effectiveCwd = decision.cwd ?? cwd ?? findToolWorkdir(toolInput);
 	if (effectiveCwd) {
 		const protectedBranchDecision = protectedBranchWriteDecision(
 			effectiveCwd,
@@ -154,7 +163,8 @@ export function shouldBlockOpenCodeTool(
 function decisionForTool(
 	toolName: string,
 	toolInput: ToolInput,
-): BlockDecision | undefined {
+	cwd?: string,
+): ToolDecision | undefined {
 	if (DIRECT_WRITE_TOOL_NAMES.has(toolName)) {
 		return createBlockDecision("unknown", `\`${toolName}\` 是直接写入工具`);
 	}
@@ -162,10 +172,13 @@ function decisionForTool(
 
 	const command = findCommand(toolInput);
 	if (!command) return undefined;
-	return decisionForCommand(command);
+	return decisionForCommand(command, cwd);
 }
 
-function decisionForCommand(command: string): BlockDecision | undefined {
+function decisionForCommand(
+	command: string,
+	cwd?: string,
+): ToolDecision | undefined {
 	for (const segment of commandSegments(command)) {
 		const proxyReason = proxyEscalationReason(segment);
 		if (proxyReason) {
@@ -182,8 +195,13 @@ function decisionForCommand(command: string): BlockDecision | undefined {
 		if (normalized[0] === "git") {
 			const pushReason = gitPushReason(normalized);
 			if (pushReason) return createBlockDecision("unknown", pushReason);
-			const writeReason = gitWriteReason(normalized);
-			if (writeReason) return createBlockDecision("unknown", writeReason);
+			const gitCwd = cwd ? gitEffectiveCwd(normalized, cwd) : undefined;
+			const writeReason = gitWriteReason(normalized, gitCwd);
+			if (writeReason)
+				return {
+					...createBlockDecision("unknown", writeReason.reason),
+					cwd: writeReason.cwd,
+				};
 			continue;
 		}
 		if (
@@ -240,10 +258,16 @@ function gitPushReason(tokens: string[]): string | undefined {
 	return undefined;
 }
 
-function gitWriteReason(tokens: string[]): string | undefined {
+function gitWriteReason(
+	tokens: string[],
+	cwd?: string,
+): { reason: string; cwd?: string } | undefined {
 	const subcommand = gitSubcommand(tokens.slice(1));
 	if (subcommand && GIT_WRITE_SUBCOMMANDS.has(subcommand)) {
-		return `\`git ${subcommand}\` 会修改工作区、索引或提交历史`;
+		return {
+			reason: `\`git ${subcommand}\` 会修改工作区、索引或提交历史`,
+			cwd,
+		};
 	}
 	return undefined;
 }
@@ -291,8 +315,8 @@ function handleSubagentStop(sessionId: string | undefined): number {
 function handleSessionStart(): number {
 	const lines = [
 		"DevFlow mode: coordinator-only",
-		"Main agent may coordinate, review, and verify only.",
-		"Worker/subagent sessions may write files.",
+		"Main Codex session may coordinate, review, and verify only.",
+		"Codex worker sessions may write files.",
 		"Read-only inspection commands are allowed.",
 	];
 	for (const line of lines) {
@@ -303,10 +327,10 @@ function handleSessionStart(): number {
 
 function writeBlockMessage(decision: BlockDecision): void {
 	const lines = [
-		"DevFlow 已阻止主 Agent 直接执行写操作。",
+		"DevFlow 已阻止 main Codex session 直接执行写操作。",
 		`原因：${decision.reason}。`,
 		"",
-		"主 Agent 只能协调、审查和验证；请通过 worker/subagent 完成代码写入。",
+		"main Codex session 只能协调、审查和验证；请通过 Codex worker session 完成代码写入。",
 	];
 	for (const line of lines) {
 		process.stderr.write(`${line}\n`);

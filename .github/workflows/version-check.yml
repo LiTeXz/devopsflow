@@ -77,8 +77,11 @@ jobs:
 
           while IFS= read -r path; do
             mkdir -p "$TMP_DIR/$(dirname "$path")"
-            url="https://raw.githubusercontent.com/${REPO}/${TAG}/${path}"
-            if ! curl --fail --show-error --location "$url" --output "$TMP_DIR/$path"; then
+            url="https://api.github.com/repos/${REPO}/contents/${path}?ref=${TAG}"
+            if ! curl --fail --show-error --location --retry 5 --retry-all-errors --retry-delay 2 \
+              --header "Accept: application/vnd.github.raw" \
+              --header "Authorization: Bearer ${{ github.token }}" \
+              "$url" --output "$TMP_DIR/$path"; then
               echo "::error::Missing managed asset on ${TAG}: ${path}"
               exit 1
             fi

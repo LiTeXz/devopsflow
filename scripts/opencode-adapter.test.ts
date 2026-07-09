@@ -50,7 +50,7 @@ describe("OpenCode adapter", () => {
 		});
 
 		expect(decision).not.toBeNull();
-		expect(decision?.reason).toInclude("主 Agent 禁止写入");
+		expect(decision?.reason).toInclude("main Codex session 禁止写入");
 	});
 
 	it("blocks main agent shell writes", () => {
@@ -62,10 +62,10 @@ describe("OpenCode adapter", () => {
 		});
 
 		expect(decision).not.toBeNull();
-		expect(decision?.reason).toInclude("主 Agent 禁止写入");
+		expect(decision?.reason).toInclude("main Codex session 禁止写入");
 	});
 
-	it("allows subagent writes on feature branches", () => {
+	it("allows compatible worker writes on feature branches", () => {
 		expect(
 			shouldBlockOpenCodeToolInput({
 				tool: "write",
@@ -76,7 +76,7 @@ describe("OpenCode adapter", () => {
 		).toBeUndefined();
 	});
 
-	it("blocks subagent writes on protected branches", () => {
+	it("blocks compatible worker writes on protected branches", () => {
 		const decision = shouldBlockOpenCodeToolInput({
 			tool: "write",
 			args: { filePath: "README.md" },

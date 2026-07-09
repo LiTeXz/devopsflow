@@ -224,6 +224,25 @@ describe("ProtectedBranchPushHook", () => {
 			expect(decision?.branch).toBe("dev");
 			expect(decision?.reason).toInclude(nestedRoot);
 		});
+
+		it("uses git -C cwd for git writes in nested repositories", () => {
+			const nestedRoot = join(tempDir, "nested-git-c-root");
+			const nestedDir = join(nestedRoot, "nested");
+			initNestedRepos(nestedRoot, nestedDir, "dev", "codex/topic");
+
+			expect(
+				shouldBlock(`git -C "${nestedDir}" add README.md`, nestedRoot),
+			).toBeUndefined();
+
+			switchBranch(nestedDir, "dev");
+			const decision = shouldBlock(
+				`git -C "${nestedDir}" add README.md`,
+				nestedRoot,
+			);
+			expect(decision).not.toBeNull();
+			expect(decision?.branch).toBe("dev");
+			expect(decision?.reason).toInclude(nestedDir);
+		});
 	});
 
 	describe("shell commands on protected branch", () => {

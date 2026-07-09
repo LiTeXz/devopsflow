@@ -4,6 +4,7 @@ import { currentBranch, PROTECTED_BRANCHES } from "@/shared/branch";
 import {
 	commandSegments,
 	GIT_WRITE_SUBCOMMANDS,
+	gitEffectiveCwd,
 	gitSubcommand,
 	hasShellRedirection,
 	isPackageCommandWrites,
@@ -166,8 +167,9 @@ function analyzeGitWrite(
 	if (tokens.length < 2) return undefined;
 	const subcommand = gitSubcommand(tokens.slice(1));
 	if (subcommand && GIT_WRITE_SUBCOMMANDS.has(subcommand)) {
+		const effectiveCwd = gitEffectiveCwd(tokens, cwd);
 		return blockCurrentBranchWrite(
-			cwd,
+			effectiveCwd,
 			`\`git ${subcommand}\` 会修改工作区、索引或提交历史`,
 		);
 	}
