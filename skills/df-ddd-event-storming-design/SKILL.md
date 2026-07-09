@@ -239,6 +239,78 @@ Do not regenerate the whole model unless the user asks or the existing model is 
 - Treat CQRS as a modeling perspective: commands change business state through the domain model; queries are satisfied by read models.
 - Read models should record their information sources, but query needs must not create domain events by themselves. A read-model-only field can come from current-state lookup, query-side joins, technical projection inputs, external sources, or accepted event payloads.
 - Iterate when commands, events, aggregates, or read models do not explain each other.
+- Treat commands, events, aggregate state, aggregate methods, and read-model fields as design claims that need proof. If the proof is only "the table/API/page has this field", downgrade the item to discovery material until a business rule or consumer proves it belongs.
+
+## Design Proof Gates
+
+Use these gates before finalizing commands, events, aggregates, aggregate methods, or read models. They are mandatory when reviewing or persisting a model.
+
+### Event Admission Gate
+
+For every accepted domain event, prove:
+
+- business fact: what happened in past tense
+- producer: actor/external system -> command/fact input -> aggregate/process -> event
+- non-query consumer: actor option, command-side rule, policy/process, aggregate relationship, lifecycle, or downstream business capability affected by the fact
+- read-model impact, if any: which projection changes and which fields change
+
+Keep brainstormed but rejected events only in `候选事件池与筛选`, not in the formal `领域事件清单` or aggregate event list. If an item only repairs a projection, display, report, cache, operation log, or troubleshooting view, reject it as a domain event and record the alternative source.
+
+### Command Granularity Gate
+
+Design commands from actor intent or external fact input boundaries, not from permutations of possible events.
+
+- One command may produce multiple events when those outcomes belong to the same actor intent and consistency boundary.
+- Do not create separate commands merely because different event combinations are possible.
+- Do not create one "apply/sync/update all" command unless the initiating actor or external system is actually submitting one authoritative fact package and the aggregate can make the decision coherently.
+- When a command can produce multiple events, explain why the events are the result of one business decision instead of independent actions.
+
+### Aggregate State Necessity Gate
+
+For every aggregate state item or property, prove at least one direct use:
+
+- a command/business method reads it to decide whether an action is allowed
+- an invariant or uniqueness rule depends on it
+- it affects event production, rejection, splitting, or payload enrichment
+- it represents identity, lifecycle, ownership, parentage, or another state needed to enforce consistency
+
+If no current or confirmed future business method uses the state item, remove it from the aggregate design. Reclassify it as read-model data, persistence metadata, audit/log material, synchronization metadata, or unresolved discovery material.
+
+### Identity And Uniqueness Gate
+
+Model identity and uniqueness by actor/source, not as one generic "name/code must be unique" rule.
+
+For each uniqueness rule, record:
+
+- who relies on it: human actor, import operator, external master system, downstream system, or policy
+- identity fields and scope: tenant, company, parent, external ID, code, name, effective date, or other boundary
+- enforcement timing: command-side strong consistency, external acceptance check, deferred reconciliation, or query-only detection
+- conflict result: reject, correct, merge, override, ignore, or log-only
+
+If different actors use different identity rules, keep them as separate rules even when they touch the same subject.
+
+### Lifecycle Removal Gate
+
+For delete, unregister, close, archive, disable, or decommission behavior, prove:
+
+- the exact business meaning of removal
+- the real blocking business fact, not just indirect structural children
+- whether historical references remain valid
+- whether restoration exists as a real business capability; if not, do not add restore commands or events
+- which downstream actor, policy, rule, or read model changes after removal
+
+### Read Model Source Gate
+
+For every read-model field, record its source:
+
+- accepted domain event payload or projection
+- current-state lookup from command-side persistence
+- query-side join
+- technical projection input
+- audit/log/troubleshooting source
+- external read source
+
+Do not add a domain event only to populate a read-model field. A missing read-model field is a sourcing question first and a domain-event gap only when a non-query business consumer exists.
 
 ## Traceability Rules
 
@@ -534,13 +606,19 @@ Before finalizing, check:
 - Every important event has an affected actor, subject, command-side rule, policy/process, aggregate, or downstream business relationship.
 - Current-domain state-changing events are published by aggregates unless a clear exception is recorded.
 - Every command has the information it needs from command fields plus aggregate state/history.
+- Every command is justified by actor intent or an external fact input boundary, not by an arbitrary event-combination permutation.
+- If one command may publish multiple events, those events are explained as outcomes of one business decision inside one consistency boundary.
 - Meaningful command outcomes are represented as events.
 - Generic events such as `信息已变更` have been replaced by specific facts or explicitly justified.
+- Rejected candidate events are not retained in accepted event catalogs, aggregate event lists, or implementation-alignment lists.
 - Every read model records whether each field comes from accepted events, current-state lookup, query-side joins, technical projection inputs, enriched payloads, or external read sources.
 - Every read-model-only field is marked as query-side data, technical projection input, current-state lookup, audit/log material, or external-source data instead of being promoted to a domain event.
 - Policies do not hide aggregate invariants.
 - Domain services do not become procedural service layers.
 - Aggregates are derived from behavior, rules, identity, lifecycle, and invariants, not tables, CRUD resources, or noun lists.
+- Every aggregate property is directly used by at least one command/business method, invariant, uniqueness rule, event production decision, lifecycle decision, or consistency relationship.
+- Human-maintained identity rules and external-system identity rules are separated when they use different scopes or keys.
+- Removal/decommission rules identify the real blocking business fact, historical-reference behavior, and downstream consequence.
 - Aggregates are neither too large nor too fragmented.
 - Query needs do not pollute aggregate state.
 
@@ -560,6 +638,11 @@ Refuse or correct these patterns:
 - Treating external master-data sync as a simple upsert when ordering, dependency, failure, or conflict resolution has business meaning.
 - Creating domain events for technical actions the business does not care about.
 - Creating domain events only because a read model, page, report, cache, or projection needs a field refreshed.
+- Keeping rejected candidate events in final event lists, aggregate files, or implementation checklists.
+- Creating command permutations from possible event combinations instead of actor intent or external fact input.
+- Adding "source type", "current status", "description", display names, or other fields to aggregate state when no aggregate method or invariant uses them.
+- Collapsing different identity rules into one generic uniqueness statement when human actors and upstream systems use different scopes or keys.
+- Adding restore behavior because it is technically possible when no business capability exists.
 - Putting report/page/query fields into aggregates for convenience.
 - Putting most business rules into command handlers, application services, listeners, repositories, or policies.
 - Splitting bounded contexts before understanding the current problem domain.

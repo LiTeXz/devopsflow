@@ -14,6 +14,12 @@
 - Upsert sync modeling: treat external master-data synchronization as a simple create/update when the business cares about dependency ordering, conflict handling, missing parent records, retries, or failure status.
 - Read model leakage: add page/report fields to aggregate state only because a query needs them.
 - Projection-driven event: create a domain event only because a read model, page, report, cache, or projection needs a field refreshed.
+- Rejected candidate leakage: keep brainstormed-but-rejected events in final event catalogs, aggregate event lists, or implementation-alignment checklists.
+- Command permutation explosion: create commands from possible event combinations rather than actor intent, external fact input, and consistency boundary.
+- Unused aggregate state: add properties to an aggregate because a table, API, projection, or UI has them even though no aggregate method, invariant, uniqueness rule, lifecycle rule, or event decision uses them.
+- Generic uniqueness rule: collapse actor-specific identity rules into a single "name/code must be unique" statement when human maintenance and upstream systems use different scopes, keys, or conflict handling.
+- Invented restoration: add restore commands/events only because deletion is modeled, without a confirmed restoration business capability.
+- Indirect removal guard: block removal by structural children rather than the real business fact that matters to the domain.
 - Framework-shaped domain: treat controllers, DTOs, repositories, or packages as the domain model.
 - Unproduced event: keep a domain event without a command, policy, process, or external fact that can produce it.
 - Unexplained read source: define a read model field without identifying whether it comes from accepted events, current-state lookup, query-side joins, technical projection input, enriched payloads, audit/log data, external sources, or a confirmed domain-event gap.

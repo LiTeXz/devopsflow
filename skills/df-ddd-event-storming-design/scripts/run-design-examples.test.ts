@@ -50,6 +50,11 @@ const CASES = [
 		file: "artifact_flooding.md",
 		expectErrors: true,
 	},
+	{
+		name: "proof_gate_violations",
+		file: "proof_gate_violations.md",
+		expectErrors: true,
+	},
 ];
 
 describe("DDD Design Validation", () => {

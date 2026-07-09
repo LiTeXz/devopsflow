@@ -36,6 +36,20 @@ const SMELLS: Record<string, string[]> = {
 		"(Company|Dept|Department|Position|Employee)(Created|Updated|Deleted|Edited)Event",
 		"(公司|部门|岗位|员工).*(新增|修改|删除|编辑).*事件",
 	],
+	rejected_candidate_leakage: [
+		"(不进入领域事件|拒绝|淘汰|降级|候选事件).{0,80}(领域事件清单|聚合事件|事件列表|最终事件)",
+	],
+	command_permutation: [
+		"(事件组合|排列组合|不同组合|每种组合).{0,80}(命令|cmd|command)",
+		"(命令|cmd|command).{0,80}(事件组合|排列组合|不同组合|每种组合)",
+	],
+	unused_aggregate_state: [
+		"(聚合属性|聚合状态|状态字段|属性清单)[\\s\\S]*(来源类型|sourceType|当前状态|currentStatus|描述|description)[\\s\\S]*(未使用|无业务方法|仅展示|只展示)",
+		"(来源类型|sourceType|当前状态|currentStatus|描述|description).{0,80}(聚合属性|聚合状态)",
+	],
+	generic_uniqueness: [
+		"^(?![\\s\\S]*(范围|scope|租户|公司|父级|上游|人工|来源|actor))[\\s\\S]*(名称|编码|name|code).{0,20}(不能重复|唯一|冲突)",
+	],
 };
 
 const REQUIRED_SECTIONS = [
