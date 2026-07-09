@@ -24,7 +24,7 @@
 		"websiteURL": "https://github.com/LiTeXz/devflow-skills",
 		"defaultPrompt": [
 			"Use df-engineering-workflow-router to classify this task",
-      "Use `df-publisher`subagent, management this git and github.",
+			"Use the df-publisher Codex worker session for git and GitHub publishing tasks.",
 			"Create a DDD to TDD implementation plan",
 			"Verify this branch before completion"
 		],

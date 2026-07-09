@@ -212,14 +212,14 @@ export function ensureDfPublisherAgent(
 				if (reinstallReason) {
 					return `DevFlow: ${reinstallReason}至 v${expectedVersion}（${dfPublisherToml}）`;
 				}
-				return `DevFlow: df-publisher 子代理定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
+				return `DevFlow: df-publisher Codex worker session 定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
 			}
-			return `DevFlow: 已自动安装 df-publisher 子代理定义到 ${dfPublisherToml}`;
+			return `DevFlow: 已自动安装 df-publisher Codex worker session 定义到 ${dfPublisherToml}`;
 		}
 	}
 
 	const lines = [
-		"DevFlow 插件不完整：未找到 df-publisher 子代理定义。",
+		"DevFlow 插件不完整：未找到 df-publisher Codex worker session 定义。",
 		`预期位置：${dfPublisherToml}`,
 	];
 	if (pluginRoot) {
@@ -249,7 +249,7 @@ function invalidSourceMessage(
 	reason: string,
 ): string {
 	return [
-		"DevFlow 插件不完整：df-publisher 子代理源文件无效。",
+		"DevFlow 插件不完整：df-publisher Codex worker session 源文件无效。",
 		`源文件：${sourceToml}`,
 		`原因：${reason}`,
 		`目标位置：${dfPublisherToml}`,
@@ -283,10 +283,10 @@ function writeSessionStartMessage(message: string): void {
 function writeToolBlock(): void {
 	const lines = [
 		"DevFlow 已阻止 git/gh 发布操作。",
-		"原因：仅 df-publisher 子代理可执行 git push、git commit、gh issue、gh pr。",
+		"原因：仅 df-publisher Codex worker session 可执行 git push、git commit、gh issue、gh pr。",
 		"",
-		"主 Agent 和其他 worker 可直接执行简单 git/gh 操作（如切换分支、合并、认证），",
-		"但提交、推送、PR、issue 管理必须委托 df-publisher 子代理完成。",
+		"main Codex session 和普通 Codex worker session 可直接执行简单 git/gh 操作（如切换分支、合并、认证），",
+		"但提交、推送、PR、issue 管理必须委托 df-publisher Codex worker session 完成。",
 	];
 	for (const line of lines) {
 		process.stderr.write(`${line}\n`);

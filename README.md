@@ -1,13 +1,13 @@
 # DevFlow Skills
 
-DevFlow Skills 是一组面向 Codex 和 OpenCode 的工程工作流 skills。它把 DDD、Glue Coding、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
+DevFlow Skills 是一组面向 Codex 的工程工作流 skills，并提供 OpenCode 兼容适配。它把 DDD、Glue Coding、TDD、计划、执行、调试、评审、验证和分支收尾组织成一套可组合的强制工作流。
 
 插件还包含一个保护分支 hook：在 `main`、`dev`、`develop`、`devlop`
 等常见集成分支上启动会话时提醒切换新分支；在这些分支上拦截写文件、
 修改索引、提交、重置、依赖安装和直接 push 等污染操作，并提示改用新分支
 和 PR 流程。Codex hook 配置位于 `hooks/hooks.codex.json`，并由
 `.codex-plugin/plugin.json` 声明为插件 companion；OpenCode 本地插件入口位于 `.opencode/plugin/devflow-skills.ts`。
-另有主 Agent 禁写 hook：所有分支上主 Agent 只能协调、审查和验证，代码写入必须交给 worker/subagent 或 OpenCode subagent。
+另有 main Codex session 禁写 hook：所有分支上 main Codex session 只能协调、审查和验证，代码写入必须交给 Codex worker session 或兼容适配器识别的写入会话。
 
 ## 重要：必须开启 Plan 模式
 
@@ -84,7 +84,7 @@ OpenCode 当前按本地 checkout 使用。仓库已提供 `.opencode/plugin/dev
 }
 ```
 
-OpenCode 插件会复用同一套保护规则：主 Agent 禁写、subagent 可在非保护分支写入、保护分支写入拦截、所有 agent 的 `git push` 全局拦截。修改 `opencode.json`、插件或 skills 后，需要退出并重启 OpenCode 才会重新加载。
+OpenCode 插件会复用同一套保护规则：main Codex session 禁写、兼容适配器识别的写入会话可在非保护分支写入、保护分支写入拦截、所有 agent 的 `git push` 全局拦截。修改 `opencode.json`、插件或 skills 后，需要退出并重启 OpenCode 才会重新加载。
 
 ## 技能组合图
 

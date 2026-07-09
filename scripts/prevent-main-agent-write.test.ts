@@ -44,6 +44,15 @@ function switchBranch(path: string, branch: string): void {
 	});
 }
 
+function initBranchOnlyRepo(path: string, branch: string): void {
+	mkdirSync(path, { recursive: true });
+	Bun.spawnSync({
+		cmd: ["git", "init", "-b", branch],
+		cwd: path,
+		stdout: "ignore",
+	});
+}
+
 // Set up state path for tests
 let stateFilePath: string;
 const STATE_PATH_ENV = "DEVFLOW_MAIN_AGENT_WRITE_STATE";
@@ -242,8 +251,8 @@ describe("MainAgentWriteGuard", () => {
 		});
 	});
 
-	describe("subagent sessions", () => {
-		it("blocks git push even for registered subagent", () => {
+	describe("Codex worker sessions", () => {
+		it("blocks git push even for registered Codex worker", () => {
 			startSubagent("worker-1");
 			expect(
 				shouldBlockTool(
@@ -268,7 +277,7 @@ describe("MainAgentWriteGuard", () => {
 			).not.toBeNull();
 		});
 
-		it("allows registered subagent write", () => {
+		it("allows registered Codex worker write", () => {
 			startSubagent("worker-1");
 			expect(shouldBlockTool("Write", {}, "worker-1")).toBeUndefined();
 			expect(
@@ -276,7 +285,7 @@ describe("MainAgentWriteGuard", () => {
 			).toBeUndefined();
 		});
 
-		it("blocks after subagent stop", () => {
+		it("blocks after Codex worker stop", () => {
 			startSubagent("worker-1");
 			stopSubagent("worker-1");
 			expect(shouldBlockTool("Write", {}, "worker-1")).not.toBeNull();
@@ -289,7 +298,7 @@ describe("MainAgentWriteGuard", () => {
 			).not.toBeNull();
 		});
 
-		it("multiple subagent sessions do not interfere", () => {
+		it("multiple Codex worker sessions do not interfere", () => {
 			startSubagent("worker-1");
 			startSubagent("worker-2");
 			expect(shouldBlockTool("Write", {}, "worker-1")).toBeUndefined();
@@ -313,7 +322,7 @@ describe("MainAgentWriteGuard", () => {
 			).toBeUndefined();
 		});
 
-		it("allows unregistered shell write when nested agent declares subagent worker context", () => {
+		it("allows unregistered shell write when adapter payload declares writable worker context", () => {
 			expect(
 				shouldBlockTool(
 					"Bash",
@@ -418,8 +427,8 @@ describe("MainAgentWriteGuard", () => {
 		});
 	});
 
-	describe("protected branch write for registered subagent", () => {
-		it("blocks registered subagent write on protected branch via workdir", () => {
+	describe("protected branch write for registered Codex worker", () => {
+		it("blocks registered Codex worker write on protected branch via workdir", () => {
 			startSubagent("worker-1");
 
 			const root = join(tempDir, "pb-root");
@@ -451,6 +460,36 @@ describe("MainAgentWriteGuard", () => {
 			expect(decision).not.toBeNull();
 			expect(decision?.reason).toInclude("cwd");
 			expect(decision?.reason).toInclude(root);
+		});
+
+		it("uses git -C cwd instead of parent cwd for registered worker git writes", () => {
+			startSubagent("worker-1");
+
+			const root = join(tempDir, "worker-nested-git-c-root");
+			const allowedNested = join(root, "allowed-nested");
+			const blockedNested = join(root, "blocked-nested");
+			initBranchOnlyRepo(root, "dev");
+			initBranchOnlyRepo(allowedNested, "codex/topic");
+			initBranchOnlyRepo(blockedNested, "dev");
+
+			expect(
+				shouldBlockTool(
+					"Bash",
+					{ command: `git -C "${allowedNested}" add README.md` },
+					"worker-1",
+					root,
+				),
+			).toBeUndefined();
+
+			const decision = shouldBlockTool(
+				"Bash",
+				{ command: `git -C "${blockedNested}" add README.md` },
+				"worker-1",
+				root,
+			);
+			expect(decision).not.toBeNull();
+			expect(decision?.reason).toInclude("cwd");
+			expect(decision?.reason).toInclude(blockedNested);
 		});
 	});
 
