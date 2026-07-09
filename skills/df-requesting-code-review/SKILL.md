@@ -18,6 +18,7 @@ Use this skill after implementation and before asking someone else to trust the 
    - public contract changes
    - persistence, transaction, ordering, pagination, or concurrency risks
    - security, validation, serialization, or authorization risks
+   - selected style pack, golden example, anti-pattern, or review checklist mismatches
    - unclear naming or maintainability concerns that could hide bugs
 4. Run or cite the relevant verification.
 5. Produce a review request summary that leads with risk, not praise.

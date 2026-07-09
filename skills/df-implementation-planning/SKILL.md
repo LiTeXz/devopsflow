@@ -5,7 +5,7 @@ description: "Write a concrete, small-step implementation plan before coding. Us
 
 # Implementation Planning
 
-Use this skill to turn a requirement, confirmed DDD handoff, Glue Coding pattern selection, bug investigation result, or refactor goal into a plan that another agent can execute.
+Use this skill to turn a requirement, confirmed DDD handoff, Glue Coding pattern selection, selected style pack, bug investigation result, or refactor goal into a plan that another agent can execute.
 
 Do not edit production code while using this skill.
 
@@ -16,6 +16,7 @@ Do not edit production code while using this skill.
    - behaviors that must not change
    - public contracts
    - data, persistence, ordering, pagination, security, or side-effect risks
+   - selected style pack, golden examples, style-specific anti-patterns, and review checklist items to preserve
    - selected glue target pattern, local conventions, legacy behavior evidence, anti-patterns to remove, and project material that must be preserved
    - user-owned worktree changes to avoid
 3. Identify behavior slices.
@@ -27,7 +28,7 @@ Do not edit production code while using this skill.
    - completion standard
 5. Keep each task small enough to complete and verify independently.
 6. Mark steps that require `df-tdd-skill`, `df-spring-web-boundaries`, or `df-systematic-debugging`.
-7. For glue-style work, include the selected target pattern and the exact delta each task is allowed to change.
+7. For glue-style work, include the selected style pack when one exists, the selected target pattern, and the exact delta each task is allowed to change.
 8. For refactor glue work, separate characterization, target-pattern migration, and cleanup steps. Do not plan to copy legacy structure unless it is explicitly classified as the target pattern.
 9. State whether user confirmation is required before execution.
 
@@ -87,6 +88,6 @@ Use `templates/implementation-plan.md` when a file artifact is useful. In chat, 
 - Do not omit commands when the project has discoverable test commands.
 - Do not plan a fix before a reproducible failure and root-cause evidence exists for unclear bugs.
 - Do not mix behavior change and broad cleanup in the same step.
-- Do not invent new structure for glue-style work when a selected local target pattern must be preserved.
+- Do not invent new structure for glue-style work when a selected style pack or local target pattern must be preserved.
 - Do not plan refactors that treat legacy code or anti-patterns as the target pattern without explicit justification.
 - Do not assume approval for risky scope expansion; call it out.

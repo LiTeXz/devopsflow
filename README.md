@@ -127,6 +127,32 @@ bunfig.toml
 `skills/` 下的每个目录都是一个独立 Codex skill，包含必需的 `SKILL.md`，
 以及可选的 `agents/`、`references/`、`scripts/`、`templates/`。
 
+## Project-Owned Style Packs
+
+DevFlow can use project-owned style packs after the business design is clear. A style pack is not a shared DevFlow template; it is repository-owned material that helps agents preserve local implementation style through rules, golden examples, anti-patterns, and review checklists.
+
+Recommended project locations:
+
+```text
+devflow-style-packs/
+.devflow/style-packs/
+.ai/style-packs/
+docs/devflow/style-packs/
+```
+
+Recommended shape:
+
+```text
+<style-pack-name>/
+  style-pack.yaml
+  rules.md
+  examples/
+  anti-patterns.md
+  review-checklist.md
+```
+
+Use style packs with `df-glue-coding` after DDD, CQRS, API, security, validation, and persistence constraints are already respected. Keep project-specific examples in the project repository, not in this public DevFlow repository.
+
 ## 开发
 
 ### 安装依赖
