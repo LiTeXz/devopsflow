@@ -1,6 +1,6 @@
 interface:
-  display_name: "DDD Event Storming"
-  short_description: "Requirements intake and pure DDD modeling from actors and events"
+  display_name: "Ddd Event Storming Design"
+  short_description: "使用事件风暴、CQRS 和需求追踪进行通用 DDD 领域建模。Use this skill when Codex needs to clarify raw business requirements, split stakeholder needs into requirement items, evolve a persistent domain model, identify actors and multi-role collaboration, domain events, commands, policies, aggregates, domain services, read models, produce structured Markdown or optional Mermaid/PlantUML diagrams, and review designs that may be CRUD, database, package-structure, or DDD-terminology driven instead of problem-domain driven. Especially use for CRUD-looking admin requirements such as company, department, position, employee, account, role, or permission management that need behavior-first modeling instead of flat noun aggregates."
   default_prompt: "Use $df-ddd-event-storming-design to clarify raw business requirements, split requirement items, analyze with event storming, identify actors, commands, events, policies, aggregates, and read models, and produce a traceable behavior-first DDD domain design specification."
 
 policy:

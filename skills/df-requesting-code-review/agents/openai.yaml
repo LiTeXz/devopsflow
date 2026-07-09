@@ -1,4 +1,4 @@
 interface:
   display_name: "Requesting Code Review"
-  short_description: "Self-review implementation before external review"
+  short_description: "Prepare implemented code for review with a bug-focused self-review. Use after the main implementation is complete and before handoff, PR, or final completion to inspect diffs for behavioral regressions, missing tests, risky contracts, data consistency, security, error handling, and unclear verification evidence."
   default_prompt: "Use $df-requesting-code-review to inspect the completed change for bugs, regressions, and missing tests before review."

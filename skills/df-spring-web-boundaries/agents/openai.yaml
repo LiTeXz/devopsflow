@@ -1,4 +1,4 @@
 interface:
   display_name: "Spring Web Boundaries"
-  short_description: "Keep Spring HTTP concerns at the web adapter edge"
+  short_description: "Spring Web boundary guardrails for Java/Spring Boot refactors. Use when Codex changes controllers, REST endpoints, request/response mapping, validation, security, file upload/download, exports, or service/controller layering in Spring applications. This is an optional architecture and technology-stack companion to TDD skills; do not use as a generic TDD methodology skill."
   default_prompt: "Use $df-spring-web-boundaries when changing Spring controllers, endpoints, or service/controller boundaries."

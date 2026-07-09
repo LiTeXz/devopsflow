@@ -1,4 +1,5 @@
+interface:
 ﻿interface:
   display_name: "Systematic Debugging"
-  short_description: "Find root cause before changing code"
+  short_description: "Evidence-based debugging workflow for failing tests, production bugs, regressions, flaky behavior, or unclear root causes. Use when Codex must reproduce a problem, locate the earliest wrong point, add observations or minimal tests, identify root-cause evidence, fix one cause at a time, and add regression coverage before completion."
   default_prompt: "Use $df-systematic-debugging to reproduce the failure, gather evidence, find root cause, and fix it with regression coverage."

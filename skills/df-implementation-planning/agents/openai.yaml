@@ -1,4 +1,4 @@
 interface:
   display_name: "Implementation Planning"
-  short_description: "Write small verifiable implementation plans"
+  short_description: "Write a concrete, small-step implementation plan before coding. Use for multi-step features, bug fixes, refactors, DDD-to-TDD handoffs, risky behavior changes, or any engineering task that needs files, commands, expected RED/GREEN results, verification steps, and completion criteria before implementation."
   default_prompt: "Use $df-implementation-planning to produce a step-by-step implementation plan with files, commands, and expected results."

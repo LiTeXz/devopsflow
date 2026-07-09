@@ -1,4 +1,4 @@
 interface:
-  display_name: "Finish Development Branch"
-  short_description: "Prepare tested changes for commit or PR"
+  display_name: "Finishing Development Branch"
+  short_description: "Finish a development branch for commit, push, PR, or handoff. Use after implementation and verification to inspect git status, separate user-owned changes from Codex changes, confirm tests and plan completion, prepare a Chinese Conventional Commit message, and draft PR or handoff notes."
   default_prompt: "Use $df-finishing-development-branch to inspect status, confirm verification evidence, and prepare a Chinese Conventional Commit."

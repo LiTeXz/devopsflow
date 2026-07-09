@@ -1,4 +1,4 @@
 interface:
   display_name: "Engineering Workflow Router"
-  short_description: "Choose mandatory engineering workflows before coding"
+  short_description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, glue coding, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as df-resumable-workflow-guard, df-ddd-event-storming-design, df-glue-coding, df-ddd-to-tdd-handoff, df-implementation-planning, df-executing-implementation-plan, df-tdd-skill, df-spring-web-boundaries, df-systematic-debugging, df-requesting-code-review, df-receiving-code-review, df-verification-before-completion, df-finishing-development-branch, or df-parallel-agent-orchestration."
   default_prompt: "Use $df-engineering-workflow-router to classify this engineering task and select the mandatory skills before starting work."

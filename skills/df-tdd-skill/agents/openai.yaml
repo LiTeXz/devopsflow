@@ -1,4 +1,4 @@
 interface:
-  display_name: "TDD Skill"
-  short_description: "Build, fix, or refactor with a strict red-green-refactor loop"
+  display_name: "Tdd Skill"
+  short_description: "Pure TDD workflow for greenfield feature development, bug fixes, behavior-preserving refactors, characterization tests, and characterize-then-fix work. Use when Codex needs test-first discipline to build new behavior from scratch or change existing code without drifting behavior. Applies across languages and architectures. Do not use for technology-specific layering rules, documentation-only edits, trivial formatting-only changes, or purely exploratory prototypes where no executable behavior is expected."
   default_prompt: "Use $df-tdd-skill to define the next behavior, write the failing test first, go green, and refactor only after green."

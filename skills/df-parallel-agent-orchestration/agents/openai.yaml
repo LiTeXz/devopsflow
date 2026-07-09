@@ -1,4 +1,4 @@
 interface:
   display_name: "Parallel Agent Orchestration"
-  short_description: "Split independent work across agents safely"
+  short_description: "Plan safe parallel agent work for engineering tasks. Use when independent modules, plan review, implementation, verification, or code review can run in separate contexts with non-overlapping file ownership, or when a fresh reviewer context is valuable to avoid self-confirming complex work."
   default_prompt: "Use $df-parallel-agent-orchestration to split independent engineering work into non-overlapping agent tasks."

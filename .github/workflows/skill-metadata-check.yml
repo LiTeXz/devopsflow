@@ -1,0 +1,18 @@
+name: Skill Metadata Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  skill-metadata-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: latest
+      - name: Check skill folder and front matter names
+        run: bun run check:skill-metadata

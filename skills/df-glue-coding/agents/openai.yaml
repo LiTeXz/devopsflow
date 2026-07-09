@@ -1,4 +1,4 @@
 interface:
   display_name: "Glue Coding"
-  short_description: "Reuse local code patterns before implementation"
+  short_description: "Glue Coding workflow for AI implementation that should reuse local project material without blindly copying old structure. Use after domain ambiguity has been resolved or declared thin, and before implementation planning or coding, when a task resembles existing CRUD pages, list/form/detail screens, imports/exports, endpoints, adapters, command handlers, projections, tests, configuration, refactors, migrations, modernization, or other repeatable project patterns. The skill discovers local style packs, reference code, examples, docs, AGENTS.md rules, and nearby production implementations, classifies them as target patterns, legacy patterns, anti-patterns, or behavior evidence, preserves the right conventions, and limits new code to the intended delta."
   default_prompt: "Use $df-glue-coding after domain conclusions are clear to find local code patterns, preserve project conventions, and implement only the required delta."

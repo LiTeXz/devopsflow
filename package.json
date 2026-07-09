@@ -1,9 +1,10 @@
 {
 	"name": "devflow-skills",
-	"version": "0.2.14",
+	"version": "0.2.15",
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"check:skill-metadata": "bun scripts/check-skill-metadata.ts",
 		"test": "bun test",
 		"test:hooks": "bun test scripts/",
 		"test:validators": "bun test skills/df-tdd-skill/scripts/ skills/df-ddd-event-storming-design/scripts/",

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Draw.io"
-  short_description: "Author maintainable diagrams.net .df-drawio.svg files"
+  display_name: "Drawio"
+  short_description: "Draw.io / diagrams.net diagram authoring and maintenance. Use when Codex needs to create, edit, review, repair, or explain .df-drawio.svg files, .df-drawio files, mxfile XML, mxGraphModel, mxCell nodes/edges, architecture diagrams, flowcharts, sequence-like diagrams, data-flow diagrams, deployment diagrams, or repository documentation diagrams that should open cleanly in diagrams.net."
   default_prompt: "Use $df-drawio to create, edit, or review .df-drawio.svg / diagrams.net diagram files."

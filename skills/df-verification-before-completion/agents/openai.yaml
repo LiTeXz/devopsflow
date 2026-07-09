@@ -1,4 +1,4 @@
 interface:
   display_name: "Verification Before Completion"
-  short_description: "Verify evidence before claiming completion"
+  short_description: "Mandatory completion gate for engineering work. Use before saying a development, refactor, bug fix, modeling, review, documentation, configuration, commit, or PR task is complete to verify user requirements, changed files, commands run with exit codes, skipped checks, manual validation, residual risks, unrelated changes, and Chinese Conventional Commit readiness."
   default_prompt: "Use $df-verification-before-completion to check requirements, changed files, commands, risks, and remaining gaps before finishing."

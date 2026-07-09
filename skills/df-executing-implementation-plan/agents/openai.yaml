@@ -1,4 +1,4 @@
 interface:
-  display_name: "Execute Implementation Plan"
-  short_description: "Execute implementation plans one checked step at a time"
+  display_name: "Executing Implementation Plan"
+  short_description: "Execute an implementation plan safely. Use when Codex has a written plan or is about to follow planned engineering steps: first review the plan for missing tests, oversized steps, wrong ordering, or stale assumptions, then execute one task at a time with verification evidence."
   default_prompt: "Use $df-executing-implementation-plan to review the plan, execute one task at a time, and record verification evidence."

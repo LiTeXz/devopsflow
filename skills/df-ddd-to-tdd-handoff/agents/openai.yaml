@@ -1,4 +1,4 @@
 interface:
-  display_name: "DDD to TDD Handoff"
-  short_description: "Convert traceable DDD artifacts into language-agnostic TDD slices"
+  display_name: "Ddd To Tdd Handoff"
+  short_description: "Convert confirmed DDD event-storming outputs and requirement traceability into executable, language-agnostic TDD implementation slices. Use after df-ddd-event-storming-design has produced confirmed requirements, commands, events, aggregates, policies, invariants, read models, or relationships and Codex needs tests, implementation planning, or development sequencing."
   default_prompt: "Use $df-ddd-to-tdd-handoff to turn the confirmed DDD design and requirement traceability into small, language-agnostic TDD implementation slices."

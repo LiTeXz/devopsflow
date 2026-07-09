@@ -1,4 +1,4 @@
 interface:
   display_name: "Jimmer Java"
-  short_description: "Build Java Jimmer SQL code with APT and DSL guardrails"
+  short_description: "Java-specific Jimmer ORM guardrails. Use when Codex changes Java Jimmer SQL entities, APT/Maven/Gradle annotation processing, Spring Boot integration, generated table-class queries, fetchers, DTO language files, graph saves, repositories, or persistence tests. Use this for Java source sets and Java-first mixed JVM projects; use df-jimmer-kotlin for Kotlin source sets."
   default_prompt: "Use $df-jimmer-java when changing Java Jimmer SQL entities, queries, DTOs, or Spring Boot integration."

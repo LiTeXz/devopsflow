@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Goal Governance"
+  short_description: "Use when creating, updating, executing, or closing GitHub milestones, release plans, release checklists, tagged releases, goal/roadmap issue sets, deployment-proof workflows, failure reviews, or process feedback loops that must keep issue scope, milestone descriptions, Mermaid diagrams, draw.io diagrams, templates, and workflow skills aligned."
+  default_prompt: "Use $df-release-goal-governance."

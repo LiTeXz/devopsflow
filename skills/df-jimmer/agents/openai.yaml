@@ -1,4 +1,4 @@
 interface:
   display_name: "Jimmer"
-  short_description: "Use Jimmer ORM with compile-time DSL guardrails"
+  short_description: "General Jimmer ORM workflow and language router. Use when Codex changes Jimmer entities, compile-time generated sources, SQL DSL queries, fetchers, DTO language files, graph saves, repositories, Spring Boot integration, or persistence tests in JVM projects. Continue with df-jimmer-kotlin for Kotlin-first Jimmer projects and df-jimmer-java for Java-first Jimmer projects."
   default_prompt: "Use $df-jimmer when changing Jimmer ORM entities, queries, DTOs, saves, or Spring Boot integration."
