@@ -11,11 +11,11 @@ interface OpenCodePluginInput {
 
 function writeBlockMessage(reason: string): void {
 	process.stderr.write(
-		`DevFlow 已阻止 OpenCode 工具调用。\n原因：${reason}。\n`,
+		`DevOpsFlow 已阻止 OpenCode 工具调用。\n原因：${reason}。\n`,
 	);
 }
 
-export default async function devflowSkillsOpenCodePlugin(
+export default async function devopsflowOpenCodePlugin(
 	pluginInput: OpenCodePluginInput = {},
 ) {
 	return {

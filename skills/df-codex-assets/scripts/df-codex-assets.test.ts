@@ -148,14 +148,14 @@ describe("df-codex-assets", () => {
 			".codex-plugin/plugin.json",
 			JSON.stringify({
 				version: "1.2.3",
-				repository: "https://github.com/example/devflow-skills",
+				repository: "https://github.com/example/devopsflow",
 			}),
 		);
 
 		const result = await hydrateManagedAssets(target, {
 			fetchImpl: fixtureFetch(source),
 			tagExists: async (repo, tag) =>
-				repo === "example/devflow-skills" && tag === "v1.2.3",
+				repo === "example/devopsflow" && tag === "v1.2.3",
 		});
 
 		expect(result.status).toBe("hydrated");

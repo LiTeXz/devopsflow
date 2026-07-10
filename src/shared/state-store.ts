@@ -9,15 +9,15 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import type { StateStore } from "@/shared/types";
 
-let _statePathEnv = "DEVFLOW_MAIN_AGENT_WRITE_STATE";
+let _statePathEnv = "DEVOPSFLOW_MAIN_AGENT_WRITE_STATE";
 let _statePath = join(
 	tmpdir(),
-	`devflow-main-agent-write-sessions-${process.getuid?.() ?? 0}.json`,
+	`devopsflow-main-agent-write-sessions-${process.getuid?.() ?? 0}.json`,
 );
 
 export function setStatePathForTest(path: string): void {
 	_statePath = path;
-	_statePathEnv = "DEVFLOW_MAIN_AGENT_WRITE_STATE";
+	_statePathEnv = "DEVOPSFLOW_MAIN_AGENT_WRITE_STATE";
 }
 
 export function getStatePathEnv(): string {

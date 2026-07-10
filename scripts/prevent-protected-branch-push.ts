@@ -197,7 +197,7 @@ function writeBlockMessage(decision: BlockDecision): void {
 				? "代理绕过"
 				: "写操作";
 	const lines = [
-		`DevFlow 已阻止在 ${branch} 上进行${action}。`,
+		`DevOpsFlow 已阻止在 ${branch} 上进行${action}。`,
 		`原因：${decision.reason}。`,
 		"",
 		"请停止推送尝试，保留本地分支和验证结果，交由人工或受信任流程推送并创建 PR：",

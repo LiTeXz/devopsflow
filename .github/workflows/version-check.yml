@@ -3,6 +3,7 @@ name: Version Check
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
 
@@ -20,10 +21,10 @@ jobs:
           PKG_VERSION=$(bun -e "console.log(require('./package.json').version)")
           PLUGIN_VERSION=$(bun -e "console.log(require('./.codex-plugin/plugin.json').version)")
           if grep -q '^version[[:space:]]*=' agents/df-publisher.toml; then
-            echo "::error::agents/df-publisher.toml must not use top-level version = because Codex agent TOML reserves that field; use # devflow-version = \"...\" instead"
+            echo "::error::agents/df-publisher.toml must not use top-level version = because Codex agent TOML reserves that field; use # devopsflow-version = \"...\" instead"
             exit 1
           fi
-          AGENT_VERSION=$(grep '^#[[:space:]]*devflow-version[[:space:]]*=' agents/df-publisher.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          AGENT_VERSION=$(grep '^#[[:space:]]*devopsflow-version[[:space:]]*=' agents/df-publisher.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
 
           echo "package.json:       $PKG_VERSION"
           echo "plugin.json:        $PLUGIN_VERSION"
@@ -36,6 +37,13 @@ jobs:
           if [ "$PKG_VERSION" != "$AGENT_VERSION" ]; then
             echo "::error::package.json ($PKG_VERSION) != agents/df-publisher.toml ($AGENT_VERSION)"
             exit 1
+          fi
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            EXPECTED_TAG="v${PKG_VERSION}"
+            if [ "$GITHUB_REF_NAME" != "$EXPECTED_TAG" ]; then
+              echo "::error::package.json version requires tag ${EXPECTED_TAG}, received ${GITHUB_REF_NAME}"
+              exit 1
+            fi
           fi
 
           echo "All versions aligned: $PKG_VERSION"
@@ -56,6 +64,7 @@ jobs:
             exit 1
           fi
       - name: Check managed Codex assets on version tag
+        if: github.ref_type == 'tag'
         run: |
           set -euo pipefail
           VERSION=$(bun -e "console.log(require('./package.json').version)")

@@ -20,10 +20,10 @@ import { join } from "node:path";
 
 let tempDir: string;
 let stateFilePath: string;
-const STATE_PATH_ENV = "DEVFLOW_MAIN_AGENT_WRITE_STATE";
+const STATE_PATH_ENV = "DEVOPSFLOW_MAIN_AGENT_WRITE_STATE";
 
 beforeAll(() => {
-	tempDir = mkdtempSync(join(tmpdir(), "devflow-test-gitgh-"));
+	tempDir = mkdtempSync(join(tmpdir(), "devopsflow-test-gitgh-"));
 	stateFilePath = join(tempDir, "test-sessions.json");
 	process.env[STATE_PATH_ENV] = stateFilePath;
 });
@@ -54,7 +54,7 @@ function stopSubagent(sessionId: string): void {
 }
 
 function validDfPublisherToml(version: string): string {
-	return `# devflow-version = "${version}"
+	return `# devopsflow-version = "${version}"
 name = "df-publisher"
 description = "Publish git and GitHub changes"
 nickname_candidates = ["df-publisher", "publisher"]
@@ -88,7 +88,7 @@ describe("containsGitOrGh", () => {
 
 	it("does not false-positive on non-git commands", () => {
 		expect(containsGitOrGh("cat README.md")).toBe(false);
-		expect(containsGitOrGh("rg -n DevFlow README.md")).toBe(false);
+		expect(containsGitOrGh("rg -n DevOpsFlow README.md")).toBe(false);
 		expect(containsGitOrGh("ls .git/")).toBe(false);
 		expect(containsGitOrGh("echo git is great")).toBe(false);
 		expect(containsGitOrGh("find . -name .git")).toBe(false);
@@ -131,13 +131,13 @@ describe("containsBlockedGitGh", () => {
 
 	it("does not false-positive on non-git commands", () => {
 		expect(containsBlockedGitGh("cat README.md")).toBe(false);
-		expect(containsBlockedGitGh("rg -n DevFlow README.md")).toBe(false);
+		expect(containsBlockedGitGh("rg -n DevOpsFlow README.md")).toBe(false);
 		expect(containsBlockedGitGh("bun test")).toBe(false);
 	});
 });
 
 describe("GitGhOperationsHook SessionStart", () => {
-	it("returns undefined when df-publisher.toml exists with matching devflow-version marker", () => {
+	it("returns undefined when df-publisher.toml exists with matching devopsflow-version marker", () => {
 		const projectDir = mkdtempSync(join(tempDir, "has-matching-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-matching-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
@@ -160,7 +160,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		expect(statSync(installedPath).mtimeMs).toBe(before);
 	});
 
-	it("re-installs when installed devflow-version marker does not match plugin version", () => {
+	it("re-installs when installed devopsflow-version marker does not match plugin version", () => {
 		const projectDir = mkdtempSync(join(tempDir, "version-mismatch-"));
 		const pluginDir = mkdtempSync(join(tempDir, "plugin-v2-"));
 		const pluginAgentsDir = join(pluginDir, "agents");
@@ -178,7 +178,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		mkdirSync(agentsDir, { recursive: true });
 		writeFileSync(
 			join(agentsDir, "df-publisher.toml"),
-			'# devflow-version = "1.0.0"\nname = "df-publisher"',
+			'# devopsflow-version = "1.0.0"\nname = "df-publisher"',
 		);
 
 		const message = ensureDfPublisherAgent(projectDir, pluginDir);
@@ -295,7 +295,7 @@ describe("GitGhOperationsHook SessionStart", () => {
 		const installedPath = join(agentsDir, "df-publisher.toml");
 		writeFileSync(
 			installedPath,
-			'# devflow-version = "4.0.0"\nname = "df-publisher"\ninvalid = "',
+			'# devopsflow-version = "4.0.0"\nname = "df-publisher"\ninvalid = "',
 		);
 
 		const message = ensureDfPublisherAgent(projectDir, pluginDir);
@@ -350,7 +350,7 @@ agent_type = "df-publisher"`,
 		const installedPath = join(agentsDir, "df-publisher.toml");
 		writeFileSync(
 			installedPath,
-			`# devflow-version = "4.2.0"
+			`# devopsflow-version = "4.2.0"
 name = "df-publisher"
 description = "Publish git and GitHub changes"`,
 		);
@@ -403,7 +403,7 @@ description = "Publish git and GitHub changes"`,
 		);
 		writeFileSync(
 			join(pluginAgentsDir, "df-publisher.toml"),
-			'# devflow-version = "4.3.0"\nname = "df-publisher"\ninvalid = "',
+			'# devopsflow-version = "4.3.0"\nname = "df-publisher"\ninvalid = "',
 		);
 
 		const agentsDir = join(projectDir, ".codex", "agents");
@@ -517,7 +517,7 @@ describe("GitGhOperationsHook PreToolUse", () => {
 	it("allows non-git/gh commands", () => {
 		expect(shouldBlockTool("Bash", { command: "cat README.md" })).toBe(false);
 		expect(
-			shouldBlockTool("Bash", { command: "rg -n DevFlow README.md" }),
+			shouldBlockTool("Bash", { command: "rg -n DevOpsFlow README.md" }),
 		).toBe(false);
 		expect(shouldBlockTool("Bash", { command: "bun test" })).toBe(false);
 		expect(shouldBlockTool("Bash", { command: "ls -la" })).toBe(false);

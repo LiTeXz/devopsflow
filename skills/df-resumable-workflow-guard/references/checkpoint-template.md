@@ -1,6 +1,6 @@
 # Resumable Workflow Checkpoint
 
-Copy this template to `.devflow/checkpoints/<task-slug>.md` and keep it current while the task is active.
+Copy this template to `.devopsflow/checkpoints/<task-slug>.md` and keep it current while the task is active.
 
 ## Task
 

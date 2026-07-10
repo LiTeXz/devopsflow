@@ -1,0 +1,4 @@
+interface:
+  display_name: "Iam Access Control Design"
+  short_description: "Design and review strict Google Cloud IAM-style authorization catalogs for RBAC and ABAC across REST, GraphQL, gRPC, protobuf, and mixed API surfaces. Use when Codex needs to name permissions or roles, define role bindings and CEL conditions, map API operations to authorization checks, migrate legacy colon-delimited permissions, or prevent multiple authorization naming schemes."
+  default_prompt: "Use $df-iam-access-control-design to design a strict IAM permission catalog and RBAC/ABAC bindings."

@@ -1,11 +1,11 @@
 {
-	"name": "devflow-skills",
+	"name": "devopsflow",
 	"interface": {
-		"displayName": "DevFlow Skills"
+		"displayName": "DevOpsFlow"
 	},
 	"plugins": [
 		{
-			"name": "devflow-skills",
+			"name": "devopsflow",
 			"source": {
 				"source": "local",
 				"path": "."

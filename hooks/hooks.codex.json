@@ -6,7 +6,7 @@
 					{
 						"type": "command",
 						"command": "PLUGIN_ROOT=\"${PLUGIN_ROOT}\" bun \"${PLUGIN_ROOT}/skills/df-codex-assets/scripts/df-codex-assets.ts\" hydrate",
-						"statusMessage": "devflow-skills: ensuring df-publisher agent toml exists"
+						"statusMessage": "devopsflow: ensuring df-publisher agent toml exists"
 					}
 				]
 			}

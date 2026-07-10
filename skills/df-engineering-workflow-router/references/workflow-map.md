@@ -11,6 +11,7 @@
   -> 开始编码：df-executing-implementation-plan
     -> 每个行为切片：df-tdd-skill
     -> Spring Web 变更：df-spring-web-boundaries
+    -> IAM 权限命名、RBAC/ABAC 或 API 鉴权映射：df-iam-access-control-design
     -> 失败/异常：df-systematic-debugging
   -> 独立模块或新上下文审查：df-parallel-agent-orchestration
   -> 完成实现：df-requesting-code-review
@@ -42,5 +43,16 @@ df-engineering-workflow-router
   -> df-implementation-planning
   -> df-executing-implementation-plan
   -> df-tdd-skill when behavior changes
+  -> df-verification-before-completion
+```
+
+Default minimal chain for API authorization design:
+
+```text
+df-engineering-workflow-router
+  -> df-iam-access-control-design
+  -> df-google-aip-api-design when resource or transport design is involved
+  -> df-implementation-planning when executable behavior changes
+  -> df-tdd-skill when executable behavior changes
   -> df-verification-before-completion
 ```

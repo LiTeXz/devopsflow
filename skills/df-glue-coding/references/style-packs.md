@@ -2,7 +2,7 @@
 
 Style packs are project-owned reference material that help agents preserve a repository's implementation style after the business design is clear.
 
-They are not shared DevFlow templates and should not live inside this public skill unless they are generic examples. Concrete project examples belong in the target repository.
+They are not shared DevOpsFlow templates and should not live inside this public skill unless they are generic examples. Concrete project examples belong in the target repository.
 
 ## When To Use
 
@@ -21,7 +21,7 @@ Search project-owned material in this order:
 
 1. Explicit user-provided paths or names.
 2. `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, and local workflow docs that name style packs.
-3. `.devflow/style-pack/`
+3. `.devopsflow/style-pack/`
 4. `docs/patterns/`, `examples/`, `reference/`, and `references/`
 
 If a style pack conflicts with current production code, prefer current production code unless the task is explicitly to migrate toward the style pack.
@@ -29,7 +29,7 @@ If a style pack conflicts with current production code, prefer current productio
 ## Recommended Shape
 
 ```text
-.devflow/style-pack/
+.devopsflow/style-pack/
   <style-pack-name>/
     .pack.toml
     rules.md
