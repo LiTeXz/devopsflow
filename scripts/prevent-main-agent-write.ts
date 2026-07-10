@@ -314,7 +314,7 @@ function handleSubagentStop(sessionId: string | undefined): number {
 
 function handleSessionStart(): number {
 	const lines = [
-		"DevFlow mode: coordinator-only",
+		"DevOpsFlow mode: coordinator-only",
 		"Main Codex session may coordinate, review, and verify only.",
 		"Codex worker sessions may write files.",
 		"Read-only inspection commands are allowed.",
@@ -327,7 +327,7 @@ function handleSessionStart(): number {
 
 function writeBlockMessage(decision: BlockDecision): void {
 	const lines = [
-		"DevFlow 已阻止 main Codex session 直接执行写操作。",
+		"DevOpsFlow 已阻止 main Codex session 直接执行写操作。",
 		`原因：${decision.reason}。`,
 		"",
 		"main Codex session 只能协调、审查和验证；请通过 Codex worker session 完成代码写入。",

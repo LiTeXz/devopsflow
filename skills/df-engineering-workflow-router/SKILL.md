@@ -1,6 +1,6 @@
 ---
 name: df-engineering-workflow-router
-description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, glue coding, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as df-resumable-workflow-guard, df-ddd-event-storming-design, df-glue-coding, df-ddd-to-tdd-handoff, df-implementation-planning, df-executing-implementation-plan, df-tdd-skill, df-spring-web-boundaries, df-systematic-debugging, df-requesting-code-review, df-receiving-code-review, df-verification-before-completion, df-finishing-development-branch, or df-parallel-agent-orchestration."
+description: "Mandatory engineering workflow router. Use at the start of software development, refactoring, bug fixing, domain modeling, glue coding, API or authorization design, code review, verification, branch finishing, or commit preparation to classify the task and select required skills such as df-resumable-workflow-guard, df-ddd-event-storming-design, df-glue-coding, df-iam-access-control-design, df-ddd-to-tdd-handoff, df-implementation-planning, df-executing-implementation-plan, df-tdd-skill, df-spring-web-boundaries, df-systematic-debugging, df-requesting-code-review, df-receiving-code-review, df-verification-before-completion, df-finishing-development-branch, or df-parallel-agent-orchestration."
 ---
 
 # Engineering Workflow Router
@@ -26,7 +26,7 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
    - df-glue-coding fit: existing CRUD/page/endpoint/adapter/pattern likely covers most structure
    - behavior change
    - existing behavior preservation
-   - public API, HTTP, security, validation, or serialization boundary
+   - public API, HTTP, authorization naming, RBAC/ABAC, security, validation, or serialization boundary
    - persistence, transactions, ordering, pagination, external side effects
    - failing tests, production bug, or unclear root cause
    - multi-module work that can be split
@@ -40,6 +40,7 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
 - Use `df-resumable-workflow-guard` when the task may span multiple turns or sessions, exceed about 30 minutes, resume after interruption, approach context limits, involve several workflow stages, or need checkpoint/handoff evidence.
 - Use `df-ddd-event-storming-design` when requirements contain non-trivial business language, domain events, commands, policies, aggregates, read models, or unclear business boundaries.
 - Use `df-glue-coding` after domain ambiguity is resolved or intentionally thin, when implementation should reuse local project material such as CRUD/page patterns, reference examples, endpoints, adapters, handlers, projections, tests, imports/exports, or other repeatable structures.
+- Use `df-iam-access-control-design` when defining or reviewing permission and role identifiers, RBAC/ABAC bindings, CEL conditions, API authorization mappings, or migrations away from colon-delimited permission names.
 - Use `df-ddd-to-tdd-handoff` after a DDD design is confirmed and the user wants implementation slices, tests, or development planning.
 - Use `df-implementation-planning` for multi-step implementation, refactoring, risky changes, or any task whose safe execution needs more than one red/green slice.
 - Use `df-executing-implementation-plan` when following an existing plan or after writing one.
@@ -77,6 +78,7 @@ Keep the routing concise. After routing, immediately follow the selected skills.
 - Bug fix: `df-systematic-debugging` -> `df-tdd-skill` -> `df-verification-before-completion`.
 - Pure refactor: `df-implementation-planning` -> `df-tdd-skill` characterization -> `df-executing-implementation-plan` -> `df-verification-before-completion`.
 - Spring endpoint change: `df-tdd-skill` + `df-spring-web-boundaries` -> `df-verification-before-completion`.
+- API authorization design: `df-iam-access-control-design` + `df-google-aip-api-design` when resource or transport design is involved -> `df-implementation-planning` for executable changes -> `df-verification-before-completion`.
 - Review feedback: `df-receiving-code-review` -> targeted verification -> `df-verification-before-completion`.
 - Commit or PR: `df-verification-before-completion` -> `df-finishing-development-branch`.
 

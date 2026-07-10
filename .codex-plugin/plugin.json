@@ -1,7 +1,7 @@
 {
-	"name": "devflow-skills",
-	"version": "0.2.15",
-	"description": "DevFlow engineering workflow skills for Codex: routing, DDD, TDD, planning, execution, debugging, review, verification, and branch finishing.",
+	"name": "devopsflow",
+	"version": "0.2.16",
+	"description": "DevOpsFlow engineering workflow skills for Codex: routing, DDD, TDD, planning, execution, debugging, review, verification, and branch finishing.",
 	"composerIcon": "./assets/app-icon-small.svg",
 	"logo": "./assets/app-icon.png",
 	"author": {
@@ -15,9 +15,9 @@
 	"skills": "./skills/",
 	"hooks": "./hooks/hooks.codex.json",
 	"interface": {
-		"displayName": "DevFlow Skills",
+		"displayName": "DevOpsFlow",
 		"shortDescription": "Engineering workflow skills for Codex",
-		"longDescription": "DevFlow Skills provides a composable Codex workflow for routing engineering requests, DDD modeling, TDD handoff, implementation planning, execution, debugging, review, verification, and branch finishing.",
+		"longDescription": "DevOpsFlow provides a composable Codex workflow for routing engineering requests, DDD modeling, TDD handoff, implementation planning, execution, debugging, review, verification, and branch finishing.",
 		"developerName": "LiTeXz",
 		"category": "Developer Tools",
 		"capabilities": ["Interactive", "Read", "Write"],

@@ -64,7 +64,7 @@ function _currentBranch(cwd: string): string | null {
 }
 
 beforeAll(() => {
-	tempDir = mkdtempSync(join(tmpdir(), "devflow-test-"));
+	tempDir = mkdtempSync(join(tmpdir(), "devopsflow-test-"));
 	featureRepo = join(tempDir, "feature-repo");
 	mainRepo = join(tempDir, "main-repo");
 	devRepo = join(tempDir, "dev-repo");
@@ -256,7 +256,7 @@ describe("ProtectedBranchPushHook", () => {
 			expect(shouldBlock("mv old new", mainRepo)).not.toBeNull();
 			expect(shouldBlock("cp a b", mainRepo)).not.toBeNull();
 			expect(
-				shouldBlock("rg -n DevFlow README.md;rm README.md", mainRepo),
+				shouldBlock("rg -n DevOpsFlow README.md;rm README.md", mainRepo),
 			).not.toBeNull();
 		});
 
@@ -291,7 +291,9 @@ describe("ProtectedBranchPushHook", () => {
 				shouldBlock("sed --silent '1,20p' README.md", mainRepo),
 			).toBeUndefined();
 			expect(shouldBlock("sed 's/a/b/' README.md", mainRepo)).toBeUndefined();
-			expect(shouldBlock("rg -n DevFlow README.md", mainRepo)).toBeUndefined();
+			expect(
+				shouldBlock("rg -n DevOpsFlow README.md", mainRepo),
+			).toBeUndefined();
 			expect(shouldBlock("git status --short", mainRepo)).toBeUndefined();
 			expect(shouldBlock("python3 -c 'print(1)'", mainRepo)).toBeUndefined();
 			expect(
@@ -319,7 +321,7 @@ import { loadState, saveState } from "@/shared/state-store";
 describe("df-publisher push exemption", () => {
 	beforeAll(() => {
 		const stateFile = join(tempDir, "pb-dfpub-sessions.json");
-		process.env.DEVFLOW_MAIN_AGENT_WRITE_STATE = stateFile;
+		process.env.DEVOPSFLOW_MAIN_AGENT_WRITE_STATE = stateFile;
 	});
 
 	beforeEach(() => {

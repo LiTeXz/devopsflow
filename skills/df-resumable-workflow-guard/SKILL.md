@@ -5,7 +5,7 @@ description: "Protect long-running or interruption-prone engineering work with e
 
 # Resumable Workflow Guard
 
-Use this skill as an outer guard around existing DevFlow workflows. Its job is to keep long work resumable; it does not replace planning, TDD, debugging, review, or verification skills.
+Use this skill as an outer guard around existing DevOpsFlow workflows. Its job is to keep long work resumable; it does not replace planning, TDD, debugging, review, or verification skills.
 
 ## Core Rule
 
@@ -14,7 +14,7 @@ At the start of a guarded task, look for an active checkpoint before doing new e
 Default checkpoint path:
 
 ```text
-.devflow/checkpoints/<task-slug>.md
+.devopsflow/checkpoints/<task-slug>.md
 ```
 
 Use one checkpoint per active task. If the user gives a path or an existing plan/spec file, store the checkpoint beside that artifact or link to it clearly.
@@ -34,11 +34,11 @@ For tiny one-shot tasks, do not create a checkpoint unless the user asks.
 
 ## Start Or Resume
 
-1. Check for `.devflow/checkpoints/` and any user-provided plan/spec/handoff file.
+1. Check for `.devopsflow/checkpoints/` and any user-provided plan/spec/handoff file.
 2. If no checkpoint exists and the task needs one, create it before implementation work.
 3. If a checkpoint exists, read only the active summary, checklist, latest log entries, and resume cursor first.
 4. Compare the checkpoint with `git status`, changed files, and any named plan/spec. If they conflict, record the conflict and resolve it before editing.
-5. State the resumed phase and the next action briefly, then invoke the normal DevFlow skills for the actual work.
+5. State the resumed phase and the next action briefly, then invoke the normal DevOpsFlow skills for the actual work.
 
 ## Checkpoint Contents
 

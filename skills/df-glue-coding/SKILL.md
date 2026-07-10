@@ -26,7 +26,7 @@ Use Glue Coding after:
 Look for project-owned material in this order:
 
 1. Rules: `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, local docs, package scripts, framework config.
-2. Style packs and reference patterns: explicit user-provided style pack paths, `.devflow/style-pack/`, `reference/`, `references/`, `examples/`, `docs/patterns/`, `.ai/patterns/`, templates, scaffolds.
+2. Style packs and reference patterns: explicit user-provided style pack paths, `.devopsflow/style-pack/`, `reference/`, `references/`, `examples/`, `docs/patterns/`, `.ai/patterns/`, templates, scaffolds.
 3. Nearby production code: similar pages, endpoints, handlers, adapters, projections, tests, fixtures, migrations, exports, imports, jobs, or config. For refactors, classify whether each candidate is a target pattern, legacy pattern, anti-pattern, or behavior evidence.
 4. Historical context: `.ai/tracks/`, prior specs, plans, ADRs, issue notes, PR descriptions, or implementation notes.
 
@@ -119,7 +119,7 @@ Keep this concise. Do not paste long source files into the response; cite file p
 Before handoff or completion, ask whether the task revealed reusable material:
 
 - a new or improved code pattern worth adding to `reference/`, `examples/`, `docs/patterns/`, or `.ai/patterns/`
-- a style pack rule, golden example, anti-pattern, or review checklist entry worth adding to `.devflow/style-pack/`
+- a style pack rule, golden example, anti-pattern, or review checklist entry worth adding to `.devopsflow/style-pack/`
 - a rule that belongs in `AGENTS.md` or project docs
 - domain knowledge or a pitfall that belongs in local knowledge notes
 - a persistent spec or decision that belongs in `.ai/tracks/`

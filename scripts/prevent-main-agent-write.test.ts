@@ -55,10 +55,10 @@ function initBranchOnlyRepo(path: string, branch: string): void {
 
 // Set up state path for tests
 let stateFilePath: string;
-const STATE_PATH_ENV = "DEVFLOW_MAIN_AGENT_WRITE_STATE";
+const STATE_PATH_ENV = "DEVOPSFLOW_MAIN_AGENT_WRITE_STATE";
 
 beforeAll(() => {
-	tempDir = mkdtempSync(join(tmpdir(), "devflow-test-main-"));
+	tempDir = mkdtempSync(join(tmpdir(), "devopsflow-test-main-"));
 	stateFilePath = join(tempDir, "test-sessions.json");
 	process.env[STATE_PATH_ENV] = stateFilePath;
 });
@@ -149,7 +149,7 @@ describe("MainAgentWriteGuard", () => {
 				shouldBlockTool("Bash", { command: "sed 's/a/b/' README.md" }),
 			).toBeUndefined();
 			expect(
-				shouldBlockTool("Bash", { command: "rg -n DevFlow README.md" }),
+				shouldBlockTool("Bash", { command: "rg -n DevOpsFlow README.md" }),
 			).toBeUndefined();
 			expect(
 				shouldBlockTool("Bash", { command: "git status --short" }),

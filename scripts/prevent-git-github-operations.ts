@@ -42,7 +42,7 @@ function readPluginVersion(pluginRoot?: string): string | undefined {
 function readTomlVersionMarker(path: string): string | undefined {
 	try {
 		const content = readFileSync(path, "utf-8");
-		const match = content.match(/^#\s*devflow-version\s*=\s*"([^"]+)"/m);
+		const match = content.match(/^#\s*devopsflow-version\s*=\s*"([^"]+)"/m);
 		return match?.[1];
 	} catch {
 		return undefined;
@@ -210,16 +210,16 @@ export function ensureDfPublisherAgent(
 			copyFileSync(sourceToml, dfPublisherToml);
 			if (expectedVersion) {
 				if (reinstallReason) {
-					return `DevFlow: ${reinstallReason}至 v${expectedVersion}（${dfPublisherToml}）`;
+					return `DevOpsFlow: ${reinstallReason}至 v${expectedVersion}（${dfPublisherToml}）`;
 				}
-				return `DevFlow: df-publisher Codex worker session 定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
+				return `DevOpsFlow: df-publisher Codex worker session 定义已更新至 v${expectedVersion}（${dfPublisherToml}）`;
 			}
-			return `DevFlow: 已自动安装 df-publisher Codex worker session 定义到 ${dfPublisherToml}`;
+			return `DevOpsFlow: 已自动安装 df-publisher Codex worker session 定义到 ${dfPublisherToml}`;
 		}
 	}
 
 	const lines = [
-		"DevFlow 插件不完整：未找到 df-publisher Codex worker session 定义。",
+		"DevOpsFlow 插件不完整：未找到 df-publisher Codex worker session 定义。",
 		`预期位置：${dfPublisherToml}`,
 	];
 	if (pluginRoot) {
@@ -249,13 +249,13 @@ function invalidSourceMessage(
 	reason: string,
 ): string {
 	return [
-		"DevFlow 插件不完整：df-publisher Codex worker session 源文件无效。",
+		"DevOpsFlow 插件不完整：df-publisher Codex worker session 源文件无效。",
 		`源文件：${sourceToml}`,
 		`原因：${reason}`,
 		`目标位置：${dfPublisherToml}`,
 		`插件根目录：${pluginRoot}`,
 		"",
-		"请更新或重新安装 DevFlow 插件后重试，避免复制无法被 Codex 稳定识别的 agent TOML。",
+		"请更新或重新安装 DevOpsFlow 插件后重试，避免复制无法被 Codex 稳定识别的 agent TOML。",
 	].join("\n");
 }
 
@@ -282,7 +282,7 @@ function writeSessionStartMessage(message: string): void {
 
 function writeToolBlock(): void {
 	const lines = [
-		"DevFlow 已阻止 git/gh 发布操作。",
+		"DevOpsFlow 已阻止 git/gh 发布操作。",
 		"原因：仅 df-publisher Codex worker session 可执行 git push、git commit、gh issue、gh pr。",
 		"",
 		"main Codex session 和普通 Codex worker session 可直接执行简单 git/gh 操作（如切换分支、合并、认证），",

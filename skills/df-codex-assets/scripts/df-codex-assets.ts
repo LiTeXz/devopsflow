@@ -259,7 +259,7 @@ function printCheckMismatch(
 	mismatch: HashMismatch,
 	error: (message: string) => void,
 ): void {
-	error("DevFlow Codex asset hash mismatch.");
+	error("DevOpsFlow Codex asset hash mismatch.");
 	error(`stored hash:  ${mismatch.storedHash}`);
 	error(`correct hash: ${mismatch.correctHash}`);
 	error(`update with:   ${mismatch.updateCommand}`);

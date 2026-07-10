@@ -33,7 +33,7 @@ function initGitRepo(path: string, branch: string): void {
 }
 
 beforeAll(() => {
-	tempDir = mkdtempSync(join(tmpdir(), "devflow-opencode-test-"));
+	tempDir = mkdtempSync(join(tmpdir(), "devopsflow-opencode-test-"));
 	featureRepo = join(tempDir, "feature-repo");
 	mainRepo = join(tempDir, "main-repo");
 	initGitRepo(featureRepo, "feature/demo");
