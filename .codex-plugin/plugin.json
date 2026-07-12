@@ -10,7 +10,7 @@
 	},
 	"homepage": "https://github.com/LiTeXz/devflow-skills",
 	"repository": "https://github.com/LiTeXz/devflow-skills",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"keywords": ["codex", "skills", "workflow", "ddd", "tdd"],
 	"skills": "./skills/",
 	"hooks": "./hooks/hooks.codex.json",
