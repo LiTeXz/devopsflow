@@ -20,7 +20,7 @@ export const MANAGED_ASSET_PATHS = [
 ] as const;
 
 export const HASH_FILE_PATH = "skills/df-codex-assets/assets/hash.txt";
-export const DEFAULT_REPOSITORY = "LiTeXz/devflow-skills";
+export const DEFAULT_REPOSITORY = "TrueNine/devopsflow";
 
 export type FetchLike = (
 	input: string | URL | Request,

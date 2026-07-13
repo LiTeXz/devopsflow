@@ -20,7 +20,11 @@ const legacySlug = ["dev", "flow-skills"].join("");
 const legacyBrand = ["Dev", "Flow"].join("");
 const legacyUpper = ["DEV", "FLOW"].join("");
 const legacyDotDirectory = [".dev", "flow"].join("");
-const allowedGithubSource = `LiTeXz/${legacySlug}`;
+const legacyOwner = ["Li", "TeXz"].join("");
+const expectedOwner = "TrueNine";
+const expectedRepository = `${expectedOwner}/devopsflow`;
+const originalRepository = `${legacyOwner}/${legacySlug}`;
+const originalAttribution = `> 本项目基于 [${originalRepository}](https://github.com/${originalRepository}) 二次开发并公开发布。感谢原作者 [${legacyOwner}](https://github.com/${legacyOwner}) 的贡献；本项目继续遵循 [GPL-3.0-only](LICENSE) 协议。`;
 
 function collectTextFiles(directory: string): string[] {
 	const files: string[] = [];
@@ -42,15 +46,21 @@ describe("DevOpsFlow project identity", () => {
 			const projectPath = relative(ROOT, file).replaceAll("\\", "/");
 			expect(projectPath, projectPath).not.toContain(legacySlug);
 
-			const content = readFileSync(file, "utf-8").replaceAll(
-				allowedGithubSource,
+			const content = readFileSync(file, "utf-8").replace(
+				originalAttribution,
 				"",
 			);
 			expect(content, projectPath).not.toContain(legacySlug);
 			expect(content, projectPath).not.toContain(legacyBrand);
 			expect(content, projectPath).not.toContain(legacyUpper);
 			expect(content, projectPath).not.toContain(legacyDotDirectory);
+			expect(content, projectPath).not.toContain(legacyOwner);
 		}
+	});
+
+	it("attributes the original project in the README first line", () => {
+		const readme = readFileSync(join(ROOT, "README.md"), "utf-8");
+		expect(readme.split(/\r?\n/, 1)[0]).toBe(originalAttribution);
 	});
 
 	it("uses the new package and plugin identity", () => {
@@ -64,5 +74,17 @@ describe("DevOpsFlow project identity", () => {
 		expect(packageJson.name).toBe("devopsflow");
 		expect(pluginJson.name).toBe("devopsflow");
 		expect(pluginJson.interface.displayName).toBe("DevOpsFlow");
+		expect(pluginJson.author.name).toBe(expectedOwner);
+		expect(pluginJson.author.url).toBe(`https://github.com/${expectedOwner}`);
+		expect(pluginJson.homepage).toBe(
+			`https://github.com/${expectedRepository}`,
+		);
+		expect(pluginJson.repository).toBe(
+			`https://github.com/${expectedRepository}`,
+		);
+		expect(pluginJson.interface.developerName).toBe(expectedOwner);
+		expect(pluginJson.interface.websiteURL).toBe(
+			`https://github.com/${expectedRepository}`,
+		);
 	});
 });

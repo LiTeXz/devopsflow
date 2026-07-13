@@ -72,4 +72,4 @@ Treat linter output as a useful guardrail, not the full design review. Some AIP 
 ## Resources
 
 - Read `references/aip-map.md` when selecting which AIP rules to consult for a task.
-- This skill was copied from `https://github.com/LiTeXz/google-aip-api-design` at commit `fa650a59f791cf3ba84e431dfcce441157ac5587` on branch `main`.
+- This skill is maintained at `https://github.com/TrueNine/devopsflow/tree/main/skills/df-google-aip-api-design`.

@@ -1,3 +1,5 @@
+> 本项目基于 [LiTeXz/devflow-skills](https://github.com/LiTeXz/devflow-skills) 二次开发并公开发布。感谢原作者 [LiTeXz](https://github.com/LiTeXz) 的贡献；本项目继续遵循 [GPL-3.0-only](LICENSE) 协议。
+
 <h1 align="center">DevOpsFlow</h1>
 
 <p align="center">
@@ -21,7 +23,7 @@
 ### Codex
 
 ```bash
-codex plugin marketplace add LiTeXz/devflow-skills
+codex plugin marketplace add TrueNine/devopsflow
 codex plugin marketplace upgrade devopsflow
 codex plugin add devopsflow@devopsflow
 ```
@@ -35,9 +37,9 @@ codex plugin add devopsflow@devopsflow
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["/absolute/path/to/devflow-skills/.opencode/plugin/devopsflow.ts"],
+  "plugin": ["/absolute/path/to/devopsflow/.opencode/plugin/devopsflow.ts"],
   "skills": {
-    "paths": ["/absolute/path/to/devflow-skills/skills"]
+    "paths": ["/absolute/path/to/devopsflow/skills"]
   }
 }
 ```

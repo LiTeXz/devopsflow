@@ -1,15 +1,15 @@
 {
 	"name": "devopsflow",
-	"version": "0.2.16",
+	"version": "0.2.17",
 	"description": "DevOpsFlow engineering workflow skills for Codex: routing, DDD, TDD, planning, execution, debugging, review, verification, and branch finishing.",
 	"composerIcon": "./assets/app-icon-small.svg",
 	"logo": "./assets/app-icon.png",
 	"author": {
-		"name": "LiTeXz",
-		"url": "https://github.com/LiTeXz"
+		"name": "TrueNine",
+		"url": "https://github.com/TrueNine"
 	},
-	"homepage": "https://github.com/LiTeXz/devflow-skills",
-	"repository": "https://github.com/LiTeXz/devflow-skills",
+	"homepage": "https://github.com/TrueNine/devopsflow",
+	"repository": "https://github.com/TrueNine/devopsflow",
 	"license": "GPL-3.0-only",
 	"keywords": ["codex", "skills", "workflow", "ddd", "tdd"],
 	"skills": "./skills/",
@@ -18,10 +18,10 @@
 		"displayName": "DevOpsFlow",
 		"shortDescription": "Engineering workflow skills for Codex",
 		"longDescription": "DevOpsFlow provides a composable Codex workflow for routing engineering requests, DDD modeling, TDD handoff, implementation planning, execution, debugging, review, verification, and branch finishing.",
-		"developerName": "LiTeXz",
+		"developerName": "TrueNine",
 		"category": "Developer Tools",
 		"capabilities": ["Interactive", "Read", "Write"],
-		"websiteURL": "https://github.com/LiTeXz/devflow-skills",
+		"websiteURL": "https://github.com/TrueNine/devopsflow",
 		"defaultPrompt": [
 			"Use df-engineering-workflow-router to classify this task",
 			"Use the df-publisher Codex worker session for git and GitHub publishing tasks.",
