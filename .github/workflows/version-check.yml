@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           VERSION=$(bun -e "console.log(require('./package.json').version)")
           TAG="v${VERSION}"
-          REPO=$(bun -e "const p=require('./.codex-plugin/plugin.json'); const repo=String(p.repository||'https://github.com/LiTeXz/devflow-skills'); const m=repo.match(/github\\.com[:/]([^/]+\\/[^/.#]+)(?:\\.git)?/); console.log(m ? m[1] : 'LiTeXz/devflow-skills')")
+          REPO=$(bun -e "const p=require('./.codex-plugin/plugin.json'); const repo=String(p.repository||'https://github.com/LiTeXz/devopsflow'); const m=repo.match(/github\\.com[:/]([^/]+\\/[^/.#]+)(?:\\.git)?/); console.log(m ? m[1] : 'LiTeXz/devopsflow')")
           HASH_FILE="skills/df-codex-assets/assets/hash.txt"
           STORED_HASH=$(tr -d '[:space:]' < "$HASH_FILE")
 

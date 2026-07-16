@@ -22,4 +22,8 @@ describe("version-check workflow", () => {
 		);
 		expect(WORKFLOW).toContain("if: github.ref_type == 'tag'");
 	});
+
+	it("uses the DevOpsFlow repository as the managed asset source", () => {
+		expect(WORKFLOW).toContain("LiTeXz/devopsflow");
+	});
 });

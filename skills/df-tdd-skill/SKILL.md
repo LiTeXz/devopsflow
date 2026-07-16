@@ -101,6 +101,15 @@ Choose the test layer by risk, not by filename or technology preference:
 - Cross-layer collaboration as the risk itself: a small number of end-to-end or system tests.
 - Dependency direction or layering rules as the risk: architecture tests or static checks.
 
+Treat environment-backed validation as part of the same TDD and verification continuum, not as work outside development:
+
+- Use integration tests when the risk depends on real services, data stores, protocols, transactions, or toolchain behavior.
+- Use property tests when invariants must hold across a generated input space rather than a few examples.
+- Use canary tests when release behavior must be observed in a controlled environment before broader exposure.
+- Turn production incident investigation into a reproducing test with sanitized inputs, observable evidence, and a regression assertion before fixing the defect.
+- Keep unit tests, functional tests, integration tests, property tests, canary tests, and incident-reproduction tests connected by the same risk and behavior traceability.
+- Record required services, fixtures, environment assumptions, commands, and observations. If an environment is unavailable, report the unverified layer and remaining risk instead of reclassifying it as unnecessary.
+
 See `references/test-slices.md` for more detail.
 
 ## Characterization Tests

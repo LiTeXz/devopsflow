@@ -20,7 +20,19 @@ const legacySlug = ["dev", "flow-skills"].join("");
 const legacyBrand = ["Dev", "Flow"].join("");
 const legacyUpper = ["DEV", "FLOW"].join("");
 const legacyDotDirectory = [".dev", "flow"].join("");
-const allowedGithubSource = `LiTeXz/${legacySlug}`;
+const intermediateSlug = ["dev", "flow"].join("");
+const currentSlug = "devopsflow";
+const repository = `LiTeXz/${currentSlug}`;
+const repositoryUrl = `https://github.com/${repository}`;
+const migrationDocument = "README.md";
+const legacyCode = ["`", legacySlug, "`"].join("");
+const namingPath = [
+	legacyCode,
+	" → ",
+	["`", intermediateSlug, "`"].join(""),
+	" → ",
+	["`", currentSlug, "`"].join(""),
+].join("");
 
 function collectTextFiles(directory: string): string[] {
 	const files: string[] = [];
@@ -43,7 +55,7 @@ describe("DevOpsFlow project identity", () => {
 			expect(projectPath, projectPath).not.toContain(legacySlug);
 
 			const content = readFileSync(file, "utf-8").replaceAll(
-				allowedGithubSource,
+				projectPath === migrationDocument ? legacyCode : "",
 				"",
 			);
 			expect(content, projectPath).not.toContain(legacySlug);
@@ -64,5 +76,42 @@ describe("DevOpsFlow project identity", () => {
 		expect(packageJson.name).toBe("devopsflow");
 		expect(pluginJson.name).toBe("devopsflow");
 		expect(pluginJson.interface.displayName).toBe("DevOpsFlow");
+		expect(pluginJson.homepage).toBe(repositoryUrl);
+		expect(pluginJson.repository).toBe(repositoryUrl);
+		expect(pluginJson.interface.websiteURL).toBe(repositoryUrl);
+		const pluginDescription = [
+			pluginJson.description,
+			pluginJson.interface.longDescription,
+		].join(" ");
+		for (const capability of ["skills", "hooks", "MCP", "agent harness"]) {
+			expect(pluginDescription).toContain(capability);
+		}
+	});
+
+	it("documents project scope, naming rationale, and migration rules", () => {
+		const readme = readFileSync(join(ROOT, migrationDocument), "utf-8");
+
+		expect(readme).toContain(namingPath);
+		for (const capability of [
+			"skills",
+			"hooks",
+			"MCP",
+			"agent",
+			"agent harness",
+		]) {
+			expect(readme).toContain(capability);
+		}
+		for (const testLayer of [
+			"单元测试",
+			"功能性测试",
+			"集成测试",
+			"属性测试",
+			"灰度测试",
+			"线上问题排查测试",
+		]) {
+			expect(readme).toContain(testLayer);
+		}
+		expect(readme).toContain(`codex plugin marketplace add ${repository}`);
+		expect(readme).toContain("历史 Git 提交、标签和发布记录保持不变");
 	});
 });
