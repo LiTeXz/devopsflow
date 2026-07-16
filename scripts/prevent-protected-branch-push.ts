@@ -27,8 +27,9 @@ import {
 	SESSION_HOOK_NAMES,
 	SHELL_TOOL_NAMES,
 } from "@/shared/payload";
+import { runLoggedScript } from "@/shared/script-logger";
 import { isDfPublisherSession } from "@/shared/state-store";
-import type { ToolInput } from "@/shared/types";
+import type { Payload, ToolInput } from "@/shared/types";
 import { type BlockDecision, createBlockDecision } from "@/shared/types";
 
 export function shouldBlockSessionStart(
@@ -203,14 +204,12 @@ function writeBlockMessage(decision: BlockDecision): void {
 		"请停止推送尝试，保留本地分支和验证结果，交由人工或受信任流程推送并创建 PR：",
 		"  git switch -c codex/<task-name>",
 	];
-	const { stderr } = process;
 	for (const line of lines) {
-		stderr.write(`${line}\n`);
+		console.error(line);
 	}
 }
 
-function main(): number {
-	const payload = readPayload();
+function main(payload: Payload | null = readPayload()): number {
 	if (!payload || typeof payload !== "object") return 0;
 
 	const toolInput = findToolInput(payload) ?? {};
@@ -246,5 +245,11 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	const payload = readPayload();
+	process.exit(
+		runLoggedScript(
+			{ payload, scriptName: "prevent-protected-branch-push" },
+			() => main(payload),
+		),
+	);
 }

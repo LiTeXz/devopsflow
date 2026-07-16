@@ -2,6 +2,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { runLoggedScript } from "@/shared/script-logger";
 
 // biome-ignore lint/style/noNonNullAssertion: import.meta.dir is always defined at runtime
 const ROOT = dirname(import.meta.dir!);
@@ -79,5 +80,7 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	process.exit(
+		runLoggedScript({ scriptName: "check-template-extraction" }, () => main()),
+	);
 }

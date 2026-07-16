@@ -2,6 +2,7 @@
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
+import { runLoggedScript } from "@/shared/script-logger";
 
 export interface SkillMetadataViolation {
 	path: string;
@@ -154,5 +155,7 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	process.exit(
+		runLoggedScript({ scriptName: "check-skill-metadata" }, () => main()),
+	);
 }
