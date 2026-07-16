@@ -1,6 +1,6 @@
 {
 	"name": "devopsflow",
-	"version": "0.2.16",
+	"version": "0.2.17",
 	"description": "DevOpsFlow engineering workflow and agent harness for Codex, combining skills, hooks, MCP integration, specialized agents, execution constraints, and feedback loops.",
 	"composerIcon": "./assets/app-icon-small.svg",
 	"logo": "./assets/app-icon.png",
