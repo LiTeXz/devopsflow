@@ -12,11 +12,13 @@ import { dirname, join } from "node:path";
 import {
 	checkManagedAssetHash,
 	computeManagedAssetHash,
+	DEFAULT_REPOSITORY,
 	type FetchLike,
 	hashContent,
 	hydrateManagedAssets,
 	MANAGED_ASSET_PATHS,
 	manifestForFiles,
+	readPluginRepository,
 	readPluginVersion,
 	runCli,
 	writeStoredHash,
@@ -222,5 +224,13 @@ describe("df-codex-assets", () => {
 		);
 
 		expect(readPluginVersion(root)).toBe("1.2.3");
+	});
+
+	it("uses the DevOpsFlow repository when plugin metadata has no repository", () => {
+		const root = tempRoot();
+		writeAsset(root, ".codex-plugin/plugin.json", JSON.stringify({}));
+
+		expect(DEFAULT_REPOSITORY).toBe("LiTeXz/devopsflow");
+		expect(readPluginRepository(root)).toBe(DEFAULT_REPOSITORY);
 	});
 });
