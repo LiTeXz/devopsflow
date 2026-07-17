@@ -654,4 +654,4 @@ See `references/anti-patterns.md` for a compact anti-pattern library when review
 
 - `references/anti-patterns.md`: DDD modeling anti-patterns to reject or correct.
 - `references/eval-cases.md`: evaluation cases for checking whether the skill preserves event-storming discipline.
-- `scripts/validate_ddd_design.py`: lightweight heuristic checks for Markdown drafts or `event-storming/` repositories.
+- `scripts/validate-ddd-design.ts`: lightweight heuristic checks for Markdown drafts or `event-storming/` repositories. Run with `bun skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts <path> [--require-sections]`.

@@ -1,5 +1,5 @@
 node_modules/
 *.tsbuildinfo
 dist/
-**/__pycache__/**
 .codex/
+.logs/

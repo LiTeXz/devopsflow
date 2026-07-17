@@ -18,7 +18,7 @@ Before finishing, emit a `tdd_finish` protocol block using `templates/tdd_finish
 These blocks are process metadata for semi-automated guardrails. Do not put project structure or technology-stack rules in them. See `references/hook-protocol.md` for the full protocol.
 Evidence fields must record concrete commands, exit codes, test names, and failure/pass summaries. Do not use vague evidence such as "the test failed" or "the test passed."
 
-This skill cannot register platform-level automatic hooks. When using it, actively run `scripts/validate_tdd_protocol.py` at fixed stages:
+This skill cannot register platform-level automatic hooks. When using it, actively run `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` at fixed stages:
 
 - Append the current task's protocol blocks to a temporary workspace file, such as `.codex/tdd-protocol.md`, or to `tdd-protocol.md` in the system temp directory.
 - Before production-code edits: emit `tdd_start`, then run `--stage before_edit`. If validation fails, complete the declaration before editing production code.
@@ -152,8 +152,8 @@ Treat difficult tests as design feedback before widening the implementation:
 - `references/eval-cases.md`: failure samples and expected guardrail behavior for iterating this skill.
 - `references/anti-patterns.md`: common TDD failure modes to reject or correct when iterating this skill.
 - `templates/tdd_start.yaml`, `templates/tdd_state.yaml`, `templates/tdd_finish.yaml`: protocol block templates to load as needed.
-- `scripts/validate_tdd_protocol.py`: protocol validation script to run at fixed stages.
-- `scripts/run_protocol_examples.py`: lightweight regression suite that checks valid examples pass and common violations fail.
+- `scripts/validate-tdd-protocol.ts`: protocol validation script to run at fixed stages with `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`.
+- `scripts/run-protocol-examples.test.ts`: lightweight regression suite to run with `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts`; it checks valid examples pass and common violations fail.
 
 ## Commit Message
 

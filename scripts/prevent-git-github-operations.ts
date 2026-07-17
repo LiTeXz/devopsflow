@@ -25,7 +25,9 @@ import {
 	SHELL_TOOL_NAMES,
 	SUBAGENT_TOOL_NAMES,
 } from "@/shared/payload";
+import { runLoggedScript } from "@/shared/script-logger";
 import { isDfPublisherSession } from "@/shared/state-store";
+import type { Payload } from "@/shared/types";
 
 function readPluginVersion(pluginRoot?: string): string | undefined {
 	if (!pluginRoot) return undefined;
@@ -276,7 +278,7 @@ export function shouldBlockTool(
 
 function writeSessionStartMessage(message: string): void {
 	for (const line of message.split("\n")) {
-		process.stdout.write(`${line}\n`);
+		console.log(line);
 	}
 }
 
@@ -289,12 +291,11 @@ function writeToolBlock(): void {
 		"但提交、推送、PR、issue 管理必须委托 df-publisher Codex worker session 完成。",
 	];
 	for (const line of lines) {
-		process.stderr.write(`${line}\n`);
+		console.error(line);
 	}
 }
 
-function main(): number {
-	const payload = readPayload();
+function main(payload: Payload | null = readPayload()): number {
 	if (!payload || typeof payload !== "object") return 0;
 
 	const event = findHookEvent(payload);
@@ -327,5 +328,11 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	const payload = readPayload();
+	process.exit(
+		runLoggedScript(
+			{ payload, scriptName: "prevent-git-github-operations" },
+			() => main(payload),
+		),
+	);
 }

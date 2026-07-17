@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import { runLoggedScript } from "@/shared/script-logger";
+
 const TASK_TYPES = new Set([
 	"greenfield_feature",
 	"bug_fix",
@@ -577,5 +579,7 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	process.exit(
+		runLoggedScript({ scriptName: "validate-tdd-protocol" }, () => main()),
+	);
 }

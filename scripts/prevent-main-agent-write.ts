@@ -36,6 +36,7 @@ import {
 	SUBAGENT_STOP_EVENTS,
 	SUBAGENT_TOOL_NAMES,
 } from "@/shared/payload";
+import { runLoggedScript } from "@/shared/script-logger";
 import {
 	isDfPublisherSession,
 	isRegisteredSubagentSession,
@@ -320,7 +321,7 @@ function handleSessionStart(): number {
 		"Read-only inspection commands are allowed.",
 	];
 	for (const line of lines) {
-		process.stdout.write(`${line}\n`);
+		console.log(line);
 	}
 	return 0;
 }
@@ -333,12 +334,11 @@ function writeBlockMessage(decision: BlockDecision): void {
 		"main Codex session 只能协调、审查和验证；请通过 Codex worker session 完成代码写入。",
 	];
 	for (const line of lines) {
-		process.stderr.write(`${line}\n`);
+		console.error(line);
 	}
 }
 
-function main(): number {
-	const payload = readPayload();
+function main(payload: Payload | null = readPayload()): number {
 	if (!payload || typeof payload !== "object") return 0;
 
 	const event = findHookEvent(payload);
@@ -378,5 +378,10 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	const payload = readPayload();
+	process.exit(
+		runLoggedScript({ payload, scriptName: "prevent-main-agent-write" }, () =>
+			main(payload),
+		),
+	);
 }
