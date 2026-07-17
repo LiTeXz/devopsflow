@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { readFileSync } from "node:fs";
+import { runLoggedScript } from "@/shared/script-logger";
 
 export type IdentifierKind = "permission" | "role";
 
@@ -108,4 +109,10 @@ function main(): number {
 	return 0;
 }
 
-if (import.meta.main) process.exit(main());
+if (import.meta.main) {
+	process.exit(
+		runLoggedScript({ scriptName: "validate-authorization-identifiers" }, () =>
+			main(),
+		),
+	);
+}

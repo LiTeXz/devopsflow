@@ -1,4 +1,4 @@
-import { readSync } from "node:fs";
+import { readScriptPayload } from "@/shared/script-logger";
 import type { Payload, ToolInput } from "@/shared/types";
 
 const COMMAND_KEYS = ["command", "cmd"] as const;
@@ -56,20 +56,7 @@ export const SUBAGENT_TOOL_NAMES = new Set([
 ]);
 
 export function readPayload(): Payload | null {
-	try {
-		const chunks: Buffer[] = [];
-		const buf = Buffer.alloc(65536);
-		let bytesRead: number;
-		// biome-ignore lint/suspicious/noAssignInExpressions: standard read loop pattern
-		while ((bytesRead = readSync(0, buf, 0, buf.length, null)) > 0) {
-			chunks.push(Buffer.from(buf.subarray(0, bytesRead)));
-		}
-		const raw = Buffer.concat(chunks).toString("utf-8");
-		if (!raw.trim()) return null;
-		return JSON.parse(raw) as Payload;
-	} catch {
-		return null;
-	}
+	return readScriptPayload() as Payload | null;
 }
 
 export function findHookEvent(payload: Payload): string {

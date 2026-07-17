@@ -3,6 +3,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { readScriptPayload, runLoggedScriptAsync } from "./script-logger";
 
 export const MANAGED_ASSET_PATHS = [
 	"agents/df-publisher.toml",
@@ -13,6 +14,7 @@ export const MANAGED_ASSET_PATHS = [
 	"src/shared/command-parser.ts",
 	"src/shared/opencode-adapter.ts",
 	"src/shared/payload.ts",
+	"src/shared/script-logger.ts",
 	"src/shared/state-store.ts",
 	"src/shared/types.ts",
 	"package.json",
@@ -298,5 +300,15 @@ export async function runCli(
 }
 
 if (import.meta.main) {
-	process.exit(await runCli());
+	const payload = process.stdin.isTTY ? null : readScriptPayload();
+	process.exit(
+		await runLoggedScriptAsync(
+			{
+				details: { command: process.argv[2] ?? "check" },
+				payload,
+				scriptName: "df-codex-assets",
+			},
+			() => runCli(),
+		),
+	);
 }

@@ -2,6 +2,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { runLoggedScript } from "@/shared/script-logger";
 
 const SMELLS: Record<string, string[]> = {
 	table_first: [
@@ -197,5 +198,7 @@ function main(): number {
 }
 
 if (import.meta.main) {
-	process.exit(main());
+	process.exit(
+		runLoggedScript({ scriptName: "validate-ddd-design" }, () => main()),
+	);
 }
