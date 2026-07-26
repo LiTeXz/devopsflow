@@ -1,0 +1,25 @@
+name: Dependency governance
+
+on:
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Check JavaScript dependencies
+        run: bun skills/df-depend-man/scripts/check-js-dependencies.ts --path . --format text
+      - name: Check GitHub dependency policy
+        run: bun skills/df-depend-man/scripts/check-github-dependencies.ts --path . --format text
+      - name: Check Gradle dependencies when present
+        shell: bash
+        run: if [[ -f gradlew || -f gradlew.bat ]]; then bun skills/df-depend-man/scripts/check-gradle-dependencies.ts --path . --format text; fi
+      - name: Check Maven dependencies when present
+        shell: bash
+        run: if [[ -f pom.xml || -f mvnw || -f mvnw.cmd ]]; then bun skills/df-depend-man/scripts/check-maven-dependencies.ts --path . --format text; fi
