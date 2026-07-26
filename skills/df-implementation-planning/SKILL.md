@@ -50,35 +50,35 @@ Use `templates/implementation-plan.md` when a file artifact is useful. In chat, 
 ```markdown
 # <Name> Implementation Plan
 
-## 目标
+## Goal
 
-## 约束
+## Constraints
 
-## 行为切片
+## Behavior Slices
 
-## 任务列表
+## Task List
 
-1. 写失败测试：<behavior>
-   - 文件：
-   - 命令：
-   - 预期 RED：
-   - 完成标准：
+1. Write Failing Test: <behavior>
+   - Files:
+   - Command:
+   - Expected RED:
+   - Completion Standard:
 
-2. 最小实现：<behavior>
-   - 文件：
-   - 命令：
-   - 预期 GREEN：
-   - 完成标准：
+2. Minimal Implementation: <behavior>
+   - Files:
+   - Command:
+   - Expected GREEN:
+   - Completion Standard:
 
-3. 重构：<design cleanup>
-   - 文件：
-   - 命令：
-   - 必须保持：
-   - 完成标准：
+3. Refactor: <design cleanup>
+   - Files:
+   - Command:
+   - Must Preserve:
+   - Completion Standard:
 
-## 验证矩阵
+## Verification Matrix
 
-## 需要用户确认
+## User Confirmation Required
 ```
 
 ## Non-Negotiable Rules

@@ -1,6 +1,6 @@
 ---
 name: df-resumable-workflow-guard
-description: "Protect long-running or interruption-prone engineering work with explicit checkpoints, resume files, and handoff notes. Use when a task may span multiple turns or sessions, exceed about 30 minutes, touch multiple workflow stages, require repeated verification, approach context limits, resume after interruption/compaction, or when the user says continue, resume, checkpoint, long task, handoff, 中断, 继续, 续跑, 检查点, 长任务, or 交接."
+description: "Protect long-running or interruption-prone engineering work with explicit checkpoints, resume files, and handoff notes. Use when a task may span multiple turns or sessions, exceed about 30 minutes, touch multiple workflow stages, require repeated verification, approach context limits, resume after interruption or compaction, or when the user asks to continue, resume, checkpoint, monitor a long task, or hand off work."
 ---
 
 # Resumable Workflow Guard
