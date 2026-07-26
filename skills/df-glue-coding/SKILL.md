@@ -85,17 +85,17 @@ For refactor work:
 ## Output Format
 
 ```markdown
-## Glue Coding 判断
+## Glue Coding Assessment
 
-- 分类：glue_fit / glue_partial / not_glue / domain_blocked / refactor_glue
-- DDD 前置：已确认 / 领域很薄 / 需要先 DDD
-- 选中的目标样板/相似实现：
-- 旧模式/反模式/行为证据：
-- 选择理由：
-- 必须保持：
-- 本次差异：
-- 不采用的候选：
-- 下一步：
+- Classification: glue_fit / glue_partial / not_glue / domain_blocked / refactor_glue
+- DDD Prerequisite: confirmed / thin domain / DDD required first
+- Selected Target Pattern Or Similar Implementation:
+- Legacy Patterns, Anti-Patterns, And Behavior Evidence:
+- Selection Rationale:
+- Must Preserve:
+- Current Delta:
+- Rejected Candidates:
+- Next Step:
 ```
 
 Keep this concise. Do not paste long source files into the response; cite file paths and relevant symbols.

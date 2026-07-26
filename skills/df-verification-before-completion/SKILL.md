@@ -41,12 +41,12 @@ Do not write vague statements such as "tests pass" without the command and scope
 For internal notes or handoff files, use `templates/verification-report.md`. In the final response, summarize the same evidence briefly:
 
 ```markdown
-完成情况：
-- 已满足：
-- 变更文件：
-- 验证：
-- 未运行：
-- 剩余风险：
+Completion Status:
+- Satisfied:
+- Changed Files:
+- Verification:
+- Not Run:
+- Remaining Risks:
 ```
 
 ## Non-Negotiable Rules

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Instruction Authoring"
+  short_description: "Improve AGENTS, SKILL, and agent instruction effects."
+  default_prompt: "Use $df-agent-instruction-authoring to improve AGENTS.md, SKILL.md, or agent instructions."
