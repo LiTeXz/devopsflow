@@ -33,6 +33,22 @@ const legacyScriptNames = [
 	["run", "_protocol", "_examples", legacyExtension].join(""),
 ];
 
+it("permits cache ignore patterns only in .gitignore", () => {
+	expect(isAllowedLegacyTextReference(".gitignore", legacyCacheDirectory)).toBe(
+		true,
+	);
+	expect(
+		isAllowedLegacyTextReference("settings.json", legacyCacheDirectory),
+	).toBe(false);
+});
+
+function isAllowedLegacyTextReference(
+	projectPath: string,
+	reference: string,
+): boolean {
+	return projectPath === ".gitignore" && reference === legacyCacheDirectory;
+}
+
 function collectRepositoryFiles(directory: string): string[] {
 	const files: string[] = [];
 	for (const entry of readdirSync(directory)) {
@@ -70,7 +86,9 @@ describe("Bun and TypeScript runtime migration", () => {
 				expect(content, projectPath).not.toContain(legacyScriptName);
 			}
 			expect(content, projectPath).not.toContain(legacyEditorGlob);
-			expect(content, projectPath).not.toContain(legacyCacheDirectory);
+			if (!isAllowedLegacyTextReference(projectPath, legacyCacheDirectory)) {
+				expect(content, projectPath).not.toContain(legacyCacheDirectory);
+			}
 		}
 	});
 
