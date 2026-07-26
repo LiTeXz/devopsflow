@@ -30,12 +30,12 @@ Use this skill when preparing a branch for commit, push, PR, or handoff.
 Use the repository's stricter format when present. Otherwise use Chinese Conventional Commits:
 
 ```text
-feat: 新增订单提交领域切片
-fix: 修复库存不足时订单仍可提交的问题
-refactor: 重构订单读模型投影流程
-test: 补充订单提交聚合不变量测试
-docs: 更新工程工作流 skill 说明
-chore: 调整 skill 元数据
+feat: add order-submission domain slice
+fix: prevent order submission when stock is insufficient
+refactor: restructure order read-model projection
+test: add order-submission aggregate invariant coverage
+docs: update engineering workflow skill guidance
+chore: adjust skill metadata
 ```
 
 The type stays in English; the summary is Chinese.

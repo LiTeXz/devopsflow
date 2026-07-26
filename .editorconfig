@@ -11,8 +11,5 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-[*.py]
-max_line_length = 120
-
 [*.{json,yaml,yml,toml,kts}]
 indent_size = 2

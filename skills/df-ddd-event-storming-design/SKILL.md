@@ -1,6 +1,6 @@
 ---
 name: df-ddd-event-storming-design
-description: 使用事件风暴、CQRS 和需求追踪进行通用 DDD 领域建模。Use this skill when Codex needs to clarify raw business requirements, split stakeholder needs into requirement items, evolve a persistent domain model, identify actors and multi-role collaboration, domain events, commands, policies, aggregates, domain services, read models, produce structured Markdown or optional Mermaid/PlantUML diagrams, and review designs that may be CRUD, database, package-structure, or DDD-terminology driven instead of problem-domain driven. Especially use for CRUD-looking admin requirements such as company, department, position, employee, account, role, or permission management that need behavior-first modeling instead of flat noun aggregates.
+description: "Use event storming, CQRS, and requirement tracing for general DDD modeling. Use when Codex must clarify raw business requirements, identify actors, events, commands, policies, aggregates, services, and read models, or review CRUD-shaped designs that need behavior-first modeling."
 ---
 
 # DDD Event Storming Design
@@ -76,17 +76,17 @@ Use requirements intake when the input is broad, messy, implementation-shaped, o
 
 Output only requirement-level facts in this stage:
 
-- `干系人表`: role, goal/pain, authority or limitation, notes.
-- `需求条目表`: requirement ID, scenario, stakeholder/affected subject, business subject, operation type such as view/create/modify/close/async/timer, preconditions, constraints, input/output, gaps.
-- `业务主体视图`: business subject, covered requirement IDs, responsibilities/rules, key inputs/outputs.
-- `触发/后续动作表`: trigger condition, follow-up action or impact, related stakeholders, affected business subject, assumptions.
-- `业务规则与依赖`: rule/constraint, related subject, dependent external system or prior fact, notes.
-- `假设与待确认清单`: item, description, owner if known, priority if useful.
+- `Stakeholder Table`: role, goal/pain, authority or limitation, notes.
+- `Requirement Item Table`: requirement ID, scenario, stakeholder/affected subject, business subject, operation type such as view/create/modify/close/async/timer, preconditions, constraints, input/output, gaps.
+- `Business Subject View`: business subject, covered requirement IDs, responsibilities/rules, key inputs/outputs.
+- `Trigger And Follow-Up Table`: trigger condition, follow-up action or impact, related stakeholders, affected business subject, assumptions.
+- `Business Rules And Dependencies`: rule/constraint, related subject, dependent external system or prior fact, notes.
+- `Assumptions And Confirmation List`: item, description, owner if known, priority if useful.
 
 Rules:
 
 - Requirement IDs are traceability anchors, not architecture names.
-- `业务主体视图` can propose subjects for exploration, but it must not become aggregates without event-command-rule proof.
+- `Business Subject View` can propose subjects for exploration, but it must not become aggregates without event-command-rule proof.
 - Operation types such as create/update/delete are only intake labels. Translate them into business intent before commands.
 - Trigger/follow-up rows are candidate material for events, policies, processes, or read-model updates; do not accept them as domain events without screening.
 - If the user only needs requirements analysis, stop here and ask for confirmation before modeling.
@@ -114,7 +114,7 @@ For each candidate event, capture enough information to support convergence:
 - business reason to keep it
 - reason to reject, split, rename, downgrade to read-model data, or mark unresolved
 
-Only accepted events move into the formal `领域事件清单`. Rejected and unresolved candidates can appear in the draft as screening notes or confirmation items, but should not be persisted as final events unless confirmed.
+Only accepted events move into the formal `Domain Event Catalog`. Rejected and unresolved candidates can appear in the draft as screening notes or confirmation items, but should not be persisted as final events unless confirmed.
 
 ## Confirmation Protocol
 
@@ -151,7 +151,7 @@ When a request is CRUD-looking or contains contested boundaries, prefer a staged
 
 Avoid producing a full boundary + actors + events + commands + policies + aggregates + read models draft in one response when earlier gate decisions are still unconfirmed and likely to change the downstream model.
 
-Use the final `结论确认清单` as a delta list, not a duplicate approval form. It should include only:
+Use the final `Conclusion Confirmation List` as a delta list, not a duplicate approval form. It should include only:
 
 - conclusions that were not confirmed during the section-by-section conversation
 - conclusions changed after the last user confirmation
@@ -254,7 +254,7 @@ For every accepted domain event, prove:
 - non-query consumer: actor option, command-side rule, policy/process, aggregate relationship, lifecycle, or downstream business capability affected by the fact
 - read-model impact, if any: which projection changes and which fields change
 
-Keep brainstormed but rejected events only in `候选事件池与筛选`, not in the formal `领域事件清单` or aggregate event list. If an item only repairs a projection, display, report, cache, operation log, or troubleshooting view, reject it as a domain event and record the alternative source.
+Keep brainstormed but rejected events only in `Candidate Event Pool And Screening`, not in the formal `Domain Event Catalog` or aggregate event list. If an item only repairs a projection, display, report, cache, operation log, or troubleshooting view, reject it as a domain event and record the alternative source.
 
 ### Command Granularity Gate
 
@@ -320,7 +320,7 @@ When `requirements.md` or requirement IDs exist, maintain a lightweight trace fr
 - Each read model should list the query/view requirement ID(s) it serves.
 - Each accepted event should list the command, policy, process, external fact, or trigger row that produces it.
 - Each trigger/follow-up requirement should resolve to an accepted event + policy/process, a read-model projection, an external integration concern, or a rejected/downgraded candidate with a reason.
-- If a requirement has no command, event, read model, or explicit rejection, mark it as uncovered in `完备性检查`.
+- If a requirement has no command, event, read model, or explicit rejection, mark it as uncovered in `Completeness Check`.
 - Do not let traceability force fake events or fake aggregates. Traceability exposes gaps; it does not override domain modeling discipline.
 
 ## Learning And Review Adaptation
@@ -433,9 +433,9 @@ Keep only facts that the current problem domain needs for business rules, state 
 
 Rules:
 
-- Name events in completed business tense, such as `订单已提交`, `书已归还`, `月度考勤已结算`.
-- Prefer specific business facts over generic data-change facts. Avoid vague events such as `信息已变更`, `资料已更新`, `状态已修改`, or `记录已删除` unless the exact changed attribute has no business-specific meaning; when using a generic event, explain why it is acceptable.
-- Split combined facts such as `已停用或解散` into separate events when different policies, read models, or actor consequences may apply.
+- Name events in completed business tense, such as `Order Submitted`, `Book Returned`, or `Monthly Attendance Settled`.
+- Prefer specific business facts over generic data-change facts. Avoid vague events such as `Information Changed`, `Record Updated`, `Status Changed`, or `Record Deleted` unless the exact changed attribute has no business-specific meaning; when using a generic event, explain why it is acceptable.
+- Split combined facts such as `Deactivated Or Dissolved` into separate events when different policies, read models, or actor consequences may apply.
 - Exclude technical facts such as logs, messages, cache refreshes, interface calls, and notifications unless the business explicitly cares about them.
 - Exclude facts outside the current problem domain.
 - Model failure events only when the failure itself has business meaning.
@@ -449,9 +449,9 @@ A command is an instruction sent to the domain model to complete a valuable busi
 
 Rules:
 
-- Name commands as business actions, such as `提交订单`, `签到`, `结算月度考勤`, `归还图书`.
+- Name commands as business actions, such as `Submit Order`, `Check In`, `Settle Monthly Attendance`, or `Return Book`.
 - Include the initiating actor for each command. If the same business action can be initiated by different actors or systems, explain whether it is one command with actor-specific rules or separate commands.
-- Avoid CRUD-template names such as `新增`, `修改`, `删除`, `维护`, `管理`, `变更信息`, or `同步数据` when a more precise business intent exists. Use names that reveal why the change matters, such as `任命部门负责人`, `登记员工入职`, `确认OA员工同步结果`, or `撤销岗位任职`.
+- Avoid CRUD-template names such as `Create`, `Update`, `Delete`, `Maintain`, `Manage`, `Change Information`, or `Synchronize Data` when a more precise business intent exists. Use names that reveal why the change matters, such as `Appoint Department Head`, `Register Employee Onboarding`, `Confirm OA Employee Synchronization`, or `Revoke Position Assignment`.
 - Commands are not HTTP APIs, UI actions, controller methods, or use cases.
 - One command may produce multiple events.
 - Timer-triggered behavior still uses a command; the timer is an Actor.
@@ -527,40 +527,40 @@ Use text as the source of truth. Diagrams are auxiliary.
 Examples:
 
 ```text
-依赖：岗位已创建事件 -> 员工入职命令，用于校验岗位存在。
-订阅：测试工单已开始事件 -> 测试步骤创建策略 -> 创建测试步骤命令。
-影响：员工已离职事件 -> 部门负责人候选人读模型移除该员工，并触发负责人任命有效性复核。
+Dependency: Position Created event -> Register Employee Onboarding command, used to verify the position exists.
+Subscription: Test Work Order Started event -> Create Test Step policy -> Create Test Step command.
+Actor impact: Employee Departed event -> Department Head Candidate read model removes the employee and triggers appointment-validity review.
 ```
 
 ## Output Order
 
 When responding in chat or updating model files, use this order:
 
-1. `需求拆解` when requirements intake is needed
-2. `问题域边界`
-3. `主体与协作场景`
-4. `候选事件池与筛选`
-5. `建模方案对比`
-6. `领域事件清单`
-7. `命令清单`
-8. `Policy/流程规则`
-9. `聚合设计`
-10. `领域服务`
-11. `读模型设计`
-12. `需求追踪`
-13. `关系总览`
-14. `完备性检查`
-15. `结论确认清单`
+1. `Requirement Breakdown` when requirements intake is needed
+2. `Problem Domain Boundary`
+3. `Actors And Collaboration Scenarios`
+4. `Candidate Event Pool And Screening`
+5. `Modeling Alternatives`
+6. `Domain Event Catalog`
+7. `Command Catalog`
+8. `Policy And Process Rules`
+9. `Aggregate Design`
+10. `Domain Services`
+11. `Read Model Design`
+12. `Requirement Traceability`
+13. `Relationship Overview`
+14. `Completeness Check`
+15. `Conclusion Confirmation List`
 
 Only list domain services that are truly needed.
 
-Use `候选事件池与筛选` to show important brainstormed candidates, especially candidates that were rejected, split, renamed, downgraded, or left unresolved. Keep this compact; it is a reasoning aid, not a second event catalog.
+Use `Candidate Event Pool And Screening` to show important brainstormed candidates, especially candidates that were rejected, split, renamed, downgraded, or left unresolved. Keep this compact; it is a reasoning aid, not a second event catalog.
 
-Use `建模方案对比` only when there are meaningful alternatives. Include 2-3 options, trade-offs, and the recommended option.
+Use `Modeling Alternatives` only when there are meaningful alternatives. Include 2-3 options, trade-offs, and the recommended option.
 
-Use `需求追踪` only when requirement IDs or requirement tables exist. Keep it compact: requirement ID -> command/read model/event/policy or uncovered/rejected reason.
+Use `Requirement Traceability` only when requirement IDs or requirement tables exist. Keep it compact: requirement ID -> command/read model/event/policy or uncovered/rejected reason.
 
-Before persistence, `结论确认清单` must list only unconfirmed or newly changed design conclusions the user should confirm or correct. Include boundary choices, actors and affected subjects, event names and meanings, command responsibilities, policies, aggregate boundaries, invariants, read models, relationships, assumptions, ambiguous business terms, and alternative interpretations that could change the model when they were not already confirmed earlier.
+Before persistence, `Conclusion Confirmation List` must list only unconfirmed or newly changed design conclusions the user should confirm or correct. Include boundary choices, actors and affected subjects, event names and meanings, command responsibilities, policies, aggregate boundaries, invariants, read models, relationships, assumptions, ambiguous business terms, and alternative interpretations that could change the model when they were not already confirmed earlier.
 
 For each confirmation item, explain which event, command, aggregate, policy, read model, or relationship it affects. Do not repeat items already confirmed in earlier sections unless they changed after confirmation. After confirmation and persistence, include only remaining unresolved items in the final summary.
 
@@ -576,15 +576,15 @@ Use Mermaid or PlantUML only when:
 
 If using Mermaid, use these labels:
 
-- `[Actor: 用户]`
-- `[Timer: 月末定时器]`
-- `[System: 外部系统]`
-- `[Command: 签到]`
-- `[Event: 员工已签到]`
-- `[Policy: 满勤奖励策略]`
-- `[Aggregate: 月度考勤]`
-- `[Service: 借书服务]`
-- `[ReadModel: 考勤记录]`
+- `[Actor: User]`
+- `[Timer: End-Of-Month Timer]`
+- `[System: External System]`
+- `[Command: Check In]`
+- `[Event: Employee Checked In]`
+- `[Policy: Full Attendance Reward]`
+- `[Aggregate: Monthly Attendance]`
+- `[Service: Book Lending]`
+- `[ReadModel: Attendance Record]`
 
 If an existing PlantUML event-storming style exists, continue it. Prefer one local file per aggregate and a global file for cross-aggregate relationships.
 
@@ -609,7 +609,7 @@ Before finalizing, check:
 - Every command is justified by actor intent or an external fact input boundary, not by an arbitrary event-combination permutation.
 - If one command may publish multiple events, those events are explained as outcomes of one business decision inside one consistency boundary.
 - Meaningful command outcomes are represented as events.
-- Generic events such as `信息已变更` have been replaced by specific facts or explicitly justified.
+- Generic events such as `Information Changed` have been replaced by specific facts or explicitly justified.
 - Rejected candidate events are not retained in accepted event catalogs, aggregate event lists, or implementation-alignment lists.
 - Every read model records whether each field comes from accepted events, current-state lookup, query-side joins, technical projection inputs, enriched payloads, or external read sources.
 - Every read-model-only field is marked as query-side data, technical projection input, current-state lookup, audit/log material, or external-source data instead of being promoted to a domain event.
@@ -634,7 +634,7 @@ Refuse or correct these patterns:
 - Designing one aggregate per noun in a CRUD-looking prompt without proving lifecycle and consistency boundaries.
 - Filling every `event-storming/` file in one pass for a new ambiguous requirement before boundary, actor authority, key rules, and event screening are confirmed.
 - Flattening a multi-role workflow into a single administrator actor or a single "manage data" scenario.
-- Using vague data-change events such as `信息已变更` when a concrete business fact is available.
+- Using vague data-change events such as `Information Changed` when a concrete business fact is available.
 - Treating external master-data sync as a simple upsert when ordering, dependency, failure, or conflict resolution has business meaning.
 - Creating domain events for technical actions the business does not care about.
 - Creating domain events only because a read model, page, report, cache, or projection needs a field refreshed.
@@ -654,4 +654,4 @@ See `references/anti-patterns.md` for a compact anti-pattern library when review
 
 - `references/anti-patterns.md`: DDD modeling anti-patterns to reject or correct.
 - `references/eval-cases.md`: evaluation cases for checking whether the skill preserves event-storming discipline.
-- `scripts/validate_ddd_design.py`: lightweight heuristic checks for Markdown drafts or `event-storming/` repositories.
+- `scripts/validate-ddd-design.ts`: lightweight heuristic checks for Markdown drafts or `event-storming/` repositories. Run with `bun skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts <path> [--require-sections]`.

@@ -103,7 +103,7 @@ describe("MainAgentWriteGuard", () => {
 	});
 
 	describe("shell command blocking", () => {
-		it("blocks main agent shell redirection, rm, git add, and pnpm add", () => {
+		it("blocks main agent shell redirection, rm, git add, and package mutations", () => {
 			expect(
 				shouldBlockTool("Bash", { command: "printf hi > README.md" }),
 			).not.toBeNull();
@@ -117,13 +117,13 @@ describe("MainAgentWriteGuard", () => {
 				shouldBlockTool("Bash", { command: "git push origin feature/demo" }),
 			).not.toBeNull();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm add zod" }),
+				shouldBlockTool("Bash", { command: "bun add zod" }),
 			).not.toBeNull();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm run generate" }),
+				shouldBlockTool("Bash", { command: "bun run generate" }),
 			).not.toBeNull();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm run build" }),
+				shouldBlockTool("Bash", { command: "bun run build" }),
 			).not.toBeNull();
 		});
 	});
@@ -163,22 +163,6 @@ describe("MainAgentWriteGuard", () => {
 				}),
 			).toBeUndefined();
 			expect(
-				shouldBlockTool("Bash", {
-					command: "python3 -X utf8 scripts/test-prevent-main-agent-write.py",
-				}),
-			).toBeUndefined();
-			expect(
-				shouldBlockTool("Bash", {
-					command: "python3 -X utf8 scripts/run_design_examples.py",
-				}),
-			).toBeUndefined();
-			expect(
-				shouldBlockTool("Bash", {
-					command:
-						"python3 -X utf8 skills/df-tdd-skill/scripts/run_protocol_examples.py",
-				}),
-			).toBeUndefined();
-			expect(
 				shouldBlockTool("Bash", { command: "python3 -m unittest" }),
 			).toBeUndefined();
 			expect(
@@ -186,23 +170,24 @@ describe("MainAgentWriteGuard", () => {
 			).toBeUndefined();
 			expect(
 				shouldBlockTool("Bash", {
-					command: "python3 -m py_compile scripts/prevent-main-agent-write.py",
-				}),
-			).toBeUndefined();
-			expect(
-				shouldBlockTool("Bash", {
 					command: "python3 -m json.tool hooks/hooks.codex.json",
 				}),
 			).toBeUndefined();
-			expect(shouldBlockTool("Bash", { command: "pnpm test" })).toBeUndefined();
+			expect(shouldBlockTool("Bash", { command: "bun test" })).toBeUndefined();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm run test" }),
+				shouldBlockTool("Bash", { command: "bun run test" }),
 			).toBeUndefined();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm run typecheck" }),
+				shouldBlockTool("Bash", { command: "bun run typecheck" }),
 			).toBeUndefined();
 			expect(
-				shouldBlockTool("Bash", { command: "pnpm run lint" }),
+				shouldBlockTool("Bash", { command: "bun run lint" }),
+			).toBeUndefined();
+			expect(
+				shouldBlockTool("Bash", {
+					command:
+						"bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input tdd-protocol.md",
+				}),
 			).toBeUndefined();
 		});
 	});
@@ -224,7 +209,7 @@ describe("MainAgentWriteGuard", () => {
 			).not.toBeNull();
 			expect(
 				shouldBlockTool("Bash", {
-					command: "python3 scripts/update_readme.py",
+					command: "python3 tools/update-report",
 				}),
 			).not.toBeNull();
 		});

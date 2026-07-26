@@ -26,18 +26,18 @@ Use this skill after implementation and before asking someone else to trust the 
 ## Output Format
 
 ```markdown
-## 自查结果
+## Self-Review Results
 
-### 必须关注
+### Required Attention
 - <file:line> <risk>
 
-### 测试与验证
+### Tests And Verification
 - <command> -> <exit code/result>
 
-### 审查重点
+### Review Focus
 - <area reviewers should inspect>
 
-### 已知风险
+### Known Risks
 - <risk or none>
 ```
 

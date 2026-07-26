@@ -65,27 +65,27 @@ Do not introduce language, framework, package, HTTP, database, or UI structure u
 ```markdown
 # DDD to TDD Handoff
 
-## 使用的 DDD 结论
+## Confirmed DDD Conclusions
 
-## 需求追踪
+## Requirement Traceability
 
-## 实现边界
+## Implementation Boundaries
 
-## TDD 切片
+## TDD Slices
 
 ### Slice 1: <behavior>
-- 需求ID：
-- DDD 来源：
-- 测试层：
-- 预期 RED：
-- 最小 GREEN：
-- 保护的规则/读模型：
-- 不应改变：
-- 依赖/未决事实：
+- Requirement ID:
+- DDD Source:
+- Test Layer:
+- Expected RED:
+- Minimal GREEN:
+- Protected Rules And Read Models:
+- Must Not Change:
+- Dependencies And Open Facts:
 
-## 建议执行顺序
+## Recommended Execution Order
 
-## 需要额外 skill
+## Additional Required Skills
 ```
 
 ## Non-Negotiable Rules

@@ -26,4 +26,13 @@ describe("version-check workflow", () => {
 	it("uses the DevOpsFlow repository as the managed asset source", () => {
 		expect(WORKFLOW).toContain("LiTeXz/devopsflow");
 	});
+
+	it("copies the managed asset script with its local runtime dependencies", () => {
+		expect(WORKFLOW).toContain(
+			'cp skills/df-codex-assets/scripts/df-codex-assets.ts "$TMP_DIR/skills/df-codex-assets/scripts/df-codex-assets.ts"',
+		);
+		expect(WORKFLOW).toContain(
+			'cp skills/df-codex-assets/scripts/script-logger.ts "$TMP_DIR/skills/df-codex-assets/scripts/script-logger.ts"',
+		);
+	});
 });

@@ -2,14 +2,14 @@
 
 This protocol supports semi-automated guardrails for pure TDD. The script checks only process metadata and state order; it does not check project structure, directories, frameworks, type names, or architecture style.
 
-The executable validator is `scripts/validate_tdd_protocol.py`. It does not run automatically just because it is bundled in the skill. In the current environment, an agent using this skill must call it actively at fixed stages. If a future host supports platform-level hooks, the same script can be attached there.
+The executable validator is `scripts/validate-tdd-protocol.ts`. It does not run automatically just because it is bundled in the skill. In the current environment, an agent using this skill must call it actively at fixed stages. If a future host supports platform-level hooks, the same script can be attached there.
 
 Examples:
 
 ```bash
-python scripts/validate_tdd_protocol.py --stage before_edit --input tdd-protocol.md
-python scripts/validate_tdd_protocol.py --stage state --input tdd-protocol.md
-python scripts/validate_tdd_protocol.py --stage finish --input tdd-protocol.md
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage before_edit --input tdd-protocol.md
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input tdd-protocol.md
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input tdd-protocol.md
 ```
 
 Append the current task's `tdd_start`, every `tdd_state`, and `tdd_finish` block to a temporary protocol file, then run the script against that file. The file can be deleted after the task unless the user asks to keep an audit trail.

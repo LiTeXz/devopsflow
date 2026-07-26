@@ -377,9 +377,7 @@ export function isPythonSafeTestCommand(args: string[]): boolean {
 	const script = scriptPath.split("/").pop()?.toLowerCase() ?? "";
 
 	if (script.startsWith("test-") || script.startsWith("test_")) return true;
-	if (script.startsWith("run_") && script.endsWith("examples.py")) return true;
-
-	return scriptPath === "skills/df-tdd-skill/scripts/run_protocol_examples.py";
+	return false;
 }
 
 export function pythonWriteReason(args: string[]): string | undefined {

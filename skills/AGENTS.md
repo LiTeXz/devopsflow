@@ -1,11 +1,15 @@
-# skills/ 子树命名治理
+<!-- BEGIN skills/AGENTS.md -->
 
-本目录下新增或重命名的 skill 目录名必须以 `df-` 开头。
+# skills/AGENTS.md
 
-每个 skill 的 `SKILL.md` front matter 中的 `name` 字段也必须以 `df-` 开头。
+New or renamed skill directories in this subtree must start with `df-`.
 
-原因：DevOpsFlow skills 会作为插件或外部 skills 混入使用，统一 `df-` 前缀可以避免和其他来源的 skills 发生名称冲突。
+The `name` field in every skill `SKILL.md` front matter must also start with `df-`.
 
-迁移或新增 skill 时，目录名和 `name` 字段必须保持一致。同步更新所有引用、README、测试和脚本里的 skill 名称。
+DevOpsFlow skills can be mixed with plugin or external skills, so the shared `df-` prefix prevents name collisions.
 
-提交信息继续遵守根 `AGENTS.md` 中的中文 Conventional Commits 规范。
+When migrating or adding a skill, keep its directory and front-matter name identical. Update every related reference, README, test, and script.
+
+Commit messages continue to follow the Chinese Conventional Commit rule in the root `AGENTS.md`.
+
+<!-- END skills/AGENTS.md -->

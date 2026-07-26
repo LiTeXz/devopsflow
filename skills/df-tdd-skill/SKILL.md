@@ -18,7 +18,7 @@ Before finishing, emit a `tdd_finish` protocol block using `templates/tdd_finish
 These blocks are process metadata for semi-automated guardrails. Do not put project structure or technology-stack rules in them. See `references/hook-protocol.md` for the full protocol.
 Evidence fields must record concrete commands, exit codes, test names, and failure/pass summaries. Do not use vague evidence such as "the test failed" or "the test passed."
 
-This skill cannot register platform-level automatic hooks. When using it, actively run `scripts/validate_tdd_protocol.py` at fixed stages:
+This skill cannot register platform-level automatic hooks. When using it, actively run `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` at fixed stages:
 
 - Append the current task's protocol blocks to a temporary workspace file, such as `.codex/tdd-protocol.md`, or to `tdd-protocol.md` in the system temp directory.
 - Before production-code edits: emit `tdd_start`, then run `--stage before_edit`. If validation fails, complete the declaration before editing production code.
@@ -152,15 +152,15 @@ Treat difficult tests as design feedback before widening the implementation:
 - `references/eval-cases.md`: failure samples and expected guardrail behavior for iterating this skill.
 - `references/anti-patterns.md`: common TDD failure modes to reject or correct when iterating this skill.
 - `templates/tdd_start.yaml`, `templates/tdd_state.yaml`, `templates/tdd_finish.yaml`: protocol block templates to load as needed.
-- `scripts/validate_tdd_protocol.py`: protocol validation script to run at fixed stages.
-- `scripts/run_protocol_examples.py`: lightweight regression suite that checks valid examples pass and common violations fail.
+- `scripts/validate-tdd-protocol.ts`: protocol validation script to run at fixed stages with `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`.
+- `scripts/run-protocol-examples.test.ts`: lightweight regression suite to run with `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts`; it checks valid examples pass and common violations fail.
 
 ## Commit Message
 
 When committing, follow the repository's existing format. If there is no stricter rule, use Conventional Commits with a Chinese summary:
 
-- `feat: 新增工单创建服务`
-- `refactor: 重构测试执行记录查询逻辑`
-- `test: 补充工单创建服务单元测试`
-- `fix: 修复权限绑定空列表处理`
-- `chore: 调整测试数据构造方式`
+- `feat: add work-order creation service`
+- `refactor: restructure test-execution record query`
+- `test: add work-order creation service unit coverage`
+- `fix: handle empty permission-binding list`
+- `chore: adjust test-data construction`

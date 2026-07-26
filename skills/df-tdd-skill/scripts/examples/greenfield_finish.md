@@ -12,7 +12,7 @@ tdd_start:
 ```yaml
 tdd_state:
   phase: test_written
-  command: "pytest tests/test_price_calculator.py::test_calculate_subtotal_multiplies_quantity_by_unit_price"
+  command: "bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price"
   exit_code: null
   evidence: "Test written against the new core boundary before production implementation exists."
 ```
@@ -20,7 +20,7 @@ tdd_state:
 ```yaml
 tdd_state:
   phase: red_observed
-  command: "pytest tests/test_price_calculator.py::test_calculate_subtotal_multiplies_quantity_by_unit_price"
+  command: "bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price"
   exit_code: 1
   evidence: "RED: import failed because calculate_subtotal is missing, which is the expected failure for the new behavior boundary."
 ```
@@ -28,7 +28,7 @@ tdd_state:
 ```yaml
 tdd_state:
   phase: green_reached
-  command: "pytest tests/test_price_calculator.py::test_calculate_subtotal_multiplies_quantity_by_unit_price"
+  command: "bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price"
   exit_code: 0
   evidence: "GREEN: the new subtotal behavior passes after adding the smallest calculate_subtotal implementation."
 ```
@@ -41,11 +41,11 @@ tdd_finish:
   refactor_performed: false
   tests_run:
     - phase: red
-      command: "pytest tests/test_price_calculator.py::test_calculate_subtotal_multiplies_quantity_by_unit_price"
+      command: "bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price"
       exit_code: 1
       evidence: "RED import failure proved the new production boundary did not exist before implementation."
     - phase: green
-      command: "pytest tests/test_price_calculator.py::test_calculate_subtotal_multiplies_quantity_by_unit_price"
+      command: "bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price"
       exit_code: 0
       evidence: "GREEN passing test protects the new subtotal behavior."
   current_contract_wrong: false

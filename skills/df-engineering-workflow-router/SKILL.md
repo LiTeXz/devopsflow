@@ -56,15 +56,15 @@ Use this skill before doing engineering work. Its job is to choose the mandatory
 ## Output Format
 
 ```text
-当前任务类型：<classification>
-主要风险：<risk list>
-必须使用的 skill：
+Task Type: <classification>
+Main Risks: <risk list>
+Required Skills:
 1. <skill> - <reason>
 2. <skill> - <reason>
-执行顺序：
+Execution Order:
 1. <workflow step>
 2. <workflow step>
-暂不使用：
+Not Used Yet:
 - <skill> - <reason>
 ```
 

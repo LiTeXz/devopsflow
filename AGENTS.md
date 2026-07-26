@@ -1,15 +1,19 @@
-# AGENTS.md
+<!-- BEGIN /AGENTS.md -->
 
-Chinese must be used and the format of the Commit Message must be followed.
+# /AGENTS.md
+
+Write instruction files in English and preserve the required commit-message format.
 
 ## Commit Message
 
-Use Chinese Conventional Commits unless a stricter project rule is introduced:
+Use Chinese Conventional Commits unless a stricter project rule is introduced. Keep the Conventional Commit type and write the summary in Chinese.
 
 ```text
-feat: 新增工程工作流入口调度器
-fix: 修复 DDD 校验脚本编码问题
-docs: 更新技能组合说明
-test: 补充 TDD 协议回归用例
-chore: 调整 skill 元数据
+feat: add engineering workflow router
+fix: correct DDD validator encoding
+docs: update skill composition guidance
+test: add TDD protocol regression coverage
+chore: adjust skill metadata
 ```
+
+<!-- END /AGENTS.md -->

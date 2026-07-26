@@ -20,7 +20,7 @@ tdd_state:
 ```yaml
 tdd_state:
   phase: red_observed
-  command: "pytest tests/test_list.py::test_list_given_existing_items_should_keep_sort_order"
+  command: "bun test tests/list.test.ts -t keeps-existing-sort-order"
   exit_code: 1
   evidence: "test_list_given_existing_items_should_keep_sort_order failed because the sort-order path was removed"
 ```
@@ -28,7 +28,7 @@ tdd_state:
 ```yaml
 tdd_state:
   phase: green_reached
-  command: "pytest tests/test_list.py::test_list_given_existing_items_should_keep_sort_order"
+  command: "bun test tests/list.test.ts -t keeps-existing-sort-order"
   exit_code: 0
   evidence: "same targeted test passed after restoring the sort-order behavior"
 ```
@@ -41,11 +41,11 @@ tdd_finish:
   refactor_performed: true
   tests_run:
     - phase: red
-      command: "pytest tests/test_list.py::test_list_given_existing_items_should_keep_sort_order"
+      command: "bun test tests/list.test.ts -t keeps-existing-sort-order"
       exit_code: 1
       evidence: "failed for expected sort-order reason"
     - phase: green
-      command: "pytest tests/test_list.py::test_list_given_existing_items_should_keep_sort_order"
+      command: "bun test tests/list.test.ts -t keeps-existing-sort-order"
       exit_code: 0
       evidence: "passed after minimal production change"
   current_contract_wrong: false
