@@ -39,22 +39,22 @@ Use this skill when a failure or bug exists and the root cause is not proven.
 ## Debug Log
 
 ```text
-复现：
-- 命令：
-- 退出码：
-- 失败摘要：
+Reproduction:
+- Command:
+- Exit Code:
+- Failure Summary:
 
-期望行为：
+Expected Behavior:
 
-观察点：
+Observations:
 
-假设：
+Hypothesis:
 
-根因证据：
+Root-Cause Evidence:
 
-修复：
+Fix:
 
-回归验证：
+Regression Verification:
 ```
 
 ## When To Switch Workflows

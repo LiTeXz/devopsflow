@@ -1,0 +1,4 @@
+interface:
+  display_name: "Depend Man"
+  short_description: "Audit and safely clean JavaScript, Gradle, Maven, and GitHub dependencies; detect dead, transitive, duplicated, mis-scoped, drifting, or abused declarations and review Dependabot rules."
+  default_prompt: "Use $df-depend-man to audit repository dependencies, propose or safely apply cleanup, and verify dependency governance."

@@ -159,8 +159,8 @@ Treat difficult tests as design feedback before widening the implementation:
 
 When committing, follow the repository's existing format. If there is no stricter rule, use Conventional Commits with a Chinese summary:
 
-- `feat: 新增工单创建服务`
-- `refactor: 重构测试执行记录查询逻辑`
-- `test: 补充工单创建服务单元测试`
-- `fix: 修复权限绑定空列表处理`
-- `chore: 调整测试数据构造方式`
+- `feat: add work-order creation service`
+- `refactor: restructure test-execution record query`
+- `test: add work-order creation service unit coverage`
+- `fix: handle empty permission-binding list`
+- `chore: adjust test-data construction`

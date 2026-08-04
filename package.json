@@ -1,13 +1,14 @@
 {
 	"name": "devopsflow",
-	"version": "0.2.17",
+	"version": "0.2.21",
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"check:agent-instructions": "bun skills/df-agent-instruction-authoring/scripts/validate-agent-instructions.ts",
 		"check:skill-metadata": "bun scripts/check-skill-metadata.ts",
 		"test": "bun test",
 		"test:hooks": "bun test scripts/",
-		"test:validators": "bun test skills/df-tdd-skill/scripts/ skills/df-ddd-event-storming-design/scripts/ skills/df-iam-access-control-design/scripts/",
+		"test:validators": "bun test skills/df-agent-instruction-authoring/scripts/ skills/df-tdd-skill/scripts/ skills/df-ddd-event-storming-design/scripts/ skills/df-iam-access-control-design/scripts/",
 		"typecheck": "bunx tsc --noEmit",
 		"lint": "bunx biome check ."
 	},

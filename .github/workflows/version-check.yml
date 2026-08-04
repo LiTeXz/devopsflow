@@ -98,6 +98,7 @@ jobs:
 
           mkdir -p "$TMP_DIR/skills/df-codex-assets/scripts" "$TMP_DIR/skills/df-codex-assets/assets"
           cp skills/df-codex-assets/scripts/df-codex-assets.ts "$TMP_DIR/skills/df-codex-assets/scripts/df-codex-assets.ts"
+          cp skills/df-codex-assets/scripts/script-logger.ts "$TMP_DIR/skills/df-codex-assets/scripts/script-logger.ts"
           cp "$HASH_FILE" "$TMP_DIR/$HASH_FILE"
 
           TAG_HASH=$(PLUGIN_ROOT="$TMP_DIR" bun "$TMP_DIR/skills/df-codex-assets/scripts/df-codex-assets.ts" compute)

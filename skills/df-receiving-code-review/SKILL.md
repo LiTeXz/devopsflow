@@ -35,11 +35,11 @@ For each comment:
 ## Review Resolution
 
 ### Comment: <short title>
-- 分类：
-- 处理：
-- 文件：
-- 验证：
-- 回复建议：
+- Classification:
+- Resolution:
+- Files:
+- Verification:
+- Suggested Reply:
 ```
 
 ## Non-Negotiable Rules

@@ -44,11 +44,11 @@ For each task:
 Keep a concise progress log:
 
 ```text
-任务：<plan item>
-变更：<files/modules>
-验证：<command> -> <exit code>, <result>
-状态：done / blocked / plan-updated
-证据：<short concrete detail>
+Task: <plan item>
+Changes: <files/modules>
+Verification: <command> -> <exit code>, <result>
+Status: done / blocked / plan-updated
+Evidence: <short concrete detail>
 ```
 
 ## Non-Negotiable Rules
