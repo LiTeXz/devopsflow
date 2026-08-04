@@ -1,4 +1,4 @@
-<!-- BEGINE /AGENTS.md -->
+<!-- BEGIN /AGENTS.md -->
 # /AGENTS.md
 
 本文件适用于整个 DevopsFlow 仓库。更深层的 `AGENTS.md` 只补充所在子树的规则；发生冲突时，以距离目标文件最近的规则为准。
