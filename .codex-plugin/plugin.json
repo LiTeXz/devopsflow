@@ -1,42 +1,42 @@
 {
-	"name": "devopsflow",
-	"version": "0.2.21",
-	"description": "DevOpsFlow engineering workflow and agent harness for Codex, combining skills, hooks, MCP integration, specialized agents, execution constraints, and feedback loops.",
-	"composerIcon": "./assets/app-icon-small.svg",
-	"logo": "./assets/app-icon.png",
-	"author": {
-		"name": "LiTeXz",
-		"url": "https://github.com/LiTeXz"
-	},
-	"homepage": "https://github.com/LiTeXz/devopsflow",
-	"repository": "https://github.com/LiTeXz/devopsflow",
-	"license": "GPL-3.0-only",
-	"keywords": [
-		"codex",
-		"skills",
-		"hooks",
-		"mcp",
-		"agents",
-		"workflow",
-		"ddd",
-		"tdd"
-	],
-	"skills": "./skills/",
-	"hooks": "./hooks/hooks.codex.json",
-	"interface": {
-		"displayName": "DevOpsFlow",
-		"shortDescription": "Engineering workflow and agent harness for Codex",
-		"longDescription": "DevOpsFlow combines composable skills, hooks, MCP integration, specialized agents, and an agent harness for engineering request routing, DDD modeling, TDD handoff, planning, execution, debugging, review, verification, and branch finishing.",
-		"developerName": "LiTeXz",
-		"category": "Developer Tools",
-		"capabilities": ["Interactive", "Read", "Write"],
-		"websiteURL": "https://github.com/LiTeXz/devopsflow",
-		"defaultPrompt": [
-			"Use df-engineering-workflow-router to classify this task",
-			"Use the df-publisher Codex worker session for git and GitHub publishing tasks.",
-			"Create a DDD to TDD implementation plan",
-			"Verify this branch before completion"
-		],
-		"brandColor": "#2563EB"
-	}
+  "name": "devopsflow",
+  "version": "0.2.22",
+  "description": "DevopsFlow engineering workflow and agent harness for Codex, combining skills, hooks, MCP integration, specialized agents, execution constraints, and feedback loops.",
+  "composerIcon": "./assets/app-icon-small.svg",
+  "logo": "./assets/app-icon.png",
+  "author": {
+    "name": "LiTeXz",
+    "url": "https://github.com/LiTeXz"
+  },
+  "homepage": "https://github.com/LiTeXz/devopsflow",
+  "repository": "https://github.com/LiTeXz/devopsflow",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "codex",
+    "skills",
+    "hooks",
+    "mcp",
+    "agents",
+    "workflow",
+    "ddd",
+    "tdd"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.codex.json",
+  "interface": {
+    "displayName": "DevopsFlow",
+    "shortDescription": "Engineering workflow and agent harness for Codex",
+    "longDescription": "DevopsFlow combines composable skills, hooks, MCP integration, specialized agents, and an agent harness for engineering request routing, DDD modeling, TDD handoff, planning, execution, debugging, review, verification, and branch finishing.",
+    "developerName": "LiTeXz",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://github.com/LiTeXz/devopsflow",
+    "defaultPrompt": [
+      "使用 df-engineering-workflow-router 对此任务分类",
+      "git 和 GitHub 发布任务使用 df-publisher Codex worker session。",
+      "创建 DDD 到 TDD 的实施计划",
+      "完成前验证此分支"
+    ],
+    "brandColor": "#2563EB"
+  }
 }

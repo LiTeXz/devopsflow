@@ -1,52 +1,52 @@
 # Test Slices
 
-Choose the narrowest test layer that truly protects the risk. If a narrow test cannot cover the real risk, widen immediately.
+选择真正保护风险的最窄测试层。如果窄层测试无法覆盖真实风险，立即扩大范围。
 
 ## Unit Tests
 
-Use for local behavior:
+用于局部行为：
 
-- Pure functions, calculations, and state transitions.
-- Core rules, value objects, mappers, parsers, and formatters.
-- Branches and error handling inside a single module.
+- 纯函数、计算和状态转换。
+- 核心规则、值对象、mapper、parser 和 formatter。
+- 单个模块内的分支和错误处理。
 
-Assert observable results. Use mocks only for collaborators that this slice does not validate. Assert important parameters exactly or capture them with a captor; do not hide them behind broad matchers.
+断言可观察结果。仅对本切片不验证的协作者使用 mock。精确断言重要参数或使用 captor 捕获它们；不要用宽泛 matcher 隐藏参数。
 
 ## Component Or Orchestration Tests
 
-Use for collaboration behavior:
+用于协作行为：
 
-- Call order and parameters across multiple collaborators.
-- Batching, retries, and continue/stop-on-failure policy.
-- Application flows near transaction or consistency boundaries.
-- Flow policies for imports, exports, synchronization, scheduled jobs, and similar processes.
+- 多个协作者之间的调用顺序和参数。
+- 批处理、重试以及失败后继续或停止策略。
+- 事务或一致性边界附近的应用流程。
+- 导入、导出、同步、定时任务和类似流程的流转策略。
 
-Tests should prove orchestration rules, not restate implementation steps.
+测试应证明编排规则，而不是复述实现步骤。
 
 ## Boundary Or Contract Tests
 
-Use for public boundary risks:
+用于公共边界风险：
 
-- Public APIs, CLIs, messages, file formats, RPC, HTTP, UI events, or other transport boundaries.
-- Parameter binding, defaults, validation, serialization, error responses, authentication, and authorization.
-- Compatibility requirements and response shapes callers depend on.
+- 公共 API、CLI、消息、文件格式、RPC、HTTP、UI 事件或其他传输边界。
+- 参数绑定、默认值、验证、序列化、错误响应、认证和授权。
+- 兼容性要求以及调用方依赖的响应结构。
 
-Directly calling internal methods usually cannot replace public boundary tests unless the risk is truly only internal delegation.
+除非风险确实仅是内部委托，否则直接调用内部方法通常不能替代公共边界测试。
 
 ## Persistence Or Integration Tests
 
-Use for real external-system behavior:
+用于真实外部系统行为：
 
-- Query filters, joins, projections, and aggregate shape.
-- Ordering, pagination, unique constraints, and migration impact.
-- Transaction commit/rollback, consistency, concurrency, or external-resource interactions.
+- 查询过滤、join、projection 和聚合结构。
+- 排序、分页、唯一约束和 migration 影响。
+- 事务提交或回滚、一致性、并发或外部资源交互。
 
-When a database, queue, filesystem, or third-party system is part of the behavior, do not mock away its core value.
+当数据库、队列、文件系统或第三方系统属于行为的一部分时，不要通过 mock 消除其核心价值。
 
 ## End-To-End Or System Tests
 
-Use only when cross-layer collaboration itself is the risk. These tests add confidence and should not replace narrower behavior tests.
+仅当跨层协作本身就是风险时使用。这些测试增加信心，但不应替代更窄的行为测试。
 
 ## Architecture Or Static Checks
 
-Use when dependency direction, layering rules, package boundaries, forbidden dependencies, or module contracts are the risk. These checks are architecture constraints, not core TDD, but they can work with the TDD flow.
+当风险是依赖方向、分层规则、包边界、禁止依赖或模块契约时使用。这些检查属于架构约束而非核心 TDD，但可以配合 TDD 流程。

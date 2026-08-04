@@ -1,4 +1,4 @@
 interface:
   display_name: "Repository Tooling Hygiene"
-  short_description: "Move human-only scripts, one-off maintenance helpers, local environment launchers, and Gradle init scripts out of high-salience repository roots. Use when cleaning agent context noise, relocating reset or run scripts into docs/skills, or converting Groovy init.gradle snippets to Kotlin DSL init.gradle.kts templates."
-  default_prompt: "Use $df-repository-tooling-hygiene to clean human-only scripts and Gradle init files out of a repository root."
+  short_description: "将仅供人工使用的脚本、一次性维护 helper、本地环境 launcher 和 Gradle init script 移出高显著性的仓库根目录。清理 agent 上下文噪声、将 reset 或 run script 迁移到文档/skills，或把 Groovy init.gradle 片段转换为 Kotlin DSL init.gradle.kts 模板时使用。"
+  default_prompt: "使用 $df-repository-tooling-hygiene 清理仓库根目录中仅供人工使用的脚本和 Gradle init 文件。"

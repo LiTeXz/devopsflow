@@ -1,78 +1,78 @@
 ---
 name: df-resumable-workflow-guard
-description: "Protect long-running or interruption-prone engineering work with explicit checkpoints, resume files, and handoff notes. Use when a task may span multiple turns or sessions, exceed about 30 minutes, touch multiple workflow stages, require repeated verification, approach context limits, resume after interruption or compaction, or when the user asks to continue, resume, checkpoint, monitor a long task, or hand off work."
+description: "通过明确的 checkpoint、resume file 和交接说明保护长时间或易中断的工程工作。任务可能跨多轮或多个会话、耗时超过约 30 分钟、涉及多个工作流阶段、需要重复验证、接近上下文限制、在中断或压缩后续跑，或用户提到 continue、resume、checkpoint、long task、handoff、中断、继续、续跑、检查点、长任务或交接时使用。"
 ---
 
 # Resumable Workflow Guard
 
-Use this skill as an outer guard around existing DevOpsFlow workflows. Its job is to keep long work resumable; it does not replace planning, TDD, debugging, review, or verification skills.
+将此 skill 作为现有 DevopsFlow 工作流的外层保护。它负责使长任务可续跑，不替代规划、TDD、调试、审查或验证 skills。
 
 ## Core Rule
 
-At the start of a guarded task, look for an active checkpoint before doing new exploration or edits. If a checkpoint exists, validate it against the current repository state and continue from the next incomplete step instead of restarting.
+开始受保护的任务时，在进行新的探索或编辑前查找 active checkpoint。如果 checkpoint 存在，依据仓库当前状态验证它，并从下一个未完成步骤继续，而不是重新开始。
 
-Default checkpoint path:
+默认 checkpoint 路径：
 
 ```text
 .devopsflow/checkpoints/<task-slug>.md
 ```
 
-Use one checkpoint per active task. If the user gives a path or an existing plan/spec file, store the checkpoint beside that artifact or link to it clearly.
+每个 active task 使用一个 checkpoint。如果用户给出路径或现有 plan/spec file，将 checkpoint 存放在该产物旁边，或清晰链接到它。
 
 ## Trigger Decision
 
-Use checkpointed execution when any condition is true:
+满足以下任一条件时，使用 checkpointed execution：
 
-- The work is expected to take more than about 30 minutes or more than one assistant turn.
-- The workflow crosses three or more stages, such as research -> plan -> execute -> review.
-- The work touches multiple modules, repos, services, or parallel agents.
-- Verification requires multiple commands, manual checks, or staged evidence.
-- The conversation is long enough that context compaction or loss is plausible.
-- The task is being resumed after an interruption, tool failure, app restart, or user says to continue.
+- 预计工作耗时超过约 30 分钟或超过一个 assistant turn。
+- 工作流跨越三个或更多阶段，例如 research -> plan -> execute -> review。
+- 工作涉及多个 module、repo、service 或 parallel agent。
+- 验证需要多条命令、手动检查或分阶段证据。
+- 对话足够长，可能发生上下文压缩或丢失。
+- 任务在中断、工具失败、应用重启后续跑，或用户要求继续。
 
-For tiny one-shot tasks, do not create a checkpoint unless the user asks.
+对于很小的一次性任务，除非用户要求，否则不要创建 checkpoint。
 
 ## Start Or Resume
 
-1. Check for `.devopsflow/checkpoints/` and any user-provided plan/spec/handoff file.
-2. If no checkpoint exists and the task needs one, create it before implementation work.
-3. If a checkpoint exists, read only the active summary, checklist, latest log entries, and resume cursor first.
-4. Compare the checkpoint with `git status`, changed files, and any named plan/spec. If they conflict, record the conflict and resolve it before editing.
-5. State the resumed phase and the next action briefly, then invoke the normal DevOpsFlow skills for the actual work.
+1. 检查 `.devopsflow/checkpoints/` 以及用户提供的任何 plan/spec/handoff file。
+2. 如果 checkpoint 不存在且任务需要它，在实现工作前创建。
+3. 如果 checkpoint 存在，先只读取 active summary、checklist、最新日志条目和 resume cursor。
+4. 将 checkpoint 与 `git status`、已变更文件和任何指定 plan/spec 对比。如果存在冲突，先记录并解决冲突，再编辑。
+5. 简要说明续跑阶段和下一步操作，再调用常规 DevopsFlow skills 执行实际工作。
 
 ## Checkpoint Contents
 
-Use `references/checkpoint-template.md` as the canonical shape. Keep the active summary short and move noisy history into the progress log.
+以 [checkpoint-template.md](references/checkpoint-template.md) 作为规范结构。保持 active summary 简短，将冗长历史移入 progress log。
 
-Required fields:
+必填字段：
 
-- task name and goal
-- checkpoint status: `active`, `blocked`, `completed`, or `abandoned`
-- current phase and next action
+- 任务名称和目标
+- checkpoint 状态：`active`、`blocked`、`completed` 或 `abandoned`
+- 当前阶段和下一步操作
 - active workflow chain
-- in scope and out of scope
-- current checklist with stable item IDs
-- touched files and ownership notes
-- verification evidence with commands, exit codes, and result summaries
-- decisions, assumptions, blockers, and risks
-- resume cursor: exactly where the next agent should continue
+- in scope 和 out of scope
+- 带稳定 item ID 的当前 checklist
+- 已触及文件和所有权说明
+- 包含命令、退出码和结果摘要的验证证据
+- 决策、假设、blocker 和风险
+- resume cursor：下一位 agent 应从何处准确继续
 
 ## Update Rhythm
 
-Update the checkpoint:
+在以下时机更新 checkpoint：
 
-- after creating or changing a plan
-- before and after any high-risk edit batch
-- after each completed checklist item
-- after each verification command
-- when tests fail unexpectedly or the plan changes
-- before pausing, handing off, asking the user for a decision, or ending the turn with unfinished work
+- 创建或变更计划后
+- 任何高风险编辑批次前后
+- 每个 checklist item 完成后
+- 每条验证命令执行后
+- 测试意外失败或计划变化时
+- 暂停、交接、请求用户决策或以未完成工作结束当前 turn 前
 
-Do not write vague progress such as "tests pass" or "continued implementation." Record command, exit code, scope, changed files, and the concrete next step.
+不要记录“测试通过”或“继续实现”等模糊进度。应记录命令、退出码、范围、已变更文件和具体下一步。
 
 ## Integration
 
-Use this skill before selecting the inner workflow, then keep it active as a checkpointing layer:
+选择内部工作流前使用此 skill，之后让它作为 checkpointing layer 保持 active：
 
 ```text
 df-engineering-workflow-router
@@ -84,7 +84,7 @@ df-engineering-workflow-router
   -> df-verification-before-completion
 ```
 
-For DDD work:
+对于 DDD 工作：
 
 ```text
 df-resumable-workflow-guard
@@ -93,31 +93,31 @@ df-resumable-workflow-guard
   -> df-implementation-planning
 ```
 
-For parallel work, each subtask may have its own checkpoint, but the parent checkpoint must track owners, file boundaries, and merge/review status.
+对于并行工作，每个子任务可以拥有自己的 checkpoint，但父 checkpoint 必须跟踪 owner、文件边界和 merge/review 状态。
 
 ## Recovery Rules
 
-- Never assume the checkpoint is true if the repository disagrees. Reconcile with the current files and git status.
-- If the checkpoint is stale but usable, append a correction log entry and continue.
-- If the checkpoint is contradictory, mark it `blocked`, explain the conflict, and ask only for the decision that cannot be inferred safely.
-- If work was completed outside the checkpoint, update evidence first, then continue from the new state.
-- If the task becomes small enough to finish immediately, finish it and mark the checkpoint `completed`.
+- 如果仓库状态与 checkpoint 不一致，绝不要假定 checkpoint 正确。应与当前文件及 git status 对账。
+- 如果 checkpoint 已过时但仍可用，追加一条修正日志并继续。
+- 如果 checkpoint 自相矛盾，将其标记为 `blocked`，解释冲突，并且只请求无法安全推断的决策。
+- 如果工作在 checkpoint 之外完成，先更新证据，再从新状态继续。
+- 如果任务变得足够小，可以立即完成，则完成任务并将 checkpoint 标记为 `completed`。
 
 ## Handoff
 
-Before any intentional pause or final response with unfinished work, leave a handoff section containing:
+在任何主动暂停或以未完成工作给出最终回复前，留下包含以下内容的 handoff section：
 
 ```text
-Resume from: <checkpoint path>
-Current phase: <phase>
-Next action: <single concrete action>
-Do not redo: <completed work that should not be repeated>
-Verify next with: <command or check>
-Open risks: <short list or none>
+从此处继续：<checkpoint path>
+当前阶段：<phase>
+下一步操作：<single concrete action>
+不要重做：<completed work that should not be repeated>
+下次验证：<command or check>
+未决风险：<short list or none>
 ```
 
-When the task is fully done, mark the checkpoint `completed` and keep the final verification evidence in the checkpoint.
+任务完全结束后，将 checkpoint 标记为 `completed`，并在其中保留最终验证证据。
 
 ## References
 
-- `references/checkpoint-template.md`: copy this structure when creating a new checkpoint.
+- [checkpoint-template.md](references/checkpoint-template.md)：创建新 checkpoint 时复制此结构。

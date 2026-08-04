@@ -1,86 +1,86 @@
 ---
 name: df-glue-coding
-description: "Glue Coding workflow for AI implementation that should reuse local project material without blindly copying old structure. Use after domain ambiguity has been resolved or declared thin, and before implementation planning or coding, when a task resembles existing CRUD pages, list/form/detail screens, imports/exports, endpoints, adapters, command handlers, projections, tests, configuration, refactors, migrations, modernization, or other repeatable project patterns. The skill discovers local style packs, reference code, examples, docs, AGENTS.md rules, and nearby production implementations, classifies them as target patterns, legacy patterns, anti-patterns, or behavior evidence, preserves the right conventions, and limits new code to the intended delta."
+description: "面向 AI 实现的 Glue Coding 工作流，应复用本地项目材料，同时避免盲目复制旧结构。在领域歧义已解决或被声明为很薄后、实施规划或编码前使用，适用于与现有 CRUD 页面、列表/表单/详情界面、导入/导出、端点、adapter、command handler、projection、测试、配置、重构、迁移、现代化或其他可重复项目 pattern 相似的任务。此 skill 会发现本地 style pack、参考代码、示例、文档、AGENTS.md 规则和附近的生产实现，将其归类为 target pattern、legacy pattern、anti-pattern 或 behavior evidence，保留正确约定，并将新代码限制在预期差异内。"
 ---
 
 # Glue Coding
 
-Use this skill when the implementation should be assembled from existing project material.
+当实现应由现有项目材料组装时，使用此 skill。
 
-The goal is not to make Codex more creative. The goal is to make Codex preserve the right local conventions by copying the right target pattern and changing only the required delta.
+目标不是让 Codex 更具创造性，而是通过复制正确的 target pattern 并只修改必要差异，使 Codex 保留正确的本地约定。
 
 ## Core Boundary
 
-DDD owns business truth. Glue Coding owns engineering reuse.
+DDD 负责业务事实，Glue Coding 负责工程复用。
 
-If the request has unclear domain language, hidden business rules, state transitions, multi-role collaboration, authority questions, policies, aggregates, or read-model ambiguity, use `df-ddd-event-storming-design` first. Code patterns may be read early as discovery input, but they must not become the final design before the DDD gate is confirmed.
+如果请求包含不清晰的领域语言、隐藏业务规则、状态转换、多角色协作、权威性问题、policy、aggregate 或 read model 歧义，先使用 `df-ddd-event-storming-design`。可以提前读取代码 pattern 作为发现输入，但在 DDD gate 确认前，它们不得成为最终设计。
 
-Use Glue Coding after:
+在以下条件满足后使用 Glue Coding：
 
-- the domain is already clear or intentionally thin
-- the request is mostly an extension of an existing feature shape
-- confirmed DDD conclusions are ready to be mapped into implementation
+- 领域已经清晰或被有意视为很薄
+- 请求主要是对现有功能形态的扩展
+- 已确认的 DDD 结论已准备映射到实现
 
 ## Material Types
 
-Look for project-owned material in this order:
+按以下顺序查找项目所有的材料：
 
-1. Rules: `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, local docs, package scripts, framework config.
-2. Style packs and reference patterns: explicit user-provided style pack paths, `.devopsflow/style-pack/`, `reference/`, `references/`, `examples/`, `docs/patterns/`, `.ai/patterns/`, templates, scaffolds.
-3. Nearby production code: similar pages, endpoints, handlers, adapters, projections, tests, fixtures, migrations, exports, imports, jobs, or config. For refactors, classify whether each candidate is a target pattern, legacy pattern, anti-pattern, or behavior evidence.
-4. Historical context: `.ai/tracks/`, prior specs, plans, ADRs, issue notes, PR descriptions, or implementation notes.
+1. 规则：`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md`、本地文档、package script、framework config。
+2. Style pack 和 reference pattern：用户明确提供的 style pack 路径、`.devopsflow/style-pack/`、`reference/`、`references/`、`examples/`、`docs/patterns/`、`.ai/patterns/`、template、scaffold。
+3. 附近的生产代码：相似页面、endpoint、handler、adapter、projection、测试、fixture、migration、export、import、job 或 config。对于重构，判断每个候选是 target pattern、legacy pattern、anti-pattern 还是 behavior evidence。
+4. 历史上下文：`.ai/tracks/`、之前的 spec、计划、ADR、issue note、PR 描述或实现说明。
 
-Do not store project-specific sample code in this skill. Concrete samples belong in the project repository. This skill only defines how to find and use them.
+不要在此 skill 中存放项目特定示例代码。具体示例属于项目仓库；此 skill 只定义如何查找和使用它们。
 
 ## Workflow
 
-1. Classify the task as:
-   - `glue_fit`: existing local pattern likely covers most structure
-   - `glue_partial`: a pattern exists but important deltas need design or tests
-   - `not_glue`: no trustworthy local pattern, or the work is novel
-   - `domain_blocked`: the task looks glue-like but business meaning is unclear
-   - `refactor_glue`: current code is being migrated away from an old pattern toward a target pattern
-2. If `domain_blocked`, return to `df-ddd-event-storming-design`. Use discovered code only as evidence for questions and candidate language.
-3. Search local material before planning implementation. Prefer `rg --files` and targeted `rg` searches.
-4. If a style pack is available and applicable, select it before choosing source examples. Use `references/style-packs.md` for discovery locations, recommended structure, and usage rules.
-5. Select the closest pattern and record why it fits:
-   - same user workflow or business capability
-   - same framework or layer
-   - same file organization
-   - same dependency, request, validation, error, transaction, auth, or test style
-   - same lifecycle, command, event, projection, or read-model shape
-6. Identify what must be preserved:
-   - file and module structure
-   - naming and imports
-   - component or API composition
+1. 对任务分类：
+   - `glue_fit`：现有本地 pattern 可能覆盖大部分结构
+   - `glue_partial`：pattern 已存在，但重要差异需要设计或测试
+   - `not_glue`：没有可信的本地 pattern，或工作具有新颖性
+   - `domain_blocked`：任务看似适合 Glue，但业务含义不清
+   - `refactor_glue`：当前代码正从旧 pattern 迁移到 target pattern
+2. 如果是 `domain_blocked`，返回 `df-ddd-event-storming-design`。发现的代码只能作为提问和候选语言的证据。
+3. 规划实现前搜索本地材料。优先使用 `rg --files` 和定向 `rg` 搜索。
+4. 如果 style pack 可用且适用，在选择源示例前先选定它。发现位置、推荐结构和使用规则见 [style-packs.md](references/style-packs.md)。
+5. 选择最接近的 pattern，并记录其适用原因：
+   - 相同的用户工作流或业务能力
+   - 相同的 framework 或 layer
+   - 相同的文件组织
+   - 相同的 dependency、request、validation、error、transaction、auth 或 test style
+   - 相同的 lifecycle、command、event、projection 或 read model 形态
+6. 识别必须保留的内容：
+   - 文件和 module 结构
+   - naming 和 import
+   - component 或 API composition
    - request/response mapping
-   - validation and error semantics
-   - persistence, ordering, pagination, transaction, concurrency, or side-effect behavior
-   - test style and fixture shape
-7. Identify the delta:
-   - fields, labels, columns, filters, routes, endpoints, DTOs, events, commands, policies, invariants, read-model fields, adapter mappings, or business rules that differ from the pattern
-8. Pass the selected style pack, selected pattern, preserved conventions, and delta to `df-implementation-planning` or `df-ddd-to-tdd-handoff`.
+   - validation 和 error semantic
+   - persistence、ordering、pagination、transaction、concurrency 或 side effect 行为
+   - test style 和 fixture 形态
+7. 识别差异：
+   - 与 pattern 不同的 field、label、column、filter、route、endpoint、DTO、event、command、policy、invariant、read model field、adapter mapping 或业务规则
+8. 将选定的 style pack、pattern、需保留约定和差异传递给 `df-implementation-planning` 或 `df-ddd-to-tdd-handoff`。
 
 ## Refactor Mode
 
-When the user asks for refactoring, migration, cleanup, modernization, standardization, or replacing an old pattern, do not assume nearby similar code is the target pattern.
+当用户要求重构、迁移、清理、现代化、标准化或替换旧 pattern 时，不要假定附近的相似代码就是 target pattern。
 
-Classify discovered code as:
+将发现的代码分类为：
 
-- `target_pattern`: a convention to preserve, copy, or migrate toward
-- `legacy_pattern`: current implementation style that explains behavior but should not be copied as structure
-- `anti_pattern`: code shape, dependency, or convention the task is explicitly trying to remove
-- `behavior_evidence`: source for characterization tests, compatibility constraints, inputs, outputs, errors, ordering, persistence, transactions, and side effects
-- `unknown`: candidate needs more evidence before being used
+- `target_pattern`：应保留、复制或作为迁移目标的约定
+- `legacy_pattern`：可解释行为但不应复制其结构的当前实现风格
+- `anti_pattern`：任务明确要移除的代码形态、dependency 或约定
+- `behavior_evidence`：characterization test、兼容性约束、输入、输出、错误、顺序、持久化、事务和副作用的证据来源
+- `unknown`：使用前需要更多证据的候选
 
-For refactor work:
+对于重构工作：
 
-1. Read legacy code to understand behavior, public contracts, side effects, and compatibility risks.
-2. Use `df-tdd-skill` characterization tests before changing behavior-preserving code.
-3. Search for target patterns elsewhere in the repository or in explicit reference material.
-4. If no target pattern exists, pass a target-design task to `df-implementation-planning` instead of copying the legacy shape.
-5. Preserve behavior evidence, not accidental structure.
-6. Keep refactor steps separate from behavior changes.
+1. 阅读 legacy code，理解行为、公共契约、副作用和兼容性风险。
+2. 变更行为保持型代码前，使用 `df-tdd-skill` characterization test。
+3. 在仓库其他位置或明确的参考材料中搜索 target pattern。
+4. 如果 target pattern 不存在，将目标设计任务传给 `df-implementation-planning`，而不是复制 legacy 形态。
+5. 保留 behavior evidence，而不是偶然结构。
+6. 将重构步骤与行为变更分开。
 
 ## Output Format
 
@@ -98,30 +98,30 @@ For refactor work:
 - Next Step:
 ```
 
-Keep this concise. Do not paste long source files into the response; cite file paths and relevant symbols.
+保持简洁。不要在回复中粘贴很长的源文件；引用文件路径和相关 symbol。
 
 ## Non-Negotiable Rules
 
-- Do not skip DDD when a CRUD-looking request hides business meaning.
-- Do not copy code before stating the selected pattern and delta.
-- Do not invent a new project structure while a good local pattern exists.
-- Do not ignore an applicable project-owned style pack after the business design is confirmed.
-- Do not treat legacy code or anti-patterns as target patterns during refactors.
-- Do not refactor behavior-preserving code without characterization coverage unless the user explicitly accepts the risk.
-- Do not treat stale or unrelated examples as authoritative; prefer current production code when reference material conflicts with the repository.
-- Do not preserve a pattern blindly when it violates confirmed domain rules, security, validation, persistence, or public contracts.
-- Do not turn Glue Coding into test avoidance. Behavior changes still need `df-tdd-skill` unless the task is documentation-only or explicitly non-executable.
-- Do not add project-specific samples to this skill. Put reusable samples in the project repository and mention them from `AGENTS.md` or local docs.
-- Do not treat style packs as business truth. They preserve implementation style after DDD, API, security, validation, and persistence constraints are already respected.
+- 当看似 CRUD 的请求隐藏业务含义时，不要跳过 DDD。
+- 说明选定 pattern 和差异前，不要复制代码。
+- 存在良好本地 pattern 时，不要发明新的项目结构。
+- 业务设计确认后，不要忽略适用且归项目所有的 style pack。
+- 重构期间不要把 legacy code 或 anti-pattern 当作 target pattern。
+- 除非用户明确接受风险，否则不要在缺少 characterization 覆盖时重构行为保持型代码。
+- 不要把过时或无关示例视为权威；参考材料与仓库冲突时，优先采用当前生产代码。
+- 如果 pattern 违反已确认的领域规则、安全、验证、持久化或公共契约，不要盲目保留。
+- 不要让 Glue Coding 成为逃避测试的方式。除非任务只涉及文档或被明确规定为不可执行，否则行为变更仍需要 `df-tdd-skill`。
+- 不要向此 skill 添加项目特定示例。将可复用示例放入项目仓库，并从 `AGENTS.md` 或本地文档提及。
+- 不要把 style pack 当作业务事实。它只在 DDD、API、安全、验证和持久化约束已得到遵守后保留实现风格。
 
 ## Material Flywheel
 
-Before handoff or completion, ask whether the task revealed reusable material:
+交接或完成前，判断任务是否揭示了可复用材料：
 
-- a new or improved code pattern worth adding to `reference/`, `examples/`, `docs/patterns/`, or `.ai/patterns/`
-- a style pack rule, golden example, anti-pattern, or review checklist entry worth adding to `.devopsflow/style-pack/`
-- a rule that belongs in `AGENTS.md` or project docs
-- domain knowledge or a pitfall that belongs in local knowledge notes
-- a persistent spec or decision that belongs in `.ai/tracks/`
+- 值得添加到 `reference/`、`examples/`、`docs/patterns/` 或 `.ai/patterns/` 的新 code pattern 或改进 pattern
+- 值得添加到 `.devopsflow/style-pack/` 的 style pack rule、golden example、anti-pattern 或 review checklist entry
+- 应归入 `AGENTS.md` 或项目文档的规则
+- 应归入本地知识笔记的领域知识或陷阱
+- 应归入 `.ai/tracks/` 的持久 spec 或决策
 
-Recommend material updates, but do not create broad repositories of patterns unless the user asked for that scope.
+建议更新材料，但除非用户要求该范围，否则不要创建大范围 pattern 仓库。

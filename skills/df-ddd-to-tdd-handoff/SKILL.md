@@ -1,71 +1,71 @@
 ---
 name: df-ddd-to-tdd-handoff
-description: "Convert confirmed DDD event-storming outputs and requirement traceability into executable, language-agnostic TDD implementation slices. Use after df-ddd-event-storming-design has produced confirmed requirements, commands, events, aggregates, policies, invariants, read models, or relationships and Codex needs tests, implementation planning, or development sequencing."
+description: "将已确认的 DDD 事件风暴产物与需求可追踪关系转换为可执行、与语言无关的 TDD 实现切片。在 df-ddd-event-storming-design 已产出并确认需求、命令、事件、聚合、策略、不变量、读模型或关系，且 Codex 需要测试、实现计划或开发顺序时使用。"
 ---
 
 # DDD To TDD Handoff
 
-Use this skill to bridge domain design into test-first development. It does not replace DDD modeling or TDD execution.
+使用此 skill 将领域设计衔接到测试优先开发。它不能替代 DDD 建模或 TDD 执行。
 
 ## Inputs
 
-Read the confirmed DDD artifacts available in chat or in `event-storming/`:
+读取聊天中或 `event-storming/` 中已有的已确认 DDD 产物：
 
-- requirements intake and requirement IDs when present
-- problem boundary and glossary
-- domain events
-- commands and actors
-- policies and process managers
-- aggregates, state, rules, and invariants
-- read models and projection events
-- relationships and external systems
-- unresolved assumptions
+- 需求输入以及已有的需求 ID
+- 问题边界和术语表
+- 领域事件
+- 命令和参与者
+- 策略和流程管理器
+- 聚合、状态、规则和不变量
+- 读模型和投影事件
+- 关系和外部系统
+- 未解决的假设
 
-If the DDD design is not confirmed, do not create implementation slices. Return to `df-ddd-event-storming-design` for confirmation.
+如果 DDD 设计尚未确认，不要创建实现切片。返回 `df-ddd-event-storming-design` 完成确认。
 
 ## Mapping Rules
 
-- Requirement item -> traceability anchor and acceptance intent for one or more slices.
-- Domain event -> expected observable behavior test.
-- Command -> application service, use case, or aggregate command-handler test.
-- Aggregate invariant -> domain unit test.
-- Policy -> event-to-command orchestration test.
-- Process manager -> stateful workflow test with waiting, resumption, and idempotency cases.
-- Read model -> projection or query test.
-- External system -> contract, adapter, or integration seam test.
-- Relationship dependency -> precondition, prior fact, or state setup in tests.
-- Failure event with business meaning -> explicit behavior slice; technical failure -> adapter or infrastructure slice.
-- Stakeholder/actor authority -> authorization or capability assumption to preserve in tests or planning, without choosing a framework.
-- Trigger/follow-up row -> policy, process manager, projection, integration, or explicit non-domain concern.
+- 需求项 -> 一个或多个切片的可追踪锚点和验收意图。
+- 领域事件 -> 预期的可观察行为测试。
+- 命令 -> 应用服务、用例或聚合命令处理器测试。
+- 聚合不变量 -> 领域单元测试。
+- 策略 -> 事件到命令的编排测试。
+- 流程管理器 -> 包含等待、恢复和幂等场景的有状态工作流测试。
+- 读模型 -> 投影或查询测试。
+- 外部系统 -> 契约、适配器或集成接缝测试。
+- 关系依赖 -> 测试中的前置条件、既有事实或状态准备。
+- 具有业务含义的失败事件 -> 明确的行为切片；技术失败 -> 适配器或基础设施切片。
+- 利益相关者或参与者的权限 -> 测试或计划中必须保留的授权或能力假设，但不选择具体框架。
+- 触发或后续行 -> 策略、流程管理器、投影、集成或明确的非领域关注点。
 
-Choose the narrowest test layer that protects the risk. Widen only when the behavior cannot be observed at a narrower boundary.
+选择能够保护风险的最窄测试层。仅当行为无法在更窄边界上观察时才扩大测试范围。
 
-Do not introduce language, framework, package, HTTP, database, or UI structure unless the user asks or existing repository conventions are already part of the implementation planning step. This handoff may name generic boundaries such as domain model, application command, query/projection, process manager, port/adapter, and contract test.
+除非用户提出要求，或现有仓库约定已经是实现计划的一部分，否则不要引入语言、框架、包、HTTP、数据库或 UI 结构。此交接可以使用领域模型、应用命令、查询或投影、流程管理器、端口或适配器以及契约测试等通用边界名称。
 
 ## Handoff Workflow
 
-1. List the DDD inputs being used.
-2. List requirement traceability coverage when requirement IDs exist.
-3. Identify implementation boundaries without inventing framework structure.
-4. Create small TDD slices in business order.
-5. For each slice, name:
-   - requirement ID(s) when available
-   - behavior
-   - source DDD artifact
-   - test layer
-   - first RED expectation
-   - minimal GREEN implementation boundary
-   - protected invariant or read model outcome
-   - dependencies and unresolved facts
-6. Mark slices that need a technology-specific boundary skill only when the later implementation stack is known.
-7. Pass the slices to `df-implementation-planning` or `df-tdd-skill`.
+1. 列出正在使用的 DDD 输入。
+2. 存在需求 ID 时，列出需求可追踪覆盖情况。
+3. 在不虚构框架结构的前提下识别实现边界。
+4. 按业务顺序创建小型 TDD 切片。
+5. 为每个切片注明：
+   - 已有的需求 ID
+   - 行为
+   - 来源 DDD 产物
+   - 测试层
+   - 首个 RED 预期
+   - 最小 GREEN 实现边界
+   - 受保护的不变量或读模型结果
+   - 依赖和未决事实
+6. 仅在后续实现技术栈已知时，标记需要技术专用边界 skill 的切片。
+7. 将切片传递给 `df-implementation-planning` 或 `df-tdd-skill`。
 
 ## Output Format
 
 ```markdown
 # DDD to TDD Handoff
 
-## Confirmed DDD Conclusions
+## DDD Conclusions Used
 
 ## Requirement Traceability
 
@@ -74,29 +74,29 @@ Do not introduce language, framework, package, HTTP, database, or UI structure u
 ## TDD Slices
 
 ### Slice 1: <behavior>
-- Requirement ID:
-- DDD Source:
-- Test Layer:
-- Expected RED:
-- Minimal GREEN:
-- Protected Rules And Read Models:
-- Must Not Change:
-- Dependencies And Open Facts:
+- 需求 ID：
+- DDD 来源：
+- 测试层：
+- 预期 RED：
+- 最小 GREEN：
+- 保护的规则或读模型：
+- 不应改变：
+- 依赖或未决事实：
 
 ## Recommended Execution Order
 
-## Additional Required Skills
+## Additional Skills Required
 ```
 
 ## Non-Negotiable Rules
 
-- Do not write production code.
-- Do not create tests directly unless the user explicitly asks to start implementation.
-- Do not turn HTTP endpoints, database tables, DTOs, or pages into domain commands.
-- Do not introduce framework-specific implementation rules in this generic handoff.
-- Do not hide aggregate invariants inside policies or application services.
-- Do not invent a read model that cannot be projected from events without calling out the gap.
-- Do not drop requirement IDs or confirmed requirement coverage when they exist.
-- Do not proceed when a slice depends on an unconfirmed business conclusion that could change the model.
+- 不要编写生产代码。
+- 除非用户明确要求开始实现，否则不要直接创建测试。
+- 不要把 HTTP 端点、数据库表、DTO 或页面转换为领域命令。
+- 不要在此通用交接中引入框架专用实现规则。
+- 不要把聚合不变量隐藏在策略或应用服务中。
+- 不要虚构无法由事件投影得到的读模型而不说明缺口。
+- 存在需求 ID 或已确认的需求覆盖范围时，不要遗漏它们。
+- 当切片依赖可能改变模型但尚未确认的业务结论时，不要继续。
 
-See `references/mapping-examples.md` for compact examples.
+紧凑示例参见 [mapping-examples.md](references/mapping-examples.md)。

@@ -1,109 +1,109 @@
 # Eval Cases
 
-Use these cases to iterate `df-tdd-skill`. When real use reveals a new way agents bypass TDD, vague evidence, or pick the wrong test layer, add a case here.
+使用这些场景迭代 `df-tdd-skill`。当真实使用暴露出 agent 绕过 TDD、使用含糊证据或选择错误测试层的新方式时，在此添加场景。
 
 ## Case 1: Production Code First
 
-User request:
+用户请求：
 
-> Refactor order total calculation while preserving behavior.
+> 在保持行为的前提下重构订单总额计算。
 
-Failure behavior:
+失败行为：
 
-- The agent edits production code first.
-- Characterization tests are added only afterward.
-- `tdd_start` does not appear before production-code edits.
+- agent 先编辑生产代码。
+- 之后才添加特征测试。
+- 生产代码编辑前未出现 `tdd_start`。
 
-Expected guardrail:
+预期护栏：
 
-- `before_edit` fails because `tdd_start` is missing.
-- `tdd_start.first_test_to_write` names the characterization test that must be written first.
-- The final report states RED/GREEN evidence; if the flow was already violated, it states compensating tests and remaining risk.
+- 因缺少 `tdd_start`，`before_edit` 失败。
+- `tdd_start.first_test_to_write` 指明必须首先编写的特征测试。
+- 最终报告说明 RED/GREEN 证据；如果已经违反流程，则说明补偿测试和剩余风险。
 
 ## Case 2: Vague RED Evidence
 
-User request:
+用户请求：
 
-> Fix the default sorting bug in paginated listing.
+> 修复分页列表中的默认排序缺陷。
 
-Failure behavior:
+失败行为：
 
 ```yaml
 tdd_state:
   phase: red_observed
-  evidence: "the test failed as expected"
+  evidence: "测试如预期失败"
 ```
 
-Expected guardrail:
+预期护栏：
 
-- Require command, exit code, test name, and failure reason.
-- RED evidence explains how the failure relates to the default-sort risk.
+- 要求提供命令、退出码、测试名称和失败原因。
+- RED 证据说明失败与默认排序风险的关系。
 
 ## Case 3: Pure Refactor Changes Public Behavior
 
-User request:
+用户请求：
 
-> Refactor the user query service without changing API behavior.
+> 在不改变 API 行为的前提下重构用户查询服务。
 
-Failure behavior:
+失败行为：
 
-- The agent changes empty-query behavior from returning an empty list to throwing an error.
-- Characterization tests cover only the happy path.
+- agent 将空查询行为从返回空列表改为抛出错误。
+- 特征测试只覆盖正常路径。
 
-Expected guardrail:
+预期护栏：
 
-- `protected_behavior` or completion criteria name public contracts, error semantics, and defaults as non-changing behavior.
-- Characterization tests cover caller-dependent awkward edge cases.
+- `protected_behavior` 或完成条件将公共契约、错误语义和默认值列为不得改变的行为。
+- 特征测试覆盖调用方依赖的棘手边界场景。
 
 ## Case 4: Test Layer Too Narrow
 
-User request:
+用户请求：
 
-> Fix export job data loss across multiple pages.
+> 修复导出任务跨多个页面时的数据丢失问题。
 
-Failure behavior:
+失败行为：
 
-- Only a unit test mocks the first page.
-- No assertion covers pagination sequence, termination condition, or batch size.
+- 只有单元测试 mock 了第一页。
+- 没有断言覆盖分页序列、终止条件或批次大小。
 
-Expected guardrail:
+预期护栏：
 
-- `stable_boundary` marks orchestration or persistence boundary risk.
-- The test captures the full pagination sequence.
-- If a narrow test cannot cover the boundary risk, widen to component, persistence, or integration tests.
+- `stable_boundary` 标记编排或持久化边界风险。
+- 测试捕获完整分页序列。
+- 如果窄层测试无法覆盖边界风险，扩大到组件、持久化或集成测试。
 
 ## Case 5: Wrong Contract Named As Desired Contract
 
-User request:
+用户请求：
 
-> This legacy API currently returns 500 incorrectly; refactor first, then fix it.
+> 此旧版 API 当前错误地返回 500；先重构，再修复。
 
-Failure behavior:
+失败行为：
 
-- The agent names the 500 response as expected behavior.
-- `current_contract_wrong` remains `false`.
+- agent 将 500 响应命名为期望行为。
+- `current_contract_wrong` 仍为 `false`。
 
-Expected guardrail:
+预期护栏：
 
-- `current_contract_wrong: true`.
-- `wrong_contract_plan: fix_after_characterization`.
-- Characterization test marks legacy behavior as compatibility-only, then a desired-behavior test drives the fix.
+- `current_contract_wrong: true`。
+- `wrong_contract_plan: fix_after_characterization`。
+- 特征测试将旧版行为标记为仅兼容，随后由期望行为测试驱动修复。
 
 ## Case 6: Greenfield Implementation First
 
-User request:
+用户请求：
 
-> Build a new price calculator from scratch.
+> 从零构建新的价格计算器。
 
-Failure behavior:
+失败行为：
 
-- The agent creates production classes, routes, or abstractions before any executable behavior test exists.
-- The first test is written after implementation and passes immediately.
-- `task_type` is not `greenfield_feature`.
+- agent 在任何可执行行为测试存在前创建生产类、路由或抽象。
+- 首个测试在实现后编写，并且立即通过。
+- `task_type` 不是 `greenfield_feature`。
 
-Expected guardrail:
+预期护栏：
 
-- `tdd_start.task_type: greenfield_feature`.
-- `first_test_to_write` names the first desired-behavior test.
-- RED evidence may be a missing symbol, route, command, or module only when it is the intended observable boundary.
-- GREEN evidence proves the same behavior slice passes after the smallest production implementation.
+- `tdd_start.task_type: greenfield_feature`。
+- `first_test_to_write` 指明首个期望行为测试。
+- 只有缺失的符号、路由、命令或模块正是预期可观察边界时，RED 证据才可以是该元素缺失。
+- GREEN 证据证明最小生产实现后，同一行为切片通过。

@@ -1,17 +1,17 @@
-## 自查结果
+## Self-Review Results
 
-### 必须关注
-
-- 
-
-### 测试与验证
+### Required Attention
 
 - 
 
-### 审查重点
+### Tests and Verification
 
 - 
 
-### 已知风险
+### Review Focus
+
+- 
+
+### Known Risks
 
 - 

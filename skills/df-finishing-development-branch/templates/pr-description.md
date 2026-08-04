@@ -1,9 +1,9 @@
-## 目的
+## Purpose
 
-## 主要变更
+## Key Changes
 
-## 测试与验证
+## Tests and Verification
 
-## 风险与回滚
+## Risks and Rollback
 
-## 关联信息
+## Related Information
