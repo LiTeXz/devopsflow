@@ -8,6 +8,11 @@ const WORKFLOW = readFileSync(
   join(ROOT, ".github", "workflows", "version-check.yml"),
   "utf-8",
 );
+const PACKAGE = JSON.parse(
+  readFileSync(join(ROOT, "package.json"), "utf-8"),
+) as {
+  scripts: Record<string, string>;
+};
 
 describe("version-check workflow", () => {
   it("uses package.json as the release tag version source", () => {
@@ -25,5 +30,17 @@ describe("version-check workflow", () => {
 
   it("uses the DevopsFlow repository as the managed asset source", () => {
     expect(WORKFLOW).toContain("LiTeXz/devopsflow");
+  });
+
+  it("defines every package script invoked by the skill metadata workflow", () => {
+    const skillMetadataWorkflow = readFileSync(
+      join(ROOT, ".github", "workflows", "skill-metadata-check.yml"),
+      "utf-8",
+    );
+
+    expect(skillMetadataWorkflow).toContain("bun run check:agent-instructions");
+    expect(PACKAGE.scripts["check:agent-instructions"]).toBe(
+      "bun skills/df-agent-instruction-authoring/scripts/validate-agent-instructions.ts",
+    );
   });
 });
