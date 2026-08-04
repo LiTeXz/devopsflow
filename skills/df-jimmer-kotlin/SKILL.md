@@ -1,48 +1,48 @@
 ---
 name: df-jimmer-kotlin
-description: "Kotlin-specific Jimmer ORM guardrails. Use when Codex changes Kotlin Jimmer SQL entities, KSP/Gradle setup, Spring Boot integration, generated table-object queries, fetchers, DTO language files, graph saves, repositories, or persistence tests. Use this for Kotlin source sets and Kotlin-first mixed JVM projects; use df-jimmer-java for Java source sets."
+description: "Kotlin 专用 Jimmer ORM guardrail。当 Codex 修改 Kotlin Jimmer SQL 实体、KSP/Gradle 配置、Spring Boot 集成、生成的 table object query、fetcher、DTO language 文件、graph save、repository 或持久化测试时使用。Kotlin source set 和 Kotlin-first 混合 JVM 项目使用此 skill；Java source set 使用 df-jimmer-java。"
 ---
 
 # Jimmer Kotlin
 
-Use this skill when working on Kotlin code that uses Jimmer SQL. Treat Jimmer as a compile-time ORM built around immutable entity models, KSP-generated code, Kotlin DSL, and type-safe queries. Do not handle it like JPA with mutable POJOs.
+处理使用 Jimmer SQL 的 Kotlin 代码时使用此 skill。应将 Jimmer 视为一种围绕不可变实体模型、KSP 生成代码、Kotlin DSL 和类型安全 query 构建的编译期 ORM。不要像处理使用可变 POJO 的 JPA 那样处理它。
 
 ## Pre-Change Checks
 
-- Inspect the existing build before changing dependencies. Prefer the project's current Jimmer version, Kotlin plugin, and KSP setup.
-- In Gradle Kotlin DSL projects, expect `com.google.devtools.ksp`, `df-jimmer-sql-kotlin`, and KSP processor wiring rather than Java annotation processors.
-- Locate the generated-source directory and existing table-object naming before writing queries. Do not invent generated type names.
-- Identify whether the project uses Spring Boot auto-configuration, Jimmer repositories, direct `KSqlClient` injection, or a custom persistence adapter.
+- 修改依赖前先检查现有构建。优先沿用项目当前的 Jimmer 版本、Kotlin plugin 和 KSP 配置。
+- 在 Gradle Kotlin DSL 项目中，应使用 `com.google.devtools.ksp`、`df-jimmer-sql-kotlin` 和 KSP processor wiring，而不是 Java annotation processor。
+- 编写 query 前先定位生成源码目录和现有 table object 命名。不要虚构生成的类型名称。
+- 识别项目使用的是 Spring Boot auto-configuration、Jimmer repository、直接注入 `KSqlClient`，还是自定义 persistence adapter。
 
 ## Entity Rules
 
-- Model Jimmer Kotlin entities according to local convention, usually as immutable interfaces or abstract declarations.
-- Preserve Jimmer annotations and semantics such as `@Entity`, `@Table`, `@Id`, `@GeneratedValue`, associations, computed properties, and logical deletion.
-- Do not add JPA-only patterns for persistence: mutable no-arg entity classes, setter-based mutation workflows, `EntityManager`, lazy-proxy assumptions, or cascade rules.
-- After changing entities, DTO files, or mappings, run the smallest build task that refreshes KSP-generated sources.
+- 按本地约定对 Jimmer Kotlin 实体建模，通常使用不可变接口或 abstract declaration。
+- 保留 `@Entity`、`@Table`、`@Id`、`@GeneratedValue`、association、computed property 和 logical deletion 等 Jimmer annotation 与语义。
+- 不要为持久化引入 JPA-only 模式：可变无参实体类、基于 setter 的变更工作流、`EntityManager`、lazy proxy 假设或 cascade 规则。
+- 修改实体、DTO 文件或 mapping 后，运行能够刷新 KSP 生成源码的最小构建任务。
 
 ## Query Rules
 
-- Prefer the Kotlin DSL and generated table objects for type-safe SQL. Keep dynamic predicates in the DSL instead of concatenating SQL strings.
-- Use fetchers or DTO projections to define returned graph shape. Do not load broad entity graphs when callers need narrow results.
-- Let Jimmer optimize joins, paginated count queries, and implicit subqueries where applicable. Do not manually reproduce generated behavior.
-- When native SQL expressions are required, keep them local and preserve a clear typed boundary around them.
+- 优先使用 Kotlin DSL 和生成的 table object 实现类型安全 SQL。将动态 predicate 保留在 DSL 中，不要拼接 SQL 字符串。
+- 使用 fetcher 或 DTO projection 定义返回的 graph shape。当调用方只需要窄范围结果时，不要加载宽范围 entity graph。
+- 在适用场景让 Jimmer 优化 join、分页 count query 和 implicit subquery。不要手动复刻生成行为。
+- 需要 native SQL expression 时，将其限制在局部，并在周围保留清晰的类型边界。
 
 ## Save And DTO Rules
 
-- For graph saves, construct the incomplete object graph the use case needs and let Jimmer save it. Do not pre-load full graphs just to change a few fields.
-- When the project uses Jimmer DTO language, prefer input DTOs for complex saves and output DTOs for complex query responses.
-- Treat DTO files as compile-time inputs. If only DTO files changed, run a full compile or the project's generated-source refresh command.
-- Keep business validation in the business layer. Do not hide domain policy in generated DTO templates.
+- 对于 graph save，构造用例所需的 incomplete object graph，并交由 Jimmer 保存。不要仅为修改少数字段而预加载完整 graph。
+- 项目使用 Jimmer DTO language 时，复杂 save 优先使用 input DTO，复杂 query response 优先使用 output DTO。
+- 将 DTO 文件视为编译期输入。若只修改了 DTO 文件，运行完整编译或项目的生成源码刷新命令。
+- 将业务校验保留在业务层。不要把 domain policy 隐藏在生成的 DTO template 中。
 
 ## Testing And Verification
 
-- Cover queries, ordering, filtering, pagination, association shape, graph saves, and constraint behavior with repository or SQL-client tests.
-- Assert observable results and SQL-sensitive behavior such as returned graph shape, total counts, ordering, and association presence.
-- After entity or DTO changes, run targeted Kotlin/JVM tests and a compile/KSP task to confirm generated code refresh.
-- Before finishing, search changed Kotlin code for accidental `EntityManager`, mutable entity setters, or `jakarta.persistence` usage that does not match local convention.
+- 使用 repository 或 SQL client 测试覆盖 query、ordering、filtering、pagination、association shape、graph save 和 constraint 行为。
+- 断言可观察结果及 SQL-sensitive 行为，例如返回的 graph shape、总数、ordering 和 association 是否存在。
+- 修改实体或 DTO 后，运行针对性的 Kotlin/JVM 测试和 compile/KSP 任务，确认生成代码已刷新。
+- 完成前，在已修改 Kotlin 代码中搜索意外引入的 `EntityManager`、可变实体 setter，或不符合本地约定的 `jakarta.persistence` 用法。
 
 ## Official Sources
 
-- Jimmer repository: https://github.com/babyfish-ct/df-jimmer
-- Jimmer documentation: https://babyfish-ct.github.io/df-jimmer-doc/
+- Jimmer repository： https://github.com/babyfish-ct/df-jimmer
+- Jimmer documentation： https://babyfish-ct.github.io/df-jimmer-doc/

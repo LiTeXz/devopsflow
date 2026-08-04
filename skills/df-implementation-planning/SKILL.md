@@ -1,51 +1,51 @@
 ---
 name: df-implementation-planning
-description: "Write a concrete, small-step implementation plan before coding. Use for multi-step features, bug fixes, refactors, DDD-to-TDD handoffs, risky behavior changes, or any engineering task that needs files, commands, expected RED/GREEN results, verification steps, and completion criteria before implementation."
+description: "编码前编写具体的小步实施计划。适用于多步功能、缺陷修复、重构、DDD-to-TDD 交接、风险行为变更，或任何需要在实现前明确文件、命令、预期 RED/GREEN 结果、验证步骤和完成标准的工程任务。"
 ---
 
 # Implementation Planning
 
-Use this skill to turn a requirement, confirmed DDD handoff, Glue Coding pattern selection, selected style pack, bug investigation result, or refactor goal into a plan that another agent can execute.
+使用此 skill，将需求、已确认的 DDD 交接、Glue Coding pattern 选择、选定的 style pack、缺陷调查结果或重构目标，转化为其他执行者可执行的计划。
 
-Do not edit production code while using this skill.
+使用此 skill 时不要编辑生产代码。
 
 ## Planning Workflow
 
-1. Restate the goal and scope.
-2. List constraints:
-   - behaviors that must not change
-   - public contracts
-   - data, persistence, ordering, pagination, security, or side-effect risks
-   - selected style pack, golden examples, style-specific anti-patterns, and review checklist items to preserve
-   - selected glue target pattern, local conventions, legacy behavior evidence, anti-patterns to remove, and project material that must be preserved
-   - user-owned worktree changes to avoid
-3. Identify behavior slices.
-4. For each task, specify:
-   - objective
-   - files or modules likely involved
-   - test or verification command
-   - expected RED, GREEN, or unchanged result
-   - completion standard
-5. Keep each task small enough to complete and verify independently.
-6. Mark steps that require `df-tdd-skill`, `df-spring-web-boundaries`, or `df-systematic-debugging`.
-7. For glue-style work, include the selected style pack when one exists, the selected target pattern, and the exact delta each task is allowed to change.
-8. For refactor glue work, separate characterization, target-pattern migration, and cleanup steps. Do not plan to copy legacy structure unless it is explicitly classified as the target pattern.
-9. State whether user confirmation is required before execution.
+1. 重述目标和范围。
+2. 列出约束：
+   - 不得改变的行为
+   - 公共契约
+   - 数据、持久化、顺序、分页、安全或副作用风险
+   - 必须保留的选定 style pack、golden example、特定风格 anti-pattern 和审查清单项
+   - 选定的 Glue 目标 pattern、本地约定、遗留行为证据、要移除的 anti-pattern，以及必须保留的项目材料
+   - 必须避开的用户所有 worktree 变更
+3. 识别行为切片。
+4. 对每项任务说明：
+   - 目标
+   - 可能涉及的文件或模块
+   - 测试或验证命令
+   - 预期 RED、GREEN 或不变结果
+   - 完成标准
+5. 每项任务应足够小，可独立完成并验证。
+6. 标记需要 `df-tdd-skill`、`df-spring-web-boundaries` 或 `df-systematic-debugging` 的步骤。
+7. 对 Glue 风格工作，如果存在选定的 style pack，应包含它，并写明选定的目标 pattern 及每项任务允许变更的精确差异。
+8. 对重构类 Glue 工作，分开 characterization、目标 pattern 迁移和清理步骤。除非遗留结构被明确归类为目标 pattern，否则不要计划复制它。
+9. 说明执行前是否需要用户确认。
 
 ## Step Size
 
-Prefer 2-5 minute execution steps. Split a step when it combines:
+优先采用 2 至 5 分钟的执行步骤。如果一个步骤组合了以下内容，则应拆分：
 
-- creating tests and implementing production code
-- unrelated behavior slices
-- multiple modules with separate risks
-- refactor and behavior change
-- debugging and fixing
-- code changes and commit/PR work
+- 创建测试与实现生产代码
+- 无关的行为切片
+- 风险各自独立的多个模块
+- 重构与行为变更
+- 调试与修复
+- 代码变更与 commit/PR 工作
 
 ## Output Format
 
-Use `templates/implementation-plan.md` when a file artifact is useful. In chat, use the same structure:
+需要文件产物时使用 [implementation-plan.md](templates/implementation-plan.md)。在对话中使用相同结构：
 
 ```markdown
 # <Name> Implementation Plan
@@ -83,11 +83,11 @@ Use `templates/implementation-plan.md` when a file artifact is useful. In chat, 
 
 ## Non-Negotiable Rules
 
-- Do not write production code in this phase.
-- Do not produce vague steps such as "implement feature" or "run tests".
-- Do not omit commands when the project has discoverable test commands.
-- Do not plan a fix before a reproducible failure and root-cause evidence exists for unclear bugs.
-- Do not mix behavior change and broad cleanup in the same step.
-- Do not invent new structure for glue-style work when a selected style pack or local target pattern must be preserved.
-- Do not plan refactors that treat legacy code or anti-patterns as the target pattern without explicit justification.
-- Do not assume approval for risky scope expansion; call it out.
+- 此阶段不要编写生产代码。
+- 不要生成“实现功能”或“运行测试”等模糊步骤。
+- 项目中能发现测试命令时，不要省略命令。
+- 对根因不清的缺陷，在获得可复现失败和根因证据前，不要规划修复。
+- 不要在同一步骤中混合行为变更与大范围清理。
+- 必须保留选定的 style pack 或本地目标 pattern 时，不要为 Glue 风格工作发明新结构。
+- 没有明确理由时，不要规划把遗留代码或 anti-pattern 当作目标 pattern 的重构。
+- 不要假定风险性范围扩张已获批准；应明确指出。

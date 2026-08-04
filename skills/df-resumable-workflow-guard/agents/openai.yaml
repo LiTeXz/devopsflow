@@ -1,4 +1,4 @@
 interface:
   display_name: "Resumable Workflow Guard"
-  short_description: "Protect long-running or interruption-prone engineering work with explicit checkpoints, resume files, and handoff notes. Use when a task may span multiple turns or sessions, exceed about 30 minutes, touch multiple workflow stages, require repeated verification, approach context limits, resume after interruption or compaction, or when the user asks to continue, resume, checkpoint, monitor a long task, or hand off work."
-  default_prompt: "Use $df-resumable-workflow-guard to decide whether this task needs checkpointed execution, create or update a resume file, and continue from the next incomplete step instead of restarting."
+  short_description: "通过明确的 checkpoint、resume file 和交接说明保护长时间或易中断的工程工作。任务可能跨多轮或多个会话、耗时超过约 30 分钟、涉及多个工作流阶段、需要重复验证、接近上下文限制、在中断或压缩后续跑，或用户提到 continue、resume、checkpoint、long task、handoff、中断、继续、续跑、检查点、长任务或交接时使用。"
+  default_prompt: "使用 $df-resumable-workflow-guard 判断此任务是否需要 checkpointed execution，创建或更新 resume file，并从下一个未完成步骤继续，而不是重新开始。"

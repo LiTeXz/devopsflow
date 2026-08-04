@@ -1,4 +1,4 @@
 interface:
   display_name: "Jimmer Kotlin"
-  short_description: "Kotlin-specific Jimmer ORM guardrails. Use when Codex changes Kotlin Jimmer SQL entities, KSP/Gradle setup, Spring Boot integration, generated table-object queries, fetchers, DTO language files, graph saves, repositories, or persistence tests. Use this for Kotlin source sets and Kotlin-first mixed JVM projects; use df-jimmer-java for Java source sets."
-  default_prompt: "Use $df-jimmer-kotlin when changing Kotlin Jimmer SQL entities, queries, DTOs, or Spring Boot integration."
+  short_description: "Kotlin 专用 Jimmer ORM guardrail。当 Codex 修改 Kotlin Jimmer SQL 实体、KSP/Gradle 配置、Spring Boot 集成、生成的 table object query、fetcher、DTO language 文件、graph save、repository 或持久化测试时使用。Kotlin source set 和 Kotlin-first 混合 JVM 项目使用此 skill；Java source set 使用 df-jimmer-java。"
+  default_prompt: "修改 Kotlin Jimmer SQL 实体、query、DTO 或 Spring Boot 集成时，使用 $df-jimmer-kotlin。"

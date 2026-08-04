@@ -1,4 +1,4 @@
 interface:
   display_name: "Google Aip Api Design"
-  short_description: "Design, review, and refactor resource-oriented HTTP, REST, gRPC transcoding, protobuf, and OpenAPI APIs using Google API Improvement Proposals (AIP). Use when Codex needs to create or critique API endpoints, REST URI version prefixes, resource names, standard methods, custom methods, pagination, filtering, field masks, errors, long-running operations, protobuf service definitions, or api-linter setup against Google AIP guidance."
-  default_prompt: "Use $df-google-aip-api-design to design or review an HTTP API against Google AIP guidance."
+  short_description: "使用 Google API Improvement Proposals (AIP) 设计、评审和重构 resource-oriented HTTP、REST、gRPC transcoding、protobuf 与 OpenAPI API。当 Codex 需要依据 Google AIP 指南创建或评议 API endpoint、REST URI version prefix、resource name、standard method、custom method、pagination、filtering、field mask、error、long-running operation、protobuf service definition 或 api-linter 配置时使用。"
+  default_prompt: "使用 $df-google-aip-api-design，依据 Google AIP 指南设计或评审 HTTP API。"

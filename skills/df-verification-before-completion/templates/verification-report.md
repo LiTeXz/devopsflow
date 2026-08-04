@@ -1,24 +1,23 @@
 # Verification Report
 
-## 用户要求
+## User Requirements
 
-## 已满足
+## Satisfied
 
-## 变更文件
+## Changed Files
 
-## 命令证据
+## Command Evidence
 
 | 命令 | 退出码 | 结果 |
 | --- | --- | --- |
 |  |  |  |
 
-## 未运行的检查
+## Checks Not Run
 
-## 手工验证
+## Manual Verification
 
-## 剩余风险
+## Remaining Risks
 
-## 工作区状态
+## Worktree Status
 
-## Commit Message 检查
-
+## Commit Message Check

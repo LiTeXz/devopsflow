@@ -1,33 +1,33 @@
 ---
 name: df-spring-web-boundaries
-description: "Spring Web boundary guardrails for Java/Spring Boot refactors. Use when Codex changes controllers, REST endpoints, request/response mapping, validation, security, file upload/download, exports, or service/controller layering in Spring applications. This is an optional architecture and technology-stack companion to TDD skills; do not use as a generic TDD methodology skill."
+description: "用于 Java/Spring Boot 重构的 Spring Web boundary guardrail。当 Codex 修改 Spring 应用中的 controller、REST endpoint、request/response mapping、validation、security、文件上传/下载、export 或 service/controller 分层时使用。这是 TDD skill 的可选架构与技术栈配套 skill；不要将其用作通用 TDD methodology skill。"
 ---
 
 # Spring Web Boundaries
 
-Use this skill to protect the Spring Web adapter boundary. This is not TDD itself; it is a Spring layering and Web adapter constraint.
+使用此 skill 保护 Spring Web adapter boundary。它本身不是 TDD，而是 Spring 分层与 Web adapter 约束。
 
 ## Core Principles
 
-- Controllers handle HTTP adaptation: mapping, binding, validation, status, headers, content type, multipart, servlet streaming, and security entry points.
-- Application/service layers handle application orchestration: business flow, query construction, batching, import/export strategy, transaction strategy, callback order, events, and cache side effects.
-- Domain layers handle core rules; repositories and query objects handle persistence details.
-- Do not push HTTP semantics into core application logic unless the code is already an adapter by project convention.
+- Controller 处理 HTTP adaptation：mapping、binding、validation、status、header、content type、multipart、servlet streaming 和 security entry point。
+- Application/service 层处理 application orchestration：business flow、query construction、batching、import/export strategy、transaction strategy、callback order、event 和 cache side effect。
+- Domain 层处理核心规则；repository 和 query object 处理持久化细节。
+- 除非按照项目约定代码本身已经是 adapter，否则不要把 HTTP 语义推入核心 application logic。
 
 ## Controller Changes
 
-When changing a controller or endpoint, first decide whether the change affects:
+修改 controller 或 endpoint 时，先判断变更是否影响：
 
-- HTTP method, path, query/form parameters, request body, or multipart parts.
-- Defaults, binding, validation, or serialization.
-- Status, content type, headers, or `Content-Disposition`.
-- CSRF, authentication, or authorization.
+- HTTP method、path、query/form parameter、request body 或 multipart part。
+- 默认值、binding、validation 或 serialization。
+- Status、content type、header 或 `Content-Disposition`。
+- CSRF、authentication 或 authorization。
 
-If any public contract may be affected, protect it with `MockMvc`, `WebTestClient`, or an equivalent API boundary test. Directly calling `controller.method(...)` is suitable only as supplemental coverage for internal delegation, argument construction, or pagination/export callbacks; it does not replace endpoint coverage.
+如果任何 public contract 可能受到影响，使用 `MockMvc`、`WebTestClient` 或等效 API boundary test 保护它。直接调用 `controller.method(...)` 只适合作为 internal delegation、argument construction 或 pagination/export callback 的补充覆盖；它不能替代 endpoint coverage。
 
 ## Service Boundary
 
-Services should not introduce new Web/Servlet dependencies:
+Service 不应引入新的 Web/Servlet 依赖：
 
 - `ResponseEntity`
 - `StreamingResponseBody`
@@ -38,17 +38,17 @@ Services should not introduce new Web/Servlet dependencies:
 - `org.springframework.web.*`
 - `org.springframework.http.*`
 
-If a legacy service already returns HTTP types, do not expand that pattern. Compatibility can be preserved, but new logic should prefer application results, export descriptors, metadata objects, stream/data suppliers, or DTOs that controllers convert into HTTP responses.
+如果 legacy service 已经返回 HTTP type，不要扩大这种模式。可以保留兼容性，但新逻辑应优先返回由 controller 转换为 HTTP response 的 application result、export descriptor、metadata object、stream/data supplier 或 DTO。
 
 ## Import, Export, And Download
 
-- Put business queries, pagination loops, batch sizes, sequence numbers, failure policy, and DTO selection in the application orchestration layer.
-- Keep filenames, content type, content disposition, HTTP status, and servlet output/streaming in the Web adapter.
-- Tests should cover page size, cross-page sequence numbers, callback/stream calls, DTO class, headers, and content type.
+- 将 business query、pagination loop、batch size、sequence number、failure policy 和 DTO selection 放在 application orchestration 层。
+- 将 filename、content type、content disposition、HTTP status 和 servlet output/streaming 保留在 Web adapter 中。
+- 测试应覆盖 page size、cross-page sequence number、callback/stream call、DTO class、header 和 content type。
 
 ## Pre-Finish Scan
 
-Before finishing, search modified services for:
+完成前，在已修改 service 中搜索：
 
 - `org.springframework.http`
 - `org.springframework.web`
@@ -58,4 +58,4 @@ Before finishing, search modified services for:
 - `ResponseEntity`
 - `StreamingResponseBody`
 
-Before finishing, confirm that modified controllers' public endpoints have API boundary tests. If they do not, explain in the final report why the existing coverage is sufficient.
+完成前，确认已修改 controller 的 public endpoint 具有 API boundary test。如果没有，应在最终报告中说明现有 coverage 为何足够。

@@ -1,72 +1,72 @@
 # AIP Selection Map
 
-Use this map to select official AIP pages to fetch from `https://google.aip.dev/{number}`. Do not treat this file as a substitute for the official pages.
+使用此 map 选择要从 `https://google.aip.dev/{number}` 获取的官方 AIP 页面。不要将此文件视为官方页面的替代品。
 
 ## Start Here
 
-- API-wide design principles: AIP-121 resource-oriented design
-- Resource names and identifiers: AIP-122 resource names, AIP-123 resource types
-- Resource relationships: AIP-124 resource association
-- Standard fields and comments: AIP-140+ field guidance, AIP-192 documentation
+- API-wide design principle：AIP-121 resource-oriented design
+- Resource name 与 identifier：AIP-122 resource name、AIP-123 resource type
+- Resource relationship：AIP-124 resource association
+- Standard field 与 comment：AIP-140+ field guidance、AIP-192 documentation
 
 ## Standard Methods
 
-- List methods: AIP-132
-- Get methods: AIP-131
-- Create methods: AIP-133
-- Update methods: AIP-134
-- Delete methods: AIP-135
-- Custom methods: AIP-136
+- List method：AIP-132
+- Get method：AIP-131
+- Create method：AIP-133
+- Update method：AIP-134
+- Delete method：AIP-135
+- Custom method：AIP-136
 
-Prefer standard methods unless the operation is clearly not CRUD-like.
+除非 operation 明确不是 CRUD-like，否则优先使用 standard method。
 
 ## HTTP and Transcoding
 
-- REST API versioning: AIP-185 is mandatory for REST/HTTP URI design and review. Check that the first URI path segment contains the major version.
-- HTTP and gRPC transcoding: AIP-127
-- Resource-oriented method naming: AIP-121, AIP-131 through AIP-136
-- Long-running operations over HTTP/gRPC: AIP-151
+- REST API versioning：AIP-185 是 REST/HTTP URI 设计与评审的强制要求。检查第一个 URI path segment 是否包含 major version。
+- HTTP 与 gRPC transcoding：AIP-127
+- Resource-oriented method naming：AIP-121、AIP-131 至 AIP-136
+- 基于 HTTP/gRPC 的 long-running operation：AIP-151
 
-For pure HTTP JSON APIs, adapt the resource-oriented parts of the AIP guidance while still checking each cited rule for protobuf-specific assumptions. Treat REST URI version-prefix review as required, not optional: stable paths should begin with `/v1/...`, `/v2/...`, and similar major version prefixes; alpha/beta paths should follow AIP-185 suffix guidance such as `/v1alpha/...` or `/v1beta/...`; minor or patch prefixes such as `/v1.0/...`, `/v1.1/...`, or `/v1.4.2/...` are design problems. If a framework, gateway, servlet context path, router group, or API prefix configuration may inject the version segment globally, inspect that configuration before deciding whether route declarations need an explicit version.
+对于纯 HTTP JSON API，在适配 AIP 指南中 resource-oriented 部分的同时，仍需检查每项引用规则是否包含 protobuf-specific assumption。将 REST URI version-prefix 评审视为必需而非可选：stable path 应以 `/v1/...`、`/v2/...` 等 major version prefix 开头；alpha/beta path 应遵循 AIP-185 suffix 指南，例如 `/v1alpha/...` 或 `/v1beta/...`；`/v1.0/...`、`/v1.1/...` 或 `/v1.4.2/...` 等 minor 或 patch prefix 属于设计问题。如果 framework、gateway、servlet context path、router group 或 API prefix 配置可能全局注入 version segment，应先检查该配置，再判断 route declaration 是否需要显式 version。
 
 ## Collections and Query Behavior
 
-- Pagination: AIP-158
-- Filtering: AIP-160
-- Ordering: AIP-132 list method guidance, then check current AIP index for dedicated ordering guidance
-- Field masks and partial responses/updates: AIP-157 and AIP-161 as applicable
+- Pagination：AIP-158
+- Filtering：AIP-160
+- Ordering：AIP-132 list method 指南，然后检查当前 AIP index 中专门的 ordering 指南
+- Field mask 与 partial response/update：按需使用 AIP-157 和 AIP-161
 
 ## Mutations and Consistency
 
-- Update semantics: AIP-134
-- Delete semantics: AIP-135
-- Declarative-friendly resources: AIP-128, AIP-148, and related declarative AIPs when relevant
-- Idempotency and request identifiers: check create/update/delete method AIPs and current AIP index
+- Update 语义：AIP-134
+- Delete 语义：AIP-135
+- Declarative-friendly resource：AIP-128、AIP-148，以及相关时的 declarative AIP
+- Idempotency 与 request identifier：检查 create/update/delete method AIP 和当前 AIP index
 
 ## Errors and Operations
 
-- Errors: AIP-193
-- Long-running operations: AIP-151
-- Common operation metadata: check AIP-151 and current AIP index
+- Error：AIP-193
+- Long-running operation：AIP-151
+- Common operation metadata：检查 AIP-151 和当前 AIP index
 
 ## Protobuf Schema Design
 
-- Field behavior annotations: AIP-203
-- Resource annotations: AIP-123 and AIP-127
-- Comments and documentation: AIP-192
-- Backwards compatibility: check current AIP index for compatibility-related rules
+- Field behavior annotation：AIP-203
+- Resource annotation：AIP-123 和 AIP-127
+- Comment 与 documentation：AIP-192
+- Backwards compatibility：检查当前 AIP index 中与 compatibility 相关的规则
 
 ## Review Checklist
 
-For every endpoint, RPC, or schema under review:
+对于每个受评审的 endpoint、RPC 或 schema：
 
-1. Is the primary concept a resource with a stable resource name?
-2. Does the method fit a standard method before becoming custom?
-3. For REST/HTTP paths, does the first path segment include an AIP-185 major version prefix, or is there a verified global prefix injection configuration?
-4. Is the HTTP method and path consistent with the resource and operation?
-5. Are request and response messages named predictably?
-6. Are pagination, filtering, ordering, and field masks present only where useful and shaped consistently?
-7. Are mutations explicit about idempotency, validation, partial update behavior, and error cases?
-8. Are long-running operations represented with the expected operation shape?
-9. Are errors mapped to standard status codes and structured details where appropriate?
-10. For protobuf APIs, does `api-linter` pass or are suppressions justified?
+1. 主要概念是否为具有稳定 resource name 的 resource？
+2. method 在成为 custom method 前，是否适合某个 standard method？
+3. 对于 REST/HTTP path，第一个 path segment 是否包含 AIP-185 major version prefix，或是否存在已验证的 global prefix injection 配置？
+4. HTTP method 和 path 是否与 resource 和 operation 一致？
+5. request 与 response message 的命名是否可预测？
+6. pagination、filtering、ordering 和 field mask 是否仅在有用处出现，且 shape 保持一致？
+7. mutation 是否明确说明 idempotency、validation、partial update 行为和 error case？
+8. long-running operation 是否采用预期的 operation shape 表示？
+9. error 是否按适用情况映射到 standard status code 和 structured detail？
+10. 对于 protobuf API，`api-linter` 是否通过，或 suppression 是否有充分理由？

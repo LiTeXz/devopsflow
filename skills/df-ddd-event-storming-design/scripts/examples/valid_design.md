@@ -1,16 +1,16 @@
-# 问题域边界
+# Problem Domain Boundary
 
 订单提交。
 
-# 主体与协作场景
+# Actors and Collaboration Scenarios
 
 - 买家 -> 提交订单 -> 订单已提交 -> 订单详情读模型
 
-# 领域事件
+# Domain Events
 
 - 订单已提交
 
-# 命令
+# Commands
 
 - 买家发起提交订单
 
@@ -18,14 +18,14 @@
 
 - 无
 
-# 聚合
+# Aggregates
 
 - 订单
 
-# 读模型
+# Read Models
 
 - 订单详情，由订单已提交投影。
 
-# 完整性检查
+# Completeness Check
 
 - 每个事件都有生产路径。

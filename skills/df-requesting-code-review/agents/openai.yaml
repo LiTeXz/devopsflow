@@ -1,4 +1,4 @@
 interface:
   display_name: "Requesting Code Review"
-  short_description: "Prepare implemented code for review with a bug-focused self-review. Use after the main implementation is complete and before handoff, PR, or final completion to inspect diffs for behavioral regressions, missing tests, risky contracts, data consistency, security, error handling, and unclear verification evidence."
-  default_prompt: "Use $df-requesting-code-review to inspect the completed change for bugs, regressions, and missing tests before review."
+  short_description: "通过聚焦缺陷的自查，为已实现的代码准备审查。在主要实现完成后、交接、PR 或最终完成前使用，检查差异中是否存在行为回归、测试缺失、契约风险、数据一致性、安全、错误处理和验证证据不清等问题。"
+  default_prompt: "使用 $df-requesting-code-review 在审查前检查已完成的变更是否存在缺陷、回归和测试缺失。"

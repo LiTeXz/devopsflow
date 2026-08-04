@@ -1,22 +1,22 @@
 # Resumable Workflow Checkpoint
 
-Copy this template to `.devopsflow/checkpoints/<task-slug>.md` and keep it current while the task is active.
+将此模板复制到 `.devopsflow/checkpoints/<task-slug>.md`，并在任务 active 期间持续更新。
 
 ## Task
 
-- Name:
-- Goal:
-- Status: active
-- Owner:
-- Created:
-- Updated:
+- 名称：
+- 目标：
+- 状态：active
+- Owner：
+- 创建时间：
+- 更新时间：
 
 ## Resume Cursor
 
-- Current phase:
-- Next action:
-- Continue from:
-- Do not redo:
+- 当前阶段：
+- 下一步操作：
+- 从此处继续：
+- 不要重做：
 
 ## Workflow Chain
 
@@ -28,9 +28,9 @@ df-engineering-workflow-router
 
 ## Scope
 
-- In scope:
-- Out of scope:
-- User-owned changes:
+- 范围内：
+- 范围外：
+- 用户所有的变更：
 
 ## Checklist
 
@@ -40,45 +40,45 @@ df-engineering-workflow-router
 
 ## Touched Files
 
-| File | Owner | Reason | Status |
+| 文件 | Owner | 原因 | 状态 |
 | --- | --- | --- | --- |
 | | | | |
 
 ## Decisions And Assumptions
 
-- Decision:
-- Assumption:
+- 决策：
+- 假设：
 
 ## Verification Evidence
 
-| Command | Exit Code | Scope | Result |
+| 命令 | 退出码 | 范围 | 结果 |
 | --- | --- | --- | --- |
 | | | | |
 
 ## Risks And Blockers
 
-- Risk:
-- Blocker:
+- 风险：
+- Blocker：
 
 ## Progress Log
 
 ```text
 <timestamp>
-Task:
-Change:
-Verification:
-Status:
-Evidence:
-Next:
+任务：
+变更：
+验证：
+状态：
+证据：
+下一步：
 ```
 
 ## Handoff
 
 ```text
-Resume from:
-Current phase:
-Next action:
-Do not redo:
-Verify next with:
-Open risks:
+从此处继续：
+当前阶段：
+下一步操作：
+不要重做：
+下次验证：
+未决风险：
 ```

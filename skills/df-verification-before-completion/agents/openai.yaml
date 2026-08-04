@@ -1,4 +1,4 @@
 interface:
   display_name: "Verification Before Completion"
-  short_description: "Mandatory completion gate for engineering work. Use before saying a development, refactor, bug fix, modeling, review, documentation, configuration, commit, or PR task is complete to verify user requirements, changed files, commands run with exit codes, skipped checks, manual validation, residual risks, unrelated changes, and Chinese Conventional Commit readiness."
-  default_prompt: "Use $df-verification-before-completion to check requirements, changed files, commands, risks, and remaining gaps before finishing."
+  short_description: "工程工作的强制完成门禁。在宣称开发、重构、缺陷修复、建模、审查、文档、配置、commit 或 PR 任务完成前使用，用于核验用户需求、变更文件、已运行命令及退出码、跳过的检查、手动验证、残余风险、无关变更以及中文 Conventional Commit 就绪情况。"
+  default_prompt: "使用 $df-verification-before-completion 在完成前检查需求、变更文件、命令、风险和剩余缺口。"

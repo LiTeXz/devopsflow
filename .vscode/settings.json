@@ -41,12 +41,7 @@
   "diffEditor.renderSideBySide": false,
   "diffEditor.hideUnchangedRegions.enabled": true,
   "scm.defaultViewMode": "tree",
-  "editor.rulers": [
-    2,
-    4,
-    80,
-    160
-  ],
+  "editor.rulers": [2, 4, 80, 160],
   "editor.fontFamily": "JetBrains Mono",
   "editor.fontLigatures": true,
   "kiroAgent.notifications.agent.failure": true,
@@ -147,9 +142,7 @@
     ".windsurf": true,
     ".aiassistant": true
   }, */
-  "kiroAgent.experiments": {
-
-  },
+  "kiroAgent.experiments": {},
   "editor.smoothScrolling": true,
   "workbench.list.smoothScrolling": true,
   "terminal.integrated.smoothScrolling": true,

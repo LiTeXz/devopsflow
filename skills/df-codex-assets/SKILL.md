@@ -1,10 +1,10 @@
 ---
 name: df-codex-assets
-description: "Bootstrap DevOpsFlow Codex hook runtime assets into an installed plugin mirror before other hooks run."
+description: "在其他 hook 运行前，将 DevopsFlow Codex hook 运行时资产引导至已安装的插件镜像。"
 ---
 
-# DevOpsFlow Codex Asset Bootstrap
+# DevopsFlow Codex Asset Bootstrap
 
-This internal skill carries the bootstrap script and expected hash for DevOpsFlow's managed Codex runtime assets.
+此内部 skill 携带 DevopsFlow 托管的 Codex 运行时资产引导脚本及预期哈希值。
 
-The SessionStart hook runs `scripts/df-codex-assets.ts hydrate` before the runtime hook scripts. The script verifies the managed asset hash and, when an installed plugin mirror is missing those assets, downloads the versioned files from the matching GitHub tag.
+SessionStart hook 会在运行时 hook 脚本之前运行 `scripts/df-codex-assets.ts hydrate`。该脚本会校验托管资产的哈希值；当已安装的插件镜像缺少这些资产时，会从匹配的 GitHub tag 下载对应版本的文件。

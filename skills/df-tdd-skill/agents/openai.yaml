@@ -1,4 +1,4 @@
 interface:
   display_name: "Tdd Skill"
-  short_description: "Pure TDD workflow for greenfield feature development, bug fixes, behavior-preserving refactors, characterization tests, and characterize-then-fix work. Use when Codex needs test-first discipline to build new behavior from scratch or change existing code without drifting behavior. Applies across languages and architectures. Do not use for technology-specific layering rules, documentation-only edits, trivial formatting-only changes, or purely exploratory prototypes where no executable behavior is expected."
-  default_prompt: "Use $df-tdd-skill to define the next behavior, write the failing test first, go green, and refactor only after green."
+  short_description: "适用于全新功能开发、缺陷修复、行为保持型重构、特征测试以及先刻画后修复工作的纯 TDD 工作流。当 Codex 需要以测试优先的纪律从零构建新行为，或在不引起行为漂移的前提下修改现有代码时使用。适用于各种语言和架构。不要用于技术栈专用分层规则、仅文档编辑、简单格式调整，或不期望产生可执行行为的纯探索性原型。"
+  default_prompt: "使用 $df-tdd-skill 定义下一个行为，先编写失败测试，达到 GREEN，并且仅在 GREEN 后重构。"

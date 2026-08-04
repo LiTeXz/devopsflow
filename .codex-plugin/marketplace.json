@@ -1,20 +1,20 @@
 {
-	"name": "devopsflow",
-	"interface": {
-		"displayName": "DevOpsFlow"
-	},
-	"plugins": [
-		{
-			"name": "devopsflow",
-			"source": {
-				"source": "local",
-				"path": "."
-			},
-			"policy": {
-				"installation": "AVAILABLE",
-				"authentication": "ON_INSTALL"
-			},
-			"category": "Developer Tools"
-		}
-	]
+  "name": "devopsflow",
+  "interface": {
+    "displayName": "DevopsFlow"
+  },
+  "plugins": [
+    {
+      "name": "devopsflow",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
 }
