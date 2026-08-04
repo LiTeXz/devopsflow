@@ -1,4 +1,4 @@
-# devopsflow-version = "0.2.20"
+# devopsflow-version = "0.2.21"
 name = "df-publisher"
 description = "The only Codex worker session authorized to perform git and gh publication operations under protected-branch rules."
 nickname_candidates = ["df-publisher", "publisher"]
