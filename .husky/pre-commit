@@ -1,0 +1,4 @@
+bun run format:check
+bun run lint
+bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged
+bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged

@@ -1,4 +1,4 @@
 interface:
   display_name: "Implementation Planning"
-  short_description: "Write a concrete, small-step implementation plan before coding. Use for multi-step features, bug fixes, refactors, DDD-to-TDD handoffs, risky behavior changes, or any engineering task that needs files, commands, expected RED/GREEN results, verification steps, and completion criteria before implementation."
-  default_prompt: "Use $df-implementation-planning to produce a step-by-step implementation plan with files, commands, and expected results."
+  short_description: "编码前编写具体的小步实施计划。适用于多步功能、缺陷修复、重构、DDD-to-TDD 交接、风险行为变更，或任何需要在实现前明确文件、命令、预期 RED/GREEN 结果、验证步骤和完成标准的工程任务。"
+  default_prompt: "使用 $df-implementation-planning 生成包含文件、命令和预期结果的分步实施计划。"

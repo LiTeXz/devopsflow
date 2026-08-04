@@ -1,35 +1,35 @@
 # Why This Skill Uses One Google IAM-Style Vocabulary
 
-The `casures/` directory name is retained as an explicit project requirement. This document records the non-negotiable reasons for the authorization model.
+`casures/` 目录名作为明确的项目要求予以保留。本文档记录采用此授权模型不可协商的原因。
 
 ## Permissions Describe Actions, Not Assignments
 
-`service.resource.verb` answers one question: which action on which resource type in which service is being authorized? It does not encode who receives access, where the grant applies, or under which attributes it is valid.
+`service.resource.verb` 回答一个问题：正在授权哪个 service 中哪个 resource type 上的哪个 action？它不编码谁获得访问权限、grant 在何处生效，也不编码其在哪些 attribute 下有效。
 
-Traditional strings such as `admin:user:read` mix role, resource, and action. Different teams then reinterpret each segment, add more segments, reverse their order, or introduce wildcards. The same business action accumulates incompatible names.
+`admin:user:read` 等传统字符串混合了 role、resource 和 action。不同团队随后会重新解释各个 segment、增加更多 segment、颠倒其顺序或引入 wildcard。同一 business action 因而积累出不兼容的名称。
 
 ## Roles Must Remain Collections
 
-Google Cloud IAM models roles as collections of permissions and grants roles to principals. Keeping that separation allows least-privilege roles to evolve without renaming API actions. A role name therefore cannot substitute for a permission name or appear inside one.
+Google Cloud IAM 将 role 建模为 permission collection，并将 role 授予 principal。保持这种分离，可以让 least-privilege role 演进而不重命名 API action。因此，role name 不能替代 permission name，也不能出现在其中。
 
 ## ABAC Must Refine Bindings
 
-Attributes such as tenant, environment, ownership, request time, network, and resource tags change when a grant applies. They do not change the underlying action. CEL conditions belong on bindings so RBAC and ABAC share the same permission catalog.
+tenant、environment、ownership、request time、network 和 resource tag 等 attribute 改变的是 grant 何时生效，而不是底层 action。CEL condition 应归属于 binding，使 RBAC 与 ABAC 共享同一个 permission catalog。
 
-Encoding attributes into names creates unbounded variants such as `books.get.production`, `books.get.tenantA`, or `books.get.businessHours`. Those variants are forbidden.
+将 attribute 编码进名称会产生 `books.get.production`、`books.get.tenantA` 或 `books.get.businessHours` 等无界 variant。禁止这些 variant。
 
 ## API Protocols Must Not Create Namespaces
 
-REST routes, GraphQL resolvers, and gRPC RPCs are delivery surfaces. A transport migration must not require policy migration. Explicitly mapping every surface to one catalog prevents `rest.*`, `graphql.*`, and `grpc.*` permission families from diverging.
+REST route、GraphQL resolver 和 gRPC RPC 是 delivery surface。transport 迁移不得要求 policy 迁移。将每个 surface 显式映射到同一 catalog，可防止 `rest.*`、`graphql.*` 和 `grpc.*` permission family 产生分歧。
 
 ## A Stricter Subset Prevents Drift
 
-Google Cloud documents the broad `SERVICE.RESOURCE.VERB` shape. This skill deliberately adds exact casing, role grammar, CEL-only conditions, explicit API mappings, and fail-closed migration rules. The stricter subset makes identifiers mechanically verifiable and prevents teams from treating examples as optional style advice.
+Google Cloud 记录了宽泛的 `SERVICE.RESOURCE.VERB` 结构。此 skill 有意补充精确 casing、role grammar、CEL-only condition、显式 API mapping 和 fail-closed 迁移规则。更严格的子集使 identifier 可通过机械方式校验，并防止团队将示例视为可选的 style advice。
 
 ## No Compatibility Alias
 
-Accepting both `a:b:c` and `a.b.c` preserves two authorization languages indefinitely. Automatic conversion also hides ambiguous segment meanings and can grant the wrong action. Migration must choose one canonical replacement, update all controlled producers and consumers, and then reject the legacy value.
+同时接受 `a:b:c` 和 `a.b.c` 会无限期保留两种授权语言。自动转换还会隐藏含义模糊的 segment，并可能授予错误 action。迁移必须选择一个 canonical replacement，更新所有受控 producer 与 consumer，然后拒绝旧值。
 
 ## Security Consequence
 
-Malformed, unknown, legacy, or unmapped authorization data must deny access. Logging a warning while continuing, guessing a permission, falling back to a broad role, or skipping the check turns naming drift into an authorization bypass.
+格式错误、未知、旧式或未映射的授权数据必须导致拒绝访问。记录 warning 后继续、猜测 permission、fallback 到宽泛 role 或跳过检查，都会把命名漂移变成 authorization bypass。

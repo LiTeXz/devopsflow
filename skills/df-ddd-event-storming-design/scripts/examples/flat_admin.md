@@ -1,8 +1,8 @@
-# 问题域边界
+# Problem Domain Boundary
 
 后台组织管理。
 
-# 领域事件清单
+# Domain Event Catalog
 
 - 公司信息已变更
 - 部门信息已变更
@@ -10,7 +10,7 @@
 - 员工个人信息已变更
 - 公司已停用或解散
 
-# 命令清单
+# Command Catalog
 
 - 建立公司
 - 变更部门信息
@@ -21,18 +21,18 @@
 
 - 无
 
-# 聚合设计
+# Aggregate Design
 
 - 公司聚合
 - 部门聚合
 - 岗位聚合
 - 员工聚合
 
-# 读模型设计
+# Read Model Design
 
 - 公司列表
 - 部门树
 
-# 完整性检查
+# Completeness Check
 
 - 每个事件都有生产路径。

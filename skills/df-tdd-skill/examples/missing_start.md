@@ -5,9 +5,9 @@ tdd_finish:
   green_reached: true
   refactor_performed: false
   tests_run:
-  - "targeted test passed"
+  - "目标测试通过"
   current_contract_wrong: false
   wrong_contract_characterized: false
   wrong_contract_fixed: false
-  residual_risk: "none"
+  residual_risk: "无"
 ```

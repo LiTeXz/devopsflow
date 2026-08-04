@@ -1,19 +1,19 @@
 # Debugging Tactics
 
-Use the smallest useful observation:
+使用最小的有效观察手段：
 
-- failing unit or integration test
-- one added assertion
-- temporary log at the boundary where state changes
+- 失败的 unit test 或 integration test
+- 一条新增 assertion
+- 状态变化边界处的临时日志
 - debugger breakpoint
-- query against persisted state
-- contract replay or captured request
+- 对持久化状态的查询
+- 契约重放或捕获的请求
 
-When reproduction is difficult:
+难以复现时：
 
-1. Capture the exact environment, input, seed, time, timezone, and data version.
-2. Reduce the scenario until the failure disappears, then restore the last necessary condition.
-3. Compare a known-good path and failing path at the same boundary.
-4. Add a regression test for the reduced case once the cause is known.
+1. 捕获准确的环境、输入、seed、时间、时区和数据版本。
+2. 缩减场景直至失败消失，再恢复最后一个必要条件。
+3. 在同一边界比较已知正常路径与失败路径。
+4. 查明原因后，为缩减后的用例添加回归测试。
 
-Remove temporary diagnostics before completion unless they are converted into useful tests or structured logging.
+完成前移除临时诊断，除非它们已转化为有用测试或结构化日志。

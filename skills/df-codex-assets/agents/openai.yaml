@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Assets"
-  short_description: "Bootstrap DevOpsFlow Codex hook runtime assets into an installed plugin mirror before other hooks run."
-  default_prompt: "Use $df-codex-assets."
+  short_description: "在其他 hook 运行前，将 DevopsFlow Codex hook 运行时资产引导至已安装的插件镜像。"
+  default_prompt: "使用 $df-codex-assets。"

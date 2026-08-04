@@ -1,11 +1,11 @@
-# 问题域边界
+# Problem Domain Boundary
 
 根据 order_item 数据表设计订单聚合。
 
-# 领域事件
+# Domain Events
 
 - MQ消息已发送
 
-# 命令
+# Commands
 
 - 新增订单命令

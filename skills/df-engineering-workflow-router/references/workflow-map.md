@@ -38,11 +38,11 @@ Default minimal chain for glue-style implementation:
 
 ```text
 df-engineering-workflow-router
-  -> DDD gate when business meaning is unclear
+  -> 业务含义不清时经过 DDD gate
   -> df-glue-coding
   -> df-implementation-planning
   -> df-executing-implementation-plan
-  -> df-tdd-skill when behavior changes
+  -> 行为变化时使用 df-tdd-skill
   -> df-verification-before-completion
 ```
 
@@ -51,8 +51,8 @@ Default minimal chain for API authorization design:
 ```text
 df-engineering-workflow-router
   -> df-iam-access-control-design
-  -> df-google-aip-api-design when resource or transport design is involved
-  -> df-implementation-planning when executable behavior changes
-  -> df-tdd-skill when executable behavior changes
+  -> 涉及 resource 或 transport 设计时使用 df-google-aip-api-design
+  -> 可执行行为变化时使用 df-implementation-planning
+  -> 可执行行为变化时使用 df-tdd-skill
   -> df-verification-before-completion
 ```

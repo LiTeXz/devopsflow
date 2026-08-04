@@ -1,10 +1,10 @@
 # Hook Protocol
 
-This protocol supports semi-automated guardrails for pure TDD. The script checks only process metadata and state order; it does not check project structure, directories, frameworks, type names, or architecture style.
+此协议为纯 TDD 提供半自动护栏。脚本只检查流程元数据和状态顺序；不检查项目结构、目录、框架、类型名称或架构风格。
 
-The executable validator is `scripts/validate-tdd-protocol.ts`. It does not run automatically just because it is bundled in the skill. In the current environment, an agent using this skill must call it actively at fixed stages. If a future host supports platform-level hooks, the same script can be attached there.
+可执行 validator 是 [validate-tdd-protocol.ts](../scripts/validate-tdd-protocol.ts)。它不会仅因随 skill 一起分发就自动运行。在当前环境中，使用此 skill 的 agent 必须在固定阶段主动调用它。如果未来宿主支持平台级 hook，可以在那里挂接同一脚本。
 
-Examples:
+示例：
 
 ```bash
 bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage before_edit --input tdd-protocol.md
@@ -12,11 +12,11 @@ bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input t
 bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input tdd-protocol.md
 ```
 
-Append the current task's `tdd_start`, every `tdd_state`, and `tdd_finish` block to a temporary protocol file, then run the script against that file. The file can be deleted after the task unless the user asks to keep an audit trail.
+将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` 块追加到临时协议文件，然后对该文件运行脚本。除非用户要求保留审计记录，否则任务完成后可以删除该文件。
 
 ## State Machine
 
-Recommended order:
+推荐顺序：
 
 1. `scope_defined`
 2. `test_written`
@@ -25,59 +25,59 @@ Recommended order:
 5. `refactor_done`
 6. `final_verified`
 
-`scope_defined` is represented by `tdd_start`; `final_verified` is represented by `tdd_finish`. `tdd_state.phase` uses only the four middle states: `test_written`, `red_observed`, `green_reached`, and `refactor_done`.
-`refactor_done` may be skipped, but `tdd_finish.refactor_performed` must be `false`. Do not enter production behavior changes or final completion without `red_observed` unless `evidence` explains how an already-green test was proven valid.
+`scope_defined` 由 `tdd_start` 表示；`final_verified` 由 `tdd_finish` 表示。`tdd_state.phase` 只使用中间四种状态：`test_written`、`red_observed`、`green_reached` 和 `refactor_done`。
+可以跳过 `refactor_done`，但 `tdd_finish.refactor_performed` 必须为 `false`。除非 `evidence` 说明如何证明一个已经 GREEN 的测试有效，否则在没有 `red_observed` 时，不得进入生产行为修改或最终完成阶段。
 
 ## tdd_start
 
-Before editing production code, declare a `tdd_start` protocol block using `../templates/tdd_start.yaml`.
+编辑生产代码前，使用 [tdd_start.yaml](../templates/tdd_start.yaml) 声明 `tdd_start` 协议块。
 
-Blocking rules:
+阻断规则：
 
-- Missing `tdd_start` blocks production-code edits.
-- A `task_type` outside the four allowed enum values blocks.
-- Empty `protected_behavior`, `stable_boundary`, `first_test_to_write`, or `expected_red_reason` blocks.
-- When `current_contract_wrong: true`, `wrong_contract_plan` cannot be `none`.
-- When `task_type: characterize_then_fix`, `wrong_contract_plan` should be `fix_after_characterization`.
+- 缺少 `tdd_start` 时阻断生产代码编辑。
+- `task_type` 不属于四个允许的枚举值时阻断。
+- `protected_behavior`、`stable_boundary`、`first_test_to_write` 或 `expected_red_reason` 为空时阻断。
+- 当 `current_contract_wrong: true` 时，`wrong_contract_plan` 不能为 `none`。
+- 当 `task_type: characterize_then_fix` 时，`wrong_contract_plan` 应为 `fix_after_characterization`。
 
 ## tdd_state
 
-After key stages, record a `tdd_state` protocol block using `../templates/tdd_state.yaml`.
+关键阶段后，使用 [tdd_state.yaml](../templates/tdd_state.yaml) 记录 `tdd_state` 协议块。
 
-Blocking rules:
+阻断规则：
 
-- Without `test_written`, `red_observed` cannot be recorded.
-- Without `red_observed`, `green_reached` cannot be recorded.
-- Without `green_reached`, `refactor_done` cannot be recorded.
-- `red_observed.command` is required, or `command: none` must be justified in `evidence`.
-- `red_observed.exit_code` should be non-zero when recorded.
-- `green_reached.command` is required, or `command: none` must be justified in `evidence`.
-- `green_reached.exit_code` should be `0` when recorded.
-- `red_observed.evidence` must explain the relationship between the failure reason and the target risk.
-- If the test passes immediately, supplemental proof is required: a temporary perturbation, inverted assertion, removing the production path and seeing failure, or an explanation of why earlier red evidence cannot be reproduced.
+- 没有 `test_written` 时，不能记录 `red_observed`。
+- 没有 `red_observed` 时，不能记录 `green_reached`。
+- 没有 `green_reached` 时，不能记录 `refactor_done`。
+- 必须提供 `red_observed.command`；若使用 `command: none`，必须在 `evidence` 中说明理由。
+- 记录 `red_observed.exit_code` 时应为非零值。
+- 必须提供 `green_reached.command`；若使用 `command: none`，必须在 `evidence` 中说明理由。
+- 记录 `green_reached.exit_code` 时应为 `0`。
+- `red_observed.evidence` 必须说明失败原因与目标风险之间的关系。
+- 如果测试立即通过，必须提供补充证明：临时扰动、反转断言、移除生产路径并观察失败，或说明无法复现先前 RED 证据的原因。
 
 ## tdd_finish
 
-Before the final response, declare a `tdd_finish` protocol block using `../templates/tdd_finish.yaml`.
+最终响应前，使用 [tdd_finish.yaml](../templates/tdd_finish.yaml) 声明 `tdd_finish` 协议块。
 
-Blocking rules:
+阻断规则：
 
-- Missing `tdd_finish` blocks task completion.
-- `red_observed` or `green_reached` not being `true` requires more evidence or an explanation that the task could not be completed.
-- Empty `tests_run` requires at least one executed test or a reason tests were not run.
-- `tests_run` should use structured entries with `phase`, `command`, `exit_code`, and `evidence`. Legacy string entries are tolerated only when they include concrete phase and result evidence.
-- When `red_observed: true`, `tests_run` must include red-phase evidence.
-- When `green_reached: true`, `tests_run` must include green or final passing evidence.
-- `task_type: characterize_then_fix` with `wrong_contract_fixed: false` requires an explanation for stopping or continued repair work.
-- `current_contract_wrong: true` with `wrong_contract_characterized: false` requires additional characterization evidence.
+- 缺少 `tdd_finish` 时阻断任务完成。
+- `red_observed` 或 `green_reached` 不为 `true` 时，需要更多证据或任务无法完成的说明。
+- `tests_run` 为空时，必须至少运行一个测试或说明未运行测试的原因。
+- `tests_run` 应使用包含 `phase`、`command`、`exit_code` 和 `evidence` 的结构化条目。只有在旧式字符串包含具体阶段和结果证据时才予以兼容。
+- 当 `red_observed: true` 时，`tests_run` 必须包含 RED 阶段证据。
+- 当 `green_reached: true` 时，`tests_run` 必须包含 GREEN 或最终通过证据。
+- `task_type: characterize_then_fix` 且 `wrong_contract_fixed: false` 时，需要说明停止或继续修复工作的原因。
+- `current_contract_wrong: true` 且 `wrong_contract_characterized: false` 时，需要额外的特征测试证据。
 
 ## What This Does Not Check
 
-Pure TDD hooks do not check:
+纯 TDD hook 不检查：
 
-- Concrete layer names such as controller, service, or repository.
-- `MockMvc`, `ResponseEntity`, framework annotations, or types.
-- Directory structure, package names, or file naming.
-- Project-specific architecture rules.
+- controller、service 或 repository 等具体层名称。
+- `MockMvc`、`ResponseEntity`、框架 annotation 或类型。
+- 目录结构、包名或文件命名。
+- 项目专用架构规则。
 
-Those belong in technology-stack or architecture extensions, and should live in a separate skill or hook package.
+这些内容属于技术栈或架构扩展，应位于独立的 skill 或 hook 包中。

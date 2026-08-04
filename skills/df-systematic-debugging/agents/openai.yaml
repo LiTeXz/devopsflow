@@ -1,5 +1,4 @@
 interface:
-﻿interface:
   display_name: "Systematic Debugging"
-  short_description: "Evidence-based debugging workflow for failing tests, production bugs, regressions, flaky behavior, or unclear root causes. Use when Codex must reproduce a problem, locate the earliest wrong point, add observations or minimal tests, identify root-cause evidence, fix one cause at a time, and add regression coverage before completion."
-  default_prompt: "Use $df-systematic-debugging to reproduce the failure, gather evidence, find root cause, and fix it with regression coverage."
+  short_description: "面向测试失败、生产缺陷、回归、flaky 行为或根因不清问题的证据驱动调试工作流。当 Codex 必须复现问题、定位最早错误点、添加观察或最小测试、识别根因证据、每次修复一个原因，并在完成前添加回归覆盖时使用。"
+  default_prompt: "使用 $df-systematic-debugging 复现失败、收集证据、查明根因，并通过回归覆盖完成修复。"

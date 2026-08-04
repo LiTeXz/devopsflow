@@ -1,8 +1,8 @@
-# 参与贡献
+# Contributing
 
-感谢你参与 DevOpsFlow。提交改动前，请先阅读本说明。
+感谢你参与 DevopsFlow。提交改动前，请先阅读本说明。
 
-## 环境要求
+## Requirements
 
 - [Bun](https://bun.sh/)
 - [pnpm](https://pnpm.io/)
@@ -14,7 +14,7 @@
 pnpm install
 ```
 
-## 开始开发
+## Getting Started
 
 1. 从最新的目标分支创建功能分支。
 2. 保持改动范围单一，不混入无关调整。
@@ -24,7 +24,7 @@ pnpm install
 
 请勿直接在 `main`、`dev`、`develop` 或 `devlop` 等集成分支上开发。
 
-## 项目结构
+## Project Structure
 
 ```text
 .codex-plugin/   Codex 插件清单
@@ -33,11 +33,11 @@ agents/          Agent 配置
 assets/          图片与插件资源
 hooks/           Codex hooks
 scripts/         校验脚本与测试
-skills/          DevOpsFlow skills
+skills/          DevopsFlow skills
 src/shared/      共享实现
 ```
 
-## 验证
+## Verification
 
 ```bash
 pnpm test
@@ -55,7 +55,7 @@ pnpm check:skill-metadata
 
 提交 PR 时，请说明已运行的命令及结果。未运行的检查也应注明原因。
 
-## 提交信息
+## Commit Messages
 
 使用中文 Conventional Commits：
 
@@ -82,6 +82,6 @@ chore: 调整 skill 元数据
 
 建议每个 PR 只解决一个明确问题，以便审查和回退。
 
-## 许可证
+## License
 
 提交贡献即表示你同意贡献内容按照本项目的 [GNU General Public License v3.0](LICENSE) 发布。

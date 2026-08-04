@@ -1,163 +1,163 @@
 ---
 name: df-tdd-skill
-description: "Pure TDD workflow for greenfield feature development, bug fixes, behavior-preserving refactors, characterization tests, and characterize-then-fix work. Use when Codex needs test-first discipline to build new behavior from scratch or change existing code without drifting behavior. Applies across languages and architectures. Do not use for technology-specific layering rules, documentation-only edits, trivial formatting-only changes, or purely exploratory prototypes where no executable behavior is expected."
+description: "适用于全新功能开发、缺陷修复、行为保持型重构、特征测试以及先刻画后修复工作的纯 TDD 工作流。当 Codex 需要以测试优先的纪律从零构建新行为，或在不引起行为漂移的前提下修改现有代码时使用。适用于各种语言和架构。不要用于技术栈专用分层规则、仅文档编辑、简单格式调整，或不期望产生可执行行为的纯探索性原型。"
 ---
 
 # TDD Skill
 
-Use a project-agnostic TDD cadence to build or change behavior: define the next observable behavior first, make it fail, make it pass, and refactor only after green.
+使用与项目无关的 TDD 节奏构建或修改行为：先定义下一个可观察行为，使其失败，使其通过，并且仅在 GREEN 后重构。
 
 ## Protocol
 
-Before editing production code, emit a `tdd_start` protocol block using `templates/tdd_start.yaml` so the process is checkable.
+编辑生产代码前，使用 [tdd_start.yaml](templates/tdd_start.yaml) 输出 `tdd_start` 协议块，使流程可检查。
 
-Whenever an important state is observed, record a `tdd_state` protocol block using `templates/tdd_state.yaml`.
+每当观察到重要状态时，使用 [tdd_state.yaml](templates/tdd_state.yaml) 记录 `tdd_state` 协议块。
 
-Before finishing, emit a `tdd_finish` protocol block using `templates/tdd_finish.yaml`.
+完成前，使用 [tdd_finish.yaml](templates/tdd_finish.yaml) 输出 `tdd_finish` 协议块。
 
-These blocks are process metadata for semi-automated guardrails. Do not put project structure or technology-stack rules in them. See `references/hook-protocol.md` for the full protocol.
-Evidence fields must record concrete commands, exit codes, test names, and failure/pass summaries. Do not use vague evidence such as "the test failed" or "the test passed."
+这些块是半自动护栏所用的流程元数据。不要在其中放入项目结构或技术栈规则。完整协议参见 [hook-protocol.md](references/hook-protocol.md)。
+证据字段必须记录具体命令、退出码、测试名称以及失败或通过摘要。不要使用“测试失败了”或“测试通过了”等含糊证据。
 
-This skill cannot register platform-level automatic hooks. When using it, actively run `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` at fixed stages:
+此 skill 无法注册平台级自动 hook。使用时，必须在固定阶段主动运行 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`：
 
-- Append the current task's protocol blocks to a temporary workspace file, such as `.codex/tdd-protocol.md`, or to `tdd-protocol.md` in the system temp directory.
-- Before production-code edits: emit `tdd_start`, then run `--stage before_edit`. If validation fails, complete the declaration before editing production code.
-- After observing RED/GREEN/REFACTOR states: emit `tdd_state`, then run `--stage state`. If validation fails, add the command, exit code, test name, risk-specific evidence, or return to the correct stage.
-- Before the final response: emit `tdd_finish`, then run `--stage finish`. If validation fails, continue adding evidence, testing, or correcting the workflow.
+- 将当前任务的协议块追加到临时工作区文件（例如 `.codex/tdd-protocol.md`），或系统临时目录中的 `tdd-protocol.md`。
+- 编辑生产代码前：输出 `tdd_start`，然后运行 `--stage before_edit`。验证失败时，先补全声明再编辑生产代码。
+- 观察到 RED/GREEN/REFACTOR 状态后：输出 `tdd_state`，然后运行 `--stage state`。验证失败时，补充命令、退出码、测试名称、与风险相关的证据，或返回正确阶段。
+- 最终响应前：输出 `tdd_finish`，然后运行 `--stage finish`。验证失败时，继续补充证据、执行测试或纠正工作流。
 
 ## Core Loop
 
-1. Define one minimal behavior slice.
-2. State the stable boundary: public contract, transport boundary, orchestration logic, core logic, persistence boundary, external side effect, or another observable interface.
-3. Classify the task as `greenfield_feature`, `bug_fix`, `pure_refactor`, or `characterize_then_fix`.
-4. Write the test first: use a desired-behavior test for greenfield features, a reproducing test for bug fixes, or a characterization test for pure refactors.
-5. Observe RED first: record the failing command, exit code, test name, and the relationship between the failure and the target risk.
-   - If the test fails for the target risk, continue.
-   - If the test errors because the test itself is broken, fix the test until it fails for the target risk.
-   - If the test passes immediately, stop and prove it can fail for the target risk before editing production code.
-6. Make the smallest production change needed to reach GREEN.
-7. Refactor after green; do not do structural cleanup while red.
-8. Run the smallest relevant tests after every meaningful step.
-9. Repeat in small slices until the target behavior and design change are complete.
+1. 定义一个最小行为切片。
+2. 说明稳定边界：公共契约、传输边界、编排逻辑、核心逻辑、持久化边界、外部副作用或其他可观察接口。
+3. 将任务分类为 `greenfield_feature`、`bug_fix`、`pure_refactor` 或 `characterize_then_fix`。
+4. 先写测试：全新功能使用期望行为测试，缺陷修复使用复现测试，纯重构使用特征测试。
+5. 先观察 RED：记录失败命令、退出码、测试名称，以及失败与目标风险之间的关系。
+   - 如果测试因目标风险而失败，继续。
+   - 如果测试因测试本身有问题而报错，修复测试，直至它因目标风险而失败。
+   - 如果测试立即通过，停止操作；在编辑生产代码前，先证明它能够因目标风险而失败。
+6. 进行达到 GREEN 所需的最小生产代码修改。
+7. 在 GREEN 后重构；处于 RED 时不要进行结构清理。
+8. 每个有意义的步骤后运行最小相关测试。
+9. 以小切片重复，直至目标行为和设计变更完成。
 
 ## Violation Recovery
 
-When the flow is violated, recover before continuing instead of rationalizing the deviation:
+违反流程时，在继续前恢复流程，不要为偏差辩解：
 
-- If production code was added or changed before a meaningful failing test, stop and remove or set aside that production change, then write the failing test first.
-- If tests were added after the implementation, do not count that as TDD evidence. Recreate a RED signal by reverting or disabling the implementation path enough to prove the test protects the target risk.
-- If a RED state cannot be observed because the behavior already exists, prove the test can fail with a temporary mutation, then restore the code before proceeding.
-- If the user explicitly asks to keep a non-TDD path, report the deviation, compensating tests, and remaining risk in the final response.
+- 如果在有意义的失败测试前已经添加或修改生产代码，停止并移除或暂存该生产代码修改，然后先写失败测试。
+- 如果测试在实现之后才添加，不要将其视为 TDD 证据。充分回退或禁用实现路径，重新产生 RED 信号，以证明测试能够保护目标风险。
+- 如果因行为已经存在而无法观察 RED 状态，使用临时变异证明测试能够失败，然后在继续前恢复代码。
+- 如果用户明确要求保留非 TDD 路径，在最终响应中报告偏差、补偿测试和剩余风险。
 
 ## Greenfield Feature Development
 
-For new development, define the first externally observable behavior before creating production implementation:
+对于全新开发，在创建生产实现前定义第一个外部可观察行为：
 
-- State the first behavior in business, user, or public-contract terms.
-- Choose the first stable boundary: public API, CLI command, UI interaction, domain service, pure function, persistence contract, or integration boundary.
-- Write the failing test before creating the implementation.
-- A RED state may fail because a symbol, route, class, command, or module does not exist yet; this is valid only when the missing element is exactly the boundary required by the behavior slice.
-- Add only the production code needed to make the current test pass.
-- Delay broad infrastructure, abstractions, and cleanup until a green test creates real pressure for them.
-- Repeat with the next smallest behavior slice.
+- 用业务、用户或公共契约语言说明第一个行为。
+- 选择第一个稳定边界：公共 API、CLI 命令、UI 交互、领域服务、纯函数、持久化契约或集成边界。
+- 在创建实现前编写失败测试。
+- RED 状态可以因符号、路由、类、命令或模块尚不存在而失败；只有当缺失元素恰好是行为切片所需边界时，这才有效。
+- 只添加使当前测试通过所需的生产代码。
+- 在 GREEN 测试产生真实压力前，延后大范围基础设施、抽象和清理。
+- 使用下一个最小行为切片重复。
 
 ## Non-Negotiable Rules
 
-- Do not add or change production behavior without a failing test that supports the desired observable behavior.
-- For greenfield work, do not create broad infrastructure before the first failing behavior test unless the project cannot run tests without minimal setup.
-- Do not accept "too small to test", "I will add tests later", "manual verification is enough", or "this is only plumbing" as reasons to skip RED.
-- Do not name an incorrect current contract as the desired contract. When current behavior is wrong, explicitly choose either "characterize compatibility only" or "characterize, then continue fixing."
-- For pure refactors, do not casually change public contracts, defaults, error semantics, ordering, pagination, transaction/consistency boundaries, security rules, persistence results, or external side effects.
-- Assert observable behavior, not only implementation details or "no exception."
-- Choose the narrowest test layer that truly protects the risk. Widen the test when a narrow test cannot cover a boundary risk.
-- Refactor only after green. The same relevant test set should still pass after refactoring.
-- Do not disguise architecture or technology-stack rules as TDD itself. Use the relevant technology-stack skill when a framework boundary matters.
-- Treat `tdd_start`, `tdd_state`, and `tdd_finish` as the only stable validation interface. The semi-automated script should not infer project directories or framework types.
-- Do not satisfy the protocol with vague evidence. RED evidence must show the target test failed for the target risk; GREEN evidence must show the same risk is protected after the minimal production change.
+- 没有支持期望可观察行为的失败测试时，不要添加或修改生产行为。
+- 对于全新工作，除非项目没有最小设置就无法运行测试，否则不要在首个失败行为测试前创建大范围基础设施。
+- 不要以“太小而不值得测试”“稍后补测试”“手工验证已足够”或“这只是胶水代码”为由跳过 RED。
+- 不要把错误的当前契约命名为期望契约。当前行为错误时，明确选择“仅刻画兼容性”或“先刻画，再继续修复”。
+- 对于纯重构，不要随意修改公共契约、默认值、错误语义、排序、分页、事务或一致性边界、安全规则、持久化结果或外部副作用。
+- 断言可观察行为，不要只断言实现细节或“没有异常”。
+- 选择真正保护风险的最窄测试层。当窄层测试无法覆盖边界风险时，扩大测试范围。
+- 仅在 GREEN 后重构。重构后，同一组相关测试仍应通过。
+- 不要把架构或技术栈规则伪装成 TDD 本身。框架边界相关时，使用对应的技术栈 skill。
+- 将 `tdd_start`、`tdd_state` 和 `tdd_finish` 视为唯一稳定的验证接口。半自动脚本不应推断项目目录或框架类型。
+- 不要使用含糊证据满足协议。RED 证据必须表明目标测试因目标风险而失败；GREEN 证据必须表明最小生产修改后，同一风险已受到保护。
 
 ## Pre-Edit Check
 
-Before the first production-code edit, write down:
+第一次编辑生产代码前，写下：
 
-- What behavior is being protected?
-- What is the stable boundary?
-- Is the task type `greenfield_feature`, `bug_fix`, `pure_refactor`, or `characterize_then_fix`?
-- Which test will go red first? Why is that red meaningful?
-- Which kind of boundary does this change touch: public contract, transport, orchestration, core logic, persistence, external system, or side effect?
-- Which behaviors must not change?
-- For greenfield work, what is the smallest useful behavior that can be observed through the boundary?
-- If current behavior is wrong, is this task preserving compatibility or continuing to a fix?
+- 正在保护什么行为？
+- 稳定边界是什么？
+- 任务类型是 `greenfield_feature`、`bug_fix`、`pure_refactor` 还是 `characterize_then_fix`？
+- 哪个测试会先进入 RED？为什么这个 RED 有意义？
+- 此变更触及哪类边界：公共契约、传输、编排、核心逻辑、持久化、外部系统还是副作用？
+- 哪些行为不得改变？
+- 对于全新工作，可以通过边界观察到的最小有用行为是什么？
+- 如果当前行为错误，此任务是在保持兼容性还是继续修复？
 
-If the answers are unclear, keep reading code or add tests before changing production code.
+如果答案不明确，在修改生产代码前继续阅读代码或添加测试。
 
 ## Choosing Test Layers
 
-Choose the test layer by risk, not by filename or technology preference:
+按风险选择测试层，而不是按文件名或技术偏好选择：
 
-- Core rules, calculations, state transitions, pure functions, value objects: unit tests.
-- Orchestration logic, collaborator call order, batch processing, continue/stop-on-failure policy: component or orchestration-level tests.
-- Public transport boundaries, request/response contracts, serialization, validation, authentication and authorization: boundary or contract tests.
-- Persistence queries, ordering, pagination, constraints, transaction-sensitive behavior: persistence or integration tests.
-- Cross-layer collaboration as the risk itself: a small number of end-to-end or system tests.
-- Dependency direction or layering rules as the risk: architecture tests or static checks.
+- 核心规则、计算、状态转换、纯函数、值对象：单元测试。
+- 编排逻辑、协作者调用顺序、批处理、失败后继续或停止策略：组件或编排层测试。
+- 公共传输边界、请求或响应契约、序列化、验证、认证和授权：边界或契约测试。
+- 持久化查询、排序、分页、约束、事务敏感行为：持久化或集成测试。
+- 风险本身是跨层协作：少量端到端或系统测试。
+- 风险是依赖方向或分层规则：架构测试或静态检查。
 
-Treat environment-backed validation as part of the same TDD and verification continuum, not as work outside development:
+将有环境支撑的验证视为同一 TDD 与验证连续体的一部分，而不是开发之外的工作：
 
-- Use integration tests when the risk depends on real services, data stores, protocols, transactions, or toolchain behavior.
-- Use property tests when invariants must hold across a generated input space rather than a few examples.
-- Use canary tests when release behavior must be observed in a controlled environment before broader exposure.
-- Turn production incident investigation into a reproducing test with sanitized inputs, observable evidence, and a regression assertion before fixing the defect.
-- Keep unit tests, functional tests, integration tests, property tests, canary tests, and incident-reproduction tests connected by the same risk and behavior traceability.
-- Record required services, fixtures, environment assumptions, commands, and observations. If an environment is unavailable, report the unverified layer and remaining risk instead of reclassifying it as unnecessary.
+- 当风险取决于真实服务、数据存储、协议、事务或工具链行为时，使用集成测试。
+- 当不变量必须在生成的输入空间而非少数示例中成立时，使用属性测试。
+- 当发布行为必须先在受控环境中观察再扩大范围时，使用 canary 测试。
+- 修复缺陷前，使用脱敏输入、可观察证据和回归断言，将生产事故调查转化为复现测试。
+- 通过相同的风险和行为可追踪关系，将单元测试、功能测试、集成测试、属性测试、canary 测试和事故复现测试连接起来。
+- 记录所需服务、fixture、环境假设、命令和观察结果。如果环境不可用，报告未经验证的层和剩余风险，不要将其重新归类为不必要。
 
-See `references/test-slices.md` for more detail.
+更多细节参见 [test-slices.md](references/test-slices.md)。
 
 ## Characterization Tests
 
-Before changing behavior-preserving code, capture the current behavior:
+修改保持行为的代码前，捕获当前行为：
 
-- Cover the happy path and awkward edge cases callers may depend on.
-- Assert return values, error semantics, important parameters, persistence changes, and external side effects.
-- For pagination, batching, import/export, callbacks, and repeated queries, capture the full sequence instead of only the first call.
-- Assert exception types and meaningful messages or error codes.
-- Keep test data small, readable, and named by business meaning.
+- 覆盖调用方可能依赖的正常路径和棘手边界场景。
+- 断言返回值、错误语义、重要参数、持久化变更和外部副作用。
+- 对于分页、批处理、导入或导出、回调和重复查询，捕获完整序列，而不只是第一次调用。
+- 断言异常类型以及有意义的消息或错误码。
+- 保持测试数据小巧、可读，并按业务含义命名。
 
-See `references/characterization-tests.md` for the full rules.
+完整规则参见 [characterization-tests.md](references/characterization-tests.md)。
 
 ## When Testing Feels Hard
 
-Treat difficult tests as design feedback before widening the implementation:
+在扩大实现范围前，将难以编写的测试视为设计反馈：
 
-- If setup is huge, look for an unstable boundary, hidden dependency, or missing seam at the public contract.
-- If mocks are complex, reconsider whether the behavior belongs in a narrower core unit, a component test, or a real integration slice.
-- If assertions are vague, write the desired assertion first and shape the test data around the behavior.
-- If the first test would require broad infrastructure, choose a smaller observable behavior or a more stable boundary.
+- 如果准备工作庞大，查找公共契约上的不稳定边界、隐藏依赖或缺失的接缝。
+- 如果 mock 复杂，重新考虑该行为是否应位于更窄的核心单元、组件测试或真实集成切片中。
+- 如果断言含糊，先写期望断言，再围绕行为塑造测试数据。
+- 如果首个测试需要大范围基础设施，选择更小的可观察行为或更稳定的边界。
 
 ## Completion Criteria
 
-- Each new or changed key test has gone RED and then GREEN after the production change.
-- For greenfield work, each implemented behavior slice has gone RED before production implementation and GREEN after the smallest change.
-- Moved responsibilities still have behavior-test protection at their new owner.
-- There are no accidental behavior changes, especially in contracts, defaults, error semantics, ordering, pagination, consistency, security, persistence results, and side effects.
-- The smallest relevant tests pass; broader checks have been run or explicitly called out as not run.
-- Any deviation from the TDD flow is explicitly reported with the reason, compensating tests, and remaining risk.
-- Final user-facing reports must be in Chinese and include protected behavior, test layer, design change, changed files, command results, and remaining risk.
+- 每个新增或修改的关键测试都在生产修改后经历了 RED 再到 GREEN。
+- 对于全新工作，每个已实现行为切片都在生产实现前经历 RED，并在最小修改后达到 GREEN。
+- 移动后的职责在新归属方仍有行为测试保护。
+- 没有意外行为变更，尤其是契约、默认值、错误语义、排序、分页、一致性、安全性、持久化结果和副作用。
+- 最小相关测试通过；更广泛的检查已运行，或明确说明未运行。
+- TDD 流程的任何偏差都明确报告原因、补偿测试和剩余风险。
+- 面向用户的最终报告必须使用中文，并包含受保护行为、测试层、设计变更、修改文件、命令结果和剩余风险。
 
 ## On-Demand References
 
-- `references/test-slices.md`: choose test layers by risk.
-- `references/hook-protocol.md`: fields, states, and blocking rules for the semi-automated TDD guardrail script.
-- `references/characterization-tests.md`: how to write characterization tests for complex existing behavior.
-- `references/checklists.md`: pre-edit, pre-finish, test-quality, and boundary-smell checks.
-- `references/eval-cases.md`: failure samples and expected guardrail behavior for iterating this skill.
-- `references/anti-patterns.md`: common TDD failure modes to reject or correct when iterating this skill.
-- `templates/tdd_start.yaml`, `templates/tdd_state.yaml`, `templates/tdd_finish.yaml`: protocol block templates to load as needed.
-- `scripts/validate-tdd-protocol.ts`: protocol validation script to run at fixed stages with `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`.
-- `scripts/run-protocol-examples.test.ts`: lightweight regression suite to run with `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts`; it checks valid examples pass and common violations fail.
+- [test-slices.md](references/test-slices.md)：按风险选择测试层。
+- [hook-protocol.md](references/hook-protocol.md)：半自动 TDD 护栏脚本的字段、状态和阻断规则。
+- [characterization-tests.md](references/characterization-tests.md)：如何为复杂现有行为编写特征测试。
+- [checklists.md](references/checklists.md)：编辑前、完成前、测试质量和边界异味检查。
+- [eval-cases.md](references/eval-cases.md)：迭代此 skill 时使用的失败样例和预期护栏行为。
+- [anti-patterns.md](references/anti-patterns.md)：迭代此 skill 时应拒绝或纠正的常见 TDD 失败模式。
+- [tdd_start.yaml](templates/tdd_start.yaml)、[tdd_state.yaml](templates/tdd_state.yaml)、[tdd_finish.yaml](templates/tdd_finish.yaml)：按需加载的协议块模板。
+- [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` 运行的协议验证脚本。
+- [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts)：使用 `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts` 运行的轻量回归套件；它检查有效示例通过且常见违规失败。
 
 ## Commit Message
 
-When committing, follow the repository's existing format. If there is no stricter rule, use Conventional Commits with a Chinese summary:
+提交时遵循仓库现有格式。如果没有更严格规则，使用带中文摘要的 Conventional Commits：
 
 - `feat: add work-order creation service`
 - `refactor: restructure test-execution record query`

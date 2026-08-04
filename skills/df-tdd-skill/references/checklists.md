@@ -2,55 +2,55 @@
 
 ## Before Editing
 
-- Has `tdd_start` been emitted?
-- Can the target behavior be stated in one sentence?
-- Is the stable boundary clear?
-- Is the task type clear: `greenfield_feature`, `bug_fix`, `pure_refactor`, or `characterize_then_fix`?
-- Which test will go red first?
-- Why will the test fail because of the target risk rather than incidental implementation details?
-- Which public contracts, error semantics, ordering, pagination, consistency, security behavior, or side effects must not change?
-- For greenfield work, is the first useful behavior observable through a stable boundary before production implementation exists?
-- Has wrong behavior been characterized? If so, is the plan to preserve it or continue fixing it explicit?
+- 是否已输出 `tdd_start`？
+- 能否用一句话说明目标行为？
+- 稳定边界是否清晰？
+- 任务类型是否清晰：`greenfield_feature`、`bug_fix`、`pure_refactor` 或 `characterize_then_fix`？
+- 哪个测试会先进入 RED？
+- 为什么测试会因目标风险而非偶然实现细节失败？
+- 哪些公共契约、错误语义、排序、分页、一致性、安全行为或副作用不得改变？
+- 对于全新工作，在生产实现存在前，首个有用行为能否通过稳定边界观察？
+- 是否已刻画错误行为？如果是，计划保留还是继续修复是否明确？
 
 ## Test Quality
 
-- Does the test name state the condition and outcome?
-- Does one test fail for one clear reason?
-- Does the test name avoid "and" or "also" unless the outcomes are inseparable?
-- Does the test assert important behavior rather than only no exception?
-- Are important parameters asserted exactly or captured?
-- Is test data minimal and named by business meaning?
-- Is the test layer narrow enough while still covering the real risk?
-- Should the test remain green when internal refactoring does not change external behavior?
-- Would the new test really fail before the production change?
-- Would the test fail if the production behavior were removed or deliberately mutated?
+- 测试名称是否说明条件和结果？
+- 一个测试是否只因一个明确原因失败？
+- 除非结果不可分割，否则测试名称是否避免使用“并且”或“还”？
+- 测试是否断言重要行为，而不是仅断言没有异常？
+- 重要参数是否被精确断言或捕获？
+- 测试数据是否最小且按业务含义命名？
+- 测试层是否足够窄，同时仍覆盖真实风险？
+- 内部重构不改变外部行为时，测试是否应保持 GREEN？
+- 新测试在生产修改前是否真的会失败？
+- 如果移除或故意变异生产行为，测试是否会失败？
 
 ## TDD Smells
 
-- Missing `tdd_start`, `tdd_state`, or `tdd_finish`, making the process uncheckable.
-- Production refactoring happened first and tests were added afterward.
-- Production code was kept after a TDD violation without recreating a meaningful RED signal.
-- "Too small to test", "tests will be added later", "manual verification is enough", or "only plumbing" was used to skip RED.
-- Tests verify implementation structure and fail even when behavior is unchanged.
-- Tests mostly verify mocks, broad matchers, or setup rather than observable behavior.
-- Wrong contracts were characterized without saying whether they are preserved or fixed.
-- Tests cover only the first item, page, or batch while production behavior repeats.
-- The failing test was not observed, or the failure reason is unrelated to the target risk.
-- Naming, extracting classes, formatting, or other structural cleanup is mixed into a red state.
+- 缺少 `tdd_start`、`tdd_state` 或 `tdd_finish`，导致流程不可检查。
+- 先完成生产代码重构，之后才添加测试。
+- 违反 TDD 后保留生产代码，却没有重新产生有意义的 RED 信号。
+- 使用“太小而不值得测试”“稍后补测试”“手工验证已足够”或“只是胶水代码”跳过 RED。
+- 测试验证实现结构，即使行为不变也会失败。
+- 测试主要验证 mock、宽泛 matcher 或准备过程，而非可观察行为。
+- 刻画错误契约时，没有说明要保留还是修复它。
+- 生产行为会重复时，测试只覆盖第一个条目、页面或批次。
+- 没有观察到失败测试，或失败原因与目标风险无关。
+- 在 RED 状态中混入命名、提取类、格式化或其他结构清理。
 
 ## When Stuck
 
-- Can the desired assertion be written first, even before setup is complete?
-- Is the chosen boundary too unstable or too internal?
-- Is a hard-to-write test revealing hidden coupling, unclear API shape, or a missing domain concept?
-- Would a narrower core test or a real integration slice remove excessive mocks?
-- Can the first behavior slice be smaller while still observable?
+- 即使准备工作尚未完成，能否先写期望断言？
+- 所选边界是否过于不稳定或过于内部？
+- 难写的测试是否暴露了隐藏耦合、不清晰的 API 结构或缺失的领域概念？
+- 更窄的核心测试或真实集成切片能否减少过多 mock？
+- 首个行为切片能否更小，同时仍可观察？
 
 ## Before Finishing
 
-- Has `tdd_finish` been emitted?
-- Is there RED evidence for key tests, or an explanation for why the evidence cannot be retained?
-- Have the smallest relevant tests passed?
-- If public contracts, persistence, consistency, security, or external systems are involved, have broader checks been run or explicitly called out as not run?
-- Are moved responsibilities protected by behavior tests at the new owner?
-- Does the final report list protected behavior, stable boundary, test layer, design change, files, command results, and risks?
+- 是否已输出 `tdd_finish`？
+- 关键测试是否有 RED 证据，或有无法保留证据的说明？
+- 最小相关测试是否通过？
+- 如果涉及公共契约、持久化、一致性、安全性或外部系统，是否已运行更广泛检查，或明确说明未运行？
+- 移动后的职责是否在新归属方受到行为测试保护？
+- 最终报告是否列出受保护行为、稳定边界、测试层、设计变更、文件、命令结果和风险？

@@ -1,33 +1,33 @@
 ---
 name: df-receiving-code-review
-description: "Address code review feedback safely. Use when Codex receives PR comments, review threads, requested changes, inline code review feedback, or maintainer suggestions and must classify comments, decide what to fix or discuss, apply focused changes, verify each fix, and avoid unrelated refactors."
+description: "安全处理代码审查反馈。当 Codex 收到 PR 评论、审查线程、变更请求、行内代码审查反馈或维护者建议，需要对评论分类、决定修复或讨论、应用聚焦变更、验证每项修复并避免无关重构时使用。"
 ---
 
 # Receiving Code Review
 
-Use this skill when review comments arrive.
+收到审查评论时使用此 skill。
 
 ## Review Intake
 
-For each comment:
+对于每条评论：
 
-1. Read the full comment and surrounding code.
-2. Classify it:
+1. 阅读完整评论及其上下文代码。
+2. 对评论分类：
    - `must_fix`
    - `discuss`
    - `decline_with_reason`
    - `already_addressed`
    - `needs_more_context`
-3. Identify the affected behavior, file, and test surface.
-4. Decide whether the fix requires `df-tdd-skill`, `df-systematic-debugging`, or `df-spring-web-boundaries`.
+3. 识别受影响的行为、文件和测试面。
+4. 判断修复是否需要 `df-tdd-skill`、`df-systematic-debugging` 或 `df-spring-web-boundaries`。
 
 ## Fix Workflow
 
-1. Address one review topic at a time.
-2. Keep changes scoped to the comment.
-3. Add or update tests when behavior changes or the comment exposes an unprotected risk.
-4. Run the smallest relevant verification after each topic.
-5. Record evidence and the response for the reviewer.
+1. 每次处理一个审查主题。
+2. 将变更范围限制在评论所指内容。
+3. 当行为变化或评论暴露出未受保护的风险时，添加或更新测试。
+4. 每个主题处理完后，运行最小的相关验证。
+5. 记录证据以及给审查者的回复。
 
 ## Response Format
 
@@ -44,8 +44,8 @@ For each comment:
 
 ## Non-Negotiable Rules
 
-- Do not batch unrelated review comments into one broad refactor.
-- Do not mark a comment resolved without code, evidence, or a clear explanation.
-- Do not ignore requested changes because tests currently pass.
-- Do not revert user or reviewer changes outside the targeted scope.
-- Do not argue from preference when the comment identifies a concrete bug or contract risk.
+- 不要把无关的审查评论合并成一次大范围重构。
+- 没有代码、证据或清晰解释时，不要将评论标记为已解决。
+- 不要因为当前测试通过就忽略变更请求。
+- 不要还原目标范围之外的用户或审查者变更。
+- 当评论指出具体缺陷或契约风险时，不要以个人偏好作为反驳依据。

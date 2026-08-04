@@ -1,33 +1,33 @@
 ---
 name: df-finishing-development-branch
-description: "Finish a development branch for commit, push, PR, or handoff. Use after implementation and verification to inspect git status, separate user-owned changes from Codex changes, confirm tests and plan completion, prepare a Chinese Conventional Commit message, and draft PR or handoff notes."
+description: "完成开发分支，为 commit、push、PR 或交接做准备。在实现和验证后使用，用于检查 git 状态、分离用户所有的变更与 Codex 变更、确认测试和计划完成情况、准备中文 Conventional Commit message，并起草 PR 或交接说明。"
 ---
 
 # Finishing Development Branch
 
-Use this skill when preparing a branch for commit, push, PR, or handoff.
+准备分支以进行 commit、push、PR 或交接时使用此 skill。
 
 ## Branch Finish Workflow
 
-1. Run `git status --short`.
-2. Identify:
-   - files changed by this task
-   - unrelated or user-owned changes
-   - generated files that should not be committed
-3. Confirm all planned tasks are complete.
-4. Confirm `df-verification-before-completion` evidence.
-5. Review the diff for accidental changes.
-6. Stage only intended files.
-7. Prepare the commit message.
-8. If opening a PR, draft the PR description with:
-   - purpose
-   - key changes
-   - tests and exit codes
-   - risks or follow-ups
+1. 运行 `git status --short`。
+2. 识别：
+   - 本任务变更的文件
+   - 无关变更或用户所有的变更
+   - 不应提交的生成文件
+3. 确认所有计划任务均已完成。
+4. 确认 `df-verification-before-completion` 证据。
+5. 审查差异中是否有意外变更。
+6. 只暂存预期文件。
+7. 准备 commit message。
+8. 如果要打开 PR，起草包含以下内容的 PR 描述：
+   - 目的
+   - 关键变更
+   - 测试及退出码
+   - 风险或后续事项
 
 ## Commit Message Rule
 
-Use the repository's stricter format when present. Otherwise use Chinese Conventional Commits:
+如果仓库存在更严格的格式，则遵循该格式；否则使用中文 Conventional Commits：
 
 ```text
 feat: add order-submission domain slice
@@ -38,12 +38,12 @@ docs: update engineering workflow skill guidance
 chore: adjust skill metadata
 ```
 
-The type stays in English; the summary is Chinese.
+type 保持英文，摘要使用中文。
 
 ## Non-Negotiable Rules
 
-- Do not stage unrelated or user-owned changes.
-- Do not commit with failing required checks unless the user explicitly accepts the risk.
-- Do not invent test evidence in the commit or PR description.
-- Do not rewrite branch history unless the user explicitly asks.
-- Do not use vague commit summaries such as `update`, `fix stuff`, or `changes`.
+- 不要暂存无关变更或用户所有的变更。
+- 必要检查失败时不要提交，除非用户明确接受风险。
+- 不要在 commit 或 PR 描述中编造测试证据。
+- 除非用户明确要求，否则不要重写分支历史。
+- 不要使用 `update`、`fix stuff` 或 `changes` 等模糊 commit 摘要。

@@ -1,38 +1,38 @@
 # TDD Anti-Patterns
 
-- Implementation-first TDD cosplay: write production code first, then add tests that merely describe what was already built.
-- Meaningless RED: accept a failing test caused by syntax, import, setup, or unrelated fixture errors instead of the target behavior.
-- Accidental GREEN: write a test that passes immediately and continue implementing without proving the test can fail for the target risk.
-- Mock-only confidence: assert only collaborator calls while missing observable behavior, state, return values, persistence, or side effects.
-- Refactor while RED: perform structural cleanup while the behavior test is failing.
-- Broad GREEN leap: make multiple behavior slices pass with a large implementation that was not driven by the current test.
-- Manual verification substitution: use a quick manual check as a replacement for an executable test when a test is feasible.
-- Characterization drift: call current behavior characterized while omitting edge cases that callers likely depend on.
+- 实现优先的 TDD 表演：先写生产代码，再添加仅仅描述已有实现的测试。
+- 无意义的 RED：接受由语法、导入、准备工作或无关 fixture 错误导致的失败测试，而不是目标行为导致的失败。
+- 意外 GREEN：编写立即通过的测试，并在未证明该测试能够因目标风险而失败时继续实现。
+- 仅靠 mock 建立信心：只断言协作者调用，却遗漏可观察行为、状态、返回值、持久化或副作用。
+- 在 RED 时重构：行为测试失败时进行结构清理。
+- 大跨度 GREEN：使用并非由当前测试驱动的大规模实现，一次使多个行为切片通过。
+- 以手工验证替代测试：在可行的情况下，以快速手工检查替代可执行测试。
+- 特征测试漂移：声称已刻画当前行为，却遗漏调用方可能依赖的边界场景。
 
 ## Weak Assertions
 
-- Do not assert only "does not throw" unless the absence of a specific exception is the public behavior.
-- Do not assert only that a collaborator was called when the behavior depends on the returned value, persisted state, emitted message, response shape, or side effect.
-- Do not use broad matchers for important arguments. Capture or assert parameters that carry business meaning.
-- Do not leave a test green when the production behavior can be removed without failing the test.
+- 除非不存在某种异常本身就是公共行为，否则不要只断言“没有抛出异常”。
+- 当行为取决于返回值、持久化状态、发出消息、响应结构或副作用时，不要只断言协作者被调用。
+- 不要对重要参数使用宽泛 matcher。捕获或断言承载业务含义的参数。
+- 如果移除生产行为后测试仍不失败，不要让该测试保持 GREEN。
 
 ## Mock Smells
 
-- Do not test the mock instead of the system behavior. A verification that merely repeats the setup is usually worthless.
-- Do not mock collaborators whose real behavior is the risk being protected, such as serialization, validation, persistence constraints, transaction boundaries, ordering, pagination, retries, or external protocol shape.
-- Do not use incomplete mock data when production code reads more fields than the test initializes. Build small but valid objects.
-- Do not hide important collaborator arguments behind `any`, broad predicates, or default stubs.
-- Do not add production-only hooks, setters, constructors, or visibility changes just to make mocking easier unless that is an intentional design improvement.
+- 不要测试 mock 而非系统行为。仅仅重复准备过程的验证通常毫无价值。
+- 当协作者的真实行为正是受保护风险时，不要 mock 它，例如序列化、验证、持久化约束、事务边界、排序、分页、重试或外部协议结构。
+- 当生产代码读取的字段多于测试初始化的字段时，不要使用不完整的 mock 数据。构建小巧但有效的对象。
+- 不要把重要协作者参数隐藏在 `any`、宽泛谓词或默认 stub 后面。
+- 除非这是有意的设计改进，否则不要仅为方便 mock 而添加只供生产使用的 hook、setter、constructor 或可见性变更。
 
 ## Test Shape Smells
 
-- Split a test whose name naturally needs "and" or "also" unless those outcomes are one indivisible behavior.
-- Avoid tests that mirror private implementation steps. The test should survive internal refactoring that preserves the observable contract.
-- Avoid checking only the first item, page, batch, callback, or retry when repeated behavior is part of the risk.
-- Keep fixtures minimal and named by business meaning, not by incidental implementation details.
+- 如果测试名称自然需要“并且”或“还”，拆分该测试，除非这些结果是不可分割的单一行为。
+- 避免镜像私有实现步骤的测试。测试应能承受保持可观察契约的内部重构。
+- 当重复行为属于风险时，避免只检查第一个条目、页面、批次、回调或重试。
+- 保持 fixture 最小，并按业务含义而非偶然实现细节命名。
 
 ## Green Smells
 
-- Do not add configuration, options, abstractions, caching, retries, pagination, or generalization that the current failing test does not require.
-- Do not clean up unrelated structure while red. Reach green first, then refactor under passing tests.
-- Do not widen the public contract just because it is convenient for the current implementation.
+- 不要添加当前失败测试不需要的配置、选项、抽象、缓存、重试、分页或泛化。
+- 处于 RED 时不要清理无关结构。先达到 GREEN，再在通过的测试保护下重构。
+- 不要仅仅因为方便当前实现而扩大公共契约。
