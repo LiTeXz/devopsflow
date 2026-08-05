@@ -1,3 +1,3 @@
 # Dependabot Policy
 
-Use weekly updates for `npm`, `gradle`, `maven`, and `github-actions` directories that actually exist. Set `open-pull-requests-limit: 5`, group production and development updates separately, and keep security updates enabled. Do not add organization-specific labels, assignees, or ignore rules without repository evidence. Review generated configuration against the repository's module layout before committing it.
+对实际存在的 `npm`、`gradle`、`maven` 和 `github-actions` 目录使用每周更新。设置 `open-pull-requests-limit: 5`，分别组织 production 与 development updates，并保持 security updates 启用。没有仓库证据时，不要添加组织专用 labels、assignees 或 ignore rules。提交前根据仓库 module layout 审查生成的配置。

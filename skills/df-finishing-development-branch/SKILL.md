@@ -30,12 +30,12 @@ description: "完成开发分支，为 commit、push、PR 或交接做准备。�
 如果仓库存在更严格的格式，则遵循该格式；否则使用中文 Conventional Commits：
 
 ```text
-feat: add order-submission domain slice
-fix: prevent order submission when stock is insufficient
-refactor: restructure order read-model projection
-test: add order-submission aggregate invariant coverage
-docs: update engineering workflow skill guidance
-chore: adjust skill metadata
+feat: 新增订单提交领域切片
+fix: 库存不足时阻止订单提交
+refactor: 重构订单读模型投影
+test: 补充订单提交聚合不变量覆盖
+docs: 更新工程工作流 skill 指南
+chore: 调整 skill metadata
 ```
 
 type 保持英文，摘要使用中文。

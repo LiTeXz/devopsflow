@@ -78,6 +78,7 @@ function englishProseLines(path: string): string[] {
       /^#{1,6}\s/.test(line) ||
       /^---$/.test(line) ||
       /^name:\s/.test(line) ||
+      /^\s*run:\s/.test(rawLine) ||
       /^\s*display_name:\s/.test(rawLine) ||
       /^\s*[a-z_]+:\s*"[A-Za-z0-9_.-]+"\s*$/.test(rawLine) ||
       /^\s*[A-Za-z][A-Za-z0-9 /+.-]*:\s*$/.test(rawLine) ||

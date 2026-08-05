@@ -1,4 +1,4 @@
-# DevOpsFlow 脚本会话日志检查点
+# Script Session Logging Checkpoint
 
 ## Task
 

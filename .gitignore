@@ -3,5 +3,3 @@ node_modules/
 dist/
 .codex/
 .logs/
-__pycache__/**
-**/__pycache__/**
