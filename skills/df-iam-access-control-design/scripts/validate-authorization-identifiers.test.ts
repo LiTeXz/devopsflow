@@ -46,12 +46,12 @@ describe("permission identifiers", () => {
 });
 
 describe("role identifiers", () => {
-  it.each([
-    "roles/compute.viewer",
-    "roles/iam.serviceAccountAdmin",
-  ])("accepts %s", (identifier) => {
-    expect(validateRoleIdentifier(identifier)).toEqual([]);
-  });
+  it.each(["roles/compute.viewer", "roles/iam.serviceAccountAdmin"])(
+    "accepts %s",
+    (identifier) => {
+      expect(validateRoleIdentifier(identifier)).toEqual([]);
+    },
+  );
 
   it.each([
     "compute:viewer",
