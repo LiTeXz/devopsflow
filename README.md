@@ -1,7 +1,7 @@
 <h1 align="center">DevopsFlow</h1>
 
 <p align="center">
-  <img src="assets/app-icon.png" alt="DevopsFlow" width="160"/>
+  <img src="assets/logo.png" alt="DevopsFlow" width="160"/>
 </p>
 
 <p align="center">
