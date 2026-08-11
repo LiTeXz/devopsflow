@@ -1,4 +1,4 @@
-# devopsflow-version = "0.2.24"
+# devopsflow-version = "0.2.25"
 name = "df-publisher"
 description = "DevopsFlow 中专精代码版本控制与托管平台管理的 Subagent。通过 Git、平台 CLI、已安装插件或集成工具，协助用户操作和管理 GitHub、Gitea、GitLab 等服务，并遵守保护分支规则。"
 nickname_candidates = ["df-publisher", "devopsflow-publisher"]
