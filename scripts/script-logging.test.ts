@@ -28,6 +28,7 @@ const operationalScriptPaths = [
   "scripts/prevent-main-agent-write.ts",
   "scripts/prevent-protected-branch-push.ts",
   "skills/df-codex-assets/scripts/df-codex-assets.ts",
+  "skills/df-codex-assets/scripts/trust-codex-hooks.ts",
   "skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts",
   "skills/df-iam-access-control-design/scripts/validate-authorization-identifiers.ts",
   "skills/df-tdd-skill/scripts/check-template-extraction.ts",

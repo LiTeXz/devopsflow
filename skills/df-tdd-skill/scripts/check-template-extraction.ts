@@ -10,38 +10,38 @@ const SKILL = join(ROOT, "SKILL.md");
 const TEMPLATES = join(ROOT, "templates");
 
 const EXPECTED_TEMPLATES: Record<string, string[]> = {
-  "tdd_start.yaml": [
-    "tdd_start:",
-    "task_type:",
-    "protected_behavior:",
-    "stable_boundary:",
-    "first_test_to_write:",
-    "expected_red_reason:",
-    "current_contract_wrong:",
-    "wrong_contract_plan:",
+  "tdd_start.jsonl": [
+    '"tdd_start":',
+    '"task_type":',
+    '"protected_behavior":',
+    '"stable_boundary":',
+    '"first_test_to_write":',
+    '"expected_red_reason":',
+    '"current_contract_wrong":',
+    '"wrong_contract_plan":',
   ],
-  "tdd_state.yaml": [
-    "tdd_state:",
-    "phase:",
-    "command:",
-    "exit_code:",
-    "evidence:",
+  "tdd_state.jsonl": [
+    '"tdd_state":',
+    '"phase":',
+    '"command":',
+    '"exit_code":',
+    '"evidence":',
   ],
-  "tdd_finish.yaml": [
-    "tdd_finish:",
-    "task_type:",
-    "red_observed:",
-    "green_reached:",
-    "refactor_performed:",
-    "tests_run:",
-    "phase:",
-    "command:",
-    "exit_code:",
-    "evidence:",
-    "current_contract_wrong:",
-    "wrong_contract_characterized:",
-    "wrong_contract_fixed:",
-    "residual_risk:",
+  "tdd_finish.jsonl": [
+    '"tdd_finish":',
+    '"task_type":',
+    '"red_observed":',
+    '"green_reached":',
+    '"refactor_performed":',
+    '"tests_run":',
+    '"phase":',
+    '"command":',
+    '"exit_code":',
+    '"evidence":',
+    '"current_contract_wrong":',
+    '"wrong_contract_characterized":',
+    '"wrong_contract_fixed":',
+    '"residual_risk":',
   ],
 };
 
@@ -54,11 +54,13 @@ function main(): number {
   const skillText = readFileSync(SKILL, "utf-8");
 
   for (const blockName of ["tdd_start", "tdd_state", "tdd_finish"]) {
-    if (!new RegExp(`templates/${blockName}\\.yaml`).test(skillText)) {
-      return fail(`SKILL.md must reference templates/${blockName}.yaml`);
+    if (!new RegExp(`templates/${blockName}\\.jsonl`).test(skillText)) {
+      return fail(`SKILL.md must reference templates/${blockName}.jsonl`);
     }
-    if (new RegExp(`\`\`\`ya?ml\\s*\\n${blockName}:`).test(skillText)) {
-      return fail(`SKILL.md must not inline the ${blockName} YAML schema`);
+    if (
+      new RegExp(`\`\`\`jsonl\\s*\\n\\{\\"${blockName}\\":`).test(skillText)
+    ) {
+      return fail(`SKILL.md must not inline the ${blockName} JSONL schema`);
     }
   }
 

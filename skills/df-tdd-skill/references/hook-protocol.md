@@ -1,18 +1,18 @@
 # Hook Protocol
 
-此协议为纯 TDD 提供半自动护栏。脚本只检查流程元数据和状态顺序；不检查项目结构、目录、框架、类型名称或架构风格。
+此 protocol 为纯 TDD 提供半自动护栏。脚本只检查流程元数据和状态顺序；不检查项目结构、目录、框架、类型名称或架构风格。
 
 可执行 validator 是 [validate-tdd-protocol.ts](../scripts/validate-tdd-protocol.ts)。它不会仅因随 skill 一起分发就自动运行。在当前环境中，使用此 skill 的 agent 必须在固定阶段主动调用它。如果未来宿主支持平台级 hook，可以在那里挂接同一脚本。
 
 示例：
 
 ```bash
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage before_edit --input tdd-protocol.md
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input tdd-protocol.md
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input tdd-protocol.md
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage before_edit --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
+bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 ```
 
-将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` 块追加到临时协议文件，然后对该文件运行脚本。除非用户要求保留审计记录，否则任务完成后可以删除该文件。
+将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` blocks 追加到 protocol file，然后对该文件运行脚本。除非用户要求保留审计记录，否则任务完成后可以删除该文件。
 
 ## State Machine
 
@@ -30,7 +30,7 @@ bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input 
 
 ## tdd_start
 
-编辑生产代码前，使用 [tdd_start.yaml](../templates/tdd_start.yaml) 声明 `tdd_start` 协议块。
+编辑生产代码前，使用 [tdd_start.jsonl](../templates/tdd_start.jsonl) 声明 `tdd_start` protocol block。
 
 阻断规则：
 
@@ -42,7 +42,7 @@ bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input 
 
 ## tdd_state
 
-关键阶段后，使用 [tdd_state.yaml](../templates/tdd_state.yaml) 记录 `tdd_state` 协议块。
+关键阶段后，使用 [tdd_state.jsonl](../templates/tdd_state.jsonl) 记录 `tdd_state` protocol block。
 
 阻断规则：
 
@@ -58,7 +58,7 @@ bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input 
 
 ## tdd_finish
 
-最终响应前，使用 [tdd_finish.yaml](../templates/tdd_finish.yaml) 声明 `tdd_finish` 协议块。
+最终响应前，使用 [tdd_finish.jsonl](../templates/tdd_finish.jsonl) 声明 `tdd_finish` protocol block。
 
 阻断规则：
 

@@ -9,21 +9,21 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 
 ## Protocol
 
-编辑生产代码前，使用 [tdd_start.yaml](templates/tdd_start.yaml) 输出 `tdd_start` 协议块，使流程可检查。
+编辑生产代码前，使用 [tdd_start.jsonl](templates/tdd_start.jsonl) 输出 `tdd_start` protocol block，使流程可检查。
 
-每当观察到重要状态时，使用 [tdd_state.yaml](templates/tdd_state.yaml) 记录 `tdd_state` 协议块。
+每当观察到重要状态时，使用 [tdd_state.jsonl](templates/tdd_state.jsonl) 记录 `tdd_state` protocol block。
 
-完成前，使用 [tdd_finish.yaml](templates/tdd_finish.yaml) 输出 `tdd_finish` 协议块。
+完成前，使用 [tdd_finish.jsonl](templates/tdd_finish.jsonl) 输出 `tdd_finish` protocol block。
 
 这些块是半自动护栏所用的流程元数据。不要在其中放入项目结构或技术栈规则。完整协议参见 [hook-protocol.md](references/hook-protocol.md)。
 证据字段必须记录具体命令、退出码、测试名称以及失败或通过摘要。不要使用“测试失败了”或“测试通过了”等含糊证据。
 
 此 skill 无法注册平台级自动 hook。使用时，必须在固定阶段主动运行 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`：
 
-- 将当前任务的协议块追加到临时工作区文件（例如 `.codex/tdd-protocol.md`），或系统临时目录中的 `tdd-protocol.md`。
-- 编辑生产代码前：输出 `tdd_start`，然后运行 `--stage before_edit`。验证失败时，先补全声明再编辑生产代码。
-- 观察到 RED/GREEN/REFACTOR 状态后：输出 `tdd_state`，然后运行 `--stage state`。验证失败时，补充命令、退出码、测试名称、与风险相关的证据，或返回正确阶段。
-- 最终响应前：输出 `tdd_finish`，然后运行 `--stage finish`。验证失败时，继续补充证据、执行测试或纠正工作流。
+- 将当前任务的 protocol blocks 追加到 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`。
+- 编辑生产代码前：输出 `tdd_start`，然后运行 `--stage before_edit`。`validation failed` 时，先补全声明再编辑生产代码。
+- 观察到 RED/GREEN/REFACTOR 状态后：输出 `tdd_state`，然后运行 `--stage state`。`validation failed` 时，补充命令、退出码、测试名称、与风险相关的证据，或返回正确阶段。
+- 最终响应前：输出 `tdd_finish`，然后运行 `--stage finish`。`validation failed` 时，继续补充证据、执行测试或纠正工作流。
 
 ## Core Loop
 
@@ -151,6 +151,6 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 - [checklists.md](references/checklists.md)：编辑前、完成前、测试质量和边界异味检查。
 - [eval-cases.md](references/eval-cases.md)：迭代此 skill 时使用的失败样例和预期护栏行为。
 - [anti-patterns.md](references/anti-patterns.md)：迭代此 skill 时应拒绝或纠正的常见 TDD 失败模式。
-- [tdd_start.yaml](templates/tdd_start.yaml)、[tdd_state.yaml](templates/tdd_state.yaml)、[tdd_finish.yaml](templates/tdd_finish.yaml)：按需加载的协议块模板。
-- [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` 运行的协议验证脚本。
+- [tdd_start.jsonl](templates/tdd_start.jsonl)、[tdd_state.jsonl](templates/tdd_state.jsonl)、[tdd_finish.jsonl](templates/tdd_finish.jsonl)：按需加载的 protocol block templates。
+- [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` 运行的 protocol validation script。
 - [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts)：使用 `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts` 运行的轻量回归套件；它检查有效示例通过且常见违规失败。
