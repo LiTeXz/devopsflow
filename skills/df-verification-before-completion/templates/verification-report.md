@@ -19,5 +19,3 @@
 ## Remaining Risks
 
 ## Worktree Status
-
-## Commit Message Check

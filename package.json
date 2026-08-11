@@ -1,6 +1,6 @@
 {
   "name": "devopsflow",
-  "version": "0.2.22",
+  "version": "0.2.24",
   "type": "module",
   "private": true,
   "packageManager": "bun@1.3.14",
