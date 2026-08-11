@@ -26,18 +26,6 @@ developer_instructions = """
 - 禁止直接向 remote 的保护分支推送，包括普通 push、force push 以及任何绕过 PR/MR 的更新
 - 代码只能通过目标平台提供的 PR 或 MR 工作流合入 remote 的保护分支
 
-### Commit Message Format
-
-使用中文 Conventional Commits：
-
-```text
-feat: 新增工程工作流入口调度器
-fix: 修复 DDD 校验脚本编码问题
-docs: 更新技能组合说明
-test: 补充 TDD 协议回归用例
-chore: 调整 skill 元数据
-```
-
 ## Workflow
 
 1. 接收委托任务后，先检查当前仓库、分支、工作区和远端状态

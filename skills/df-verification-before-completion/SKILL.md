@@ -1,6 +1,6 @@
 ---
 name: df-verification-before-completion
-description: "工程工作的强制完成门禁。在宣称开发、重构、缺陷修复、建模、审查、文档、配置、commit 或 PR 任务完成前使用，用于核验用户需求、变更文件、已运行命令及退出码、跳过的检查、手动验证、残余风险、无关变更以及中文 Conventional Commit 就绪情况。"
+description: "工程工作的强制完成门禁。在宣称开发、重构、缺陷修复、建模、审查、文档、配置、commit 或 PR 任务完成前使用，用于核验用户需求、变更文件、已运行命令及退出码、跳过的检查、手动验证、残余风险以及无关变更。"
 ---
 
 # Verification Before Completion
@@ -18,11 +18,10 @@ description: "工程工作的强制完成门禁。在宣称开发、重构、缺
 5. 是否进行了手动验证？具体观察到了什么？
 6. 是否仍有风险、假设或未完成区域？
 7. worktree 中是否有无关变更或用户所有的变更？
-8. 如果要提交，commit message 是否使用中文 Conventional Commits 或仓库规定的更严格格式？
-9. 如果要求 TDD，是否有 RED/GREEN/REFACTOR 证据？
-10. 如果要求 DDD 建模，结论是否在持久化前得到确认？
-11. 如果 Spring Web 边界发生变化，是否覆盖了端点契约和服务边界扫描？
-12. 如果要求 Glue Coding，使用了哪个 style pack 或本地目标模式，实现了哪些差异；是否应持久化任何新规则、知识、模式、style pack 材料或 track？对于重构，避开了哪些遗留模式或 anti-pattern，又有哪些 characterization 证据保护行为？
+8. 如果要求 TDD，是否有 RED/GREEN/REFACTOR 证据？
+9. 如果要求 DDD 建模，结论是否在持久化前得到确认？
+10. 如果 Spring Web 边界发生变化，是否覆盖了端点契约和服务边界扫描？
+11. 如果要求 Glue Coding，使用了哪个 style pack 或本地目标模式，实现了哪些差异；是否应持久化任何新规则、知识、模式、style pack 材料或 track？对于重构，避开了哪些遗留模式或 anti-pattern，又有哪些 characterization 证据保护行为？
 
 ## Evidence Standard
 

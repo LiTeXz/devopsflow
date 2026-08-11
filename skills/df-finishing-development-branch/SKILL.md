@@ -1,6 +1,6 @@
 ---
 name: df-finishing-development-branch
-description: "完成开发分支，为 commit、push、PR 或交接做准备。在实现和验证后使用，用于检查 git 状态、分离用户所有的变更与 Codex 变更、确认测试和计划完成情况、准备中文 Conventional Commit message，并起草 PR 或交接说明。"
+description: "完成开发分支，为 commit、push、PR 或交接做准备。在实现和验证后使用，用于检查 git 状态、分离用户所有的变更与 Codex 变更、确认测试和计划完成情况，并起草 PR 或交接说明。"
 ---
 
 # Finishing Development Branch
@@ -18,27 +18,11 @@ description: "完成开发分支，为 commit、push、PR 或交接做准备。�
 4. 确认 `df-verification-before-completion` 证据。
 5. 审查差异中是否有意外变更。
 6. 只暂存预期文件。
-7. 准备 commit message。
-8. 如果要打开 PR，起草包含以下内容的 PR 描述：
+7. 如果要打开 PR，起草包含以下内容的 PR 描述：
    - 目的
    - 关键变更
    - 测试及退出码
    - 风险或后续事项
-
-## Commit Message Rule
-
-如果仓库存在更严格的格式，则遵循该格式；否则使用中文 Conventional Commits：
-
-```text
-feat: 新增订单提交领域切片
-fix: 库存不足时阻止订单提交
-refactor: 重构订单读模型投影
-test: 补充订单提交聚合不变量覆盖
-docs: 更新工程工作流 skill 指南
-chore: 调整 skill metadata
-```
-
-type 保持英文，摘要使用中文。
 
 ## Non-Negotiable Rules
 
@@ -46,4 +30,3 @@ type 保持英文，摘要使用中文。
 - 必要检查失败时不要提交，除非用户明确接受风险。
 - 不要在 commit 或 PR 描述中编造测试证据。
 - 除非用户明确要求，否则不要重写分支历史。
-- 不要使用 `update`、`fix stuff` 或 `changes` 等模糊 commit 摘要。
