@@ -1,0 +1,51 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>DevopsFlow Mobius loop</title>
+  <desc>A continuous blue and cyan Mobius ribbon representing development and operations flow.</desc>
+  <rect x="32" y="32" width="448" height="448" rx="104" fill="#0B1220"/>
+  <path
+    d="M112 256C112 185 185 159 238 218L315 304C348 341 400 317 400 256C400 195 348 171 315 208L221 313C178 361 112 327 112 256Z"
+    stroke="#05101F"
+    stroke-width="92"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M112 256C112 185 185 159 238 218L315 304C348 341 400 317 400 256C400 195 348 171 315 208L221 313C178 361 112 327 112 256Z"
+    stroke="url(#ribbon)"
+    stroke-width="68"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M213 313C227 298 242 281 256 265L292 225"
+    stroke="#0B1220"
+    stroke-width="88"
+    stroke-linecap="round"
+  />
+  <path
+    d="M213 313C227 298 242 281 256 265L292 225"
+    stroke="url(#twist)"
+    stroke-width="64"
+    stroke-linecap="round"
+  />
+  <path
+    d="M218 296C233 279 248 262 263 245"
+    stroke="#A5F3FC"
+    stroke-opacity="0.7"
+    stroke-width="7"
+    stroke-linecap="round"
+  />
+  <defs>
+    <linearGradient id="ribbon" x1="100" y1="190" x2="411" y2="318" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.48" stop-color="#2563EB"/>
+      <stop offset="0.7" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="twist" x1="210" y1="315" x2="296" y2="221" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D4ED8"/>
+      <stop offset="0.58" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#67E8F9"/>
+    </linearGradient>
+  </defs>
+</svg>
