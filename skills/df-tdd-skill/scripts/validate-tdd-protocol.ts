@@ -41,99 +41,9 @@ function loadText(path?: string): string {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
-function parseScalar(value: string): unknown {
-  value = value.trim();
-  if (value === "true") return true;
-  if (value === "false") return false;
-  if (value === "null" || value === "~") return null;
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    return value.slice(1, -1);
-  }
-  return value;
-}
-
-function parseProtocolYaml(candidate: string): Record<string, unknown> | null {
-  const lines = candidate.split("\n");
-  const root: Record<string, unknown> = {};
-  let currentKey: string | null = null;
-  let currentMap: Record<string, unknown> | null = null;
-  let currentListKey: string | null = null;
-  let currentListItem: Record<string, unknown> | null = null;
-
-  for (const raw of lines) {
-    if (!raw.trim() || raw.trimStart().startsWith("#")) continue;
-
-    const indent = raw.length - raw.trimStart().length;
-    const line = raw.trim();
-
-    if (indent === 0) {
-      if (!line.endsWith(":")) return null;
-      currentKey = line.slice(0, -1);
-      currentMap = {};
-      root[currentKey] = currentMap;
-      currentListKey = null;
-      currentListItem = null;
-      continue;
-    }
-
-    if (!currentMap) return null;
-
-    if (indent === 2) {
-      if (!line.includes(":")) return null;
-      const colonIdx = line.indexOf(":");
-      const key = line.slice(0, colonIdx).trim();
-      const value = line.slice(colonIdx + 1).trim();
-      if (value) {
-        currentMap[key] = parseScalar(value);
-        currentListKey = null;
-        currentListItem = null;
-      } else {
-        const list: unknown[] = [];
-        currentMap[key] = list;
-        currentListKey = key;
-        currentListItem = null;
-      }
-      continue;
-    }
-
-    if (indent === 4 && currentListKey) {
-      if (!line.startsWith("- ")) return null;
-      const item = line.slice(2);
-      if (item.includes(":")) {
-        const colonIdx = item.indexOf(":");
-        const key = item.slice(0, colonIdx).trim();
-        const value = item.slice(colonIdx + 1).trim();
-        currentListItem = { [key]: parseScalar(value) };
-        (currentMap[currentListKey] as unknown[]).push(currentListItem);
-      } else {
-        currentListItem = null;
-        (currentMap[currentListKey] as unknown[]).push(parseScalar(item));
-      }
-      continue;
-    }
-
-    if (indent === 6 && currentListKey && currentListItem) {
-      if (!line.includes(":")) return null;
-      const colonIdx = line.indexOf(":");
-      const key = line.slice(0, colonIdx).trim();
-      const value = line.slice(colonIdx + 1).trim();
-      currentListItem[key] = parseScalar(value);
-      continue;
-    }
-
-    return null;
-  }
-
-  return Object.keys(root).length ? root : null;
-}
-
-function extractYamlDocuments(text: string): Record<string, unknown>[] {
+function extractJsonlDocuments(text: string): Record<string, unknown>[] {
   const docs: Record<string, unknown>[] = [];
-
-  const fencedRegex = /```(?:yaml|yml)\s*\n([\s\S]*?)```/gi;
+  const fencedRegex = /```jsonl\s*\n([\s\S]*?)```/gi;
   const fencedContents: string[] = [];
   let match: RegExpExecArray | null;
   // biome-ignore lint/suspicious/noAssignInExpressions: standard regex iteration pattern
@@ -144,9 +54,16 @@ function extractYamlDocuments(text: string): Record<string, unknown>[] {
   const candidates = fencedContents.length ? fencedContents : [text];
 
   for (const candidate of candidates) {
-    const doc = parseProtocolYaml(candidate);
-    if (doc && typeof doc === "object") {
-      docs.push(doc);
+    for (const line of candidate.split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const doc = JSON.parse(line) as unknown;
+        if (doc && typeof doc === "object" && !Array.isArray(doc)) {
+          docs.push(doc as Record<string, unknown>);
+        }
+      } catch {
+        // Ignore non-JSONL prose; validation reports missing protocol blocks.
+      }
     }
   }
 
@@ -526,7 +443,7 @@ function validateFinish(finish: TddBlock | null): string[] {
 }
 
 export function validate(stage: string, text: string): string[] {
-  const docs = extractYamlDocuments(text);
+  const docs = extractJsonlDocuments(text);
   const { start, states, finish } = collectBlocks(docs);
 
   if (stage === "before_edit") return validateStart(start);

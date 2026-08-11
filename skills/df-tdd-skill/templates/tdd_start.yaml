@@ -1,8 +1,0 @@
-tdd_start:
-  task_type: greenfield_feature | bug_fix | pure_refactor | characterize_then_fix
-  protected_behavior: "..."
-  stable_boundary: "..."
-  first_test_to_write: "..."
-  expected_red_reason: "..."
-  current_contract_wrong: false
-  wrong_contract_plan: none | characterize_only | fix_after_characterization

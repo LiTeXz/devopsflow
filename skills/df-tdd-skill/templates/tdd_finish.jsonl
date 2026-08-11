@@ -1,0 +1,1 @@
+{"tdd_finish":{"task_type":"greenfield_feature | bug_fix | pure_refactor | characterize_then_fix","red_observed":true,"green_reached":true,"refactor_performed":true,"tests_run":[{"phase":"red | green | final","command":"...","exit_code":0,"evidence":"..."}],"current_contract_wrong":false,"wrong_contract_characterized":false,"wrong_contract_fixed":false,"residual_risk":"..."}}

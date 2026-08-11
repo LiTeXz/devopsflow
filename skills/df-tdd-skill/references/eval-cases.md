@@ -28,7 +28,7 @@
 
 失败行为：
 
-```yaml
+```jsonl
 tdd_state:
   phase: red_observed
   evidence: "测试如预期失败"
