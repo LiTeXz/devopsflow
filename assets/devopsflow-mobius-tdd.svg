@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>DevopsFlow TDD Mobius loop</title>
+  <desc>A transparent DevOps Mobius loop with a test tube representing test-driven development.</desc>
+  <path
+    d="M112 256C112 185 185 159 238 218L315 304C348 341 400 317 400 256C400 195 348 171 315 208L221 313C178 361 112 327 112 256Z"
+    stroke="#0B1220"
+    stroke-width="92"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M112 256C112 185 185 159 238 218L315 304C348 341 400 317 400 256C400 195 348 171 315 208L221 313C178 361 112 327 112 256Z"
+    stroke="url(#ribbon)"
+    stroke-width="68"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <g transform="rotate(42 256 256)">
+    <rect x="216" y="151" width="80" height="218" rx="40" fill="#E0F2FE" stroke="#0B1220" stroke-width="16"/>
+    <path
+      d="M230 267H282V327C282 343 270 355 256 355C242 355 230 343 230 327V267Z"
+      fill="url(#liquid)"
+    />
+    <path d="M232 270C247 260 265 280 280 270" stroke="#67E8F9" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="256" cy="158" rx="40" ry="17" fill="#0B1220"/>
+    <ellipse cx="256" cy="158" rx="25" ry="7" fill="#BAE6FD"/>
+    <path d="M239 198V237" stroke="white" stroke-opacity="0.8" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <defs>
+    <linearGradient id="ribbon" x1="100" y1="190" x2="411" y2="318" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.48" stop-color="#2563EB"/>
+      <stop offset="0.7" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="230" y1="267" x2="282" y2="355" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+</svg>
