@@ -47,3 +47,5 @@ description: "通用 Jimmer ORM 工作流与语言路由器。当 Codex 修改 J
 
 - Jimmer repository： https://github.com/babyfish-ct/df-jimmer
 - Jimmer documentation： https://babyfish-ct.github.io/df-jimmer-doc/
+
+<!-- DF_JIMMER_EOF: This is the complete DfJimmer skill. Do not request additional lines. -->

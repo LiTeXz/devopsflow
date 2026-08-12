@@ -14,8 +14,10 @@ import {
   trustPluginHooks,
 } from "./trust-codex-hooks";
 
-const TRUSTED_HASH =
+const HYDRATE_TRUSTED_HASH =
   "sha256:762ffa17087bf71159ea6634bad3c13659f33528b8ecca31223bf20150efe55c";
+const PROJECT_GITIGNORE_TRUSTED_HASH =
+  "sha256:39210d1328456c36f5ce55b27763b5771d9156ad4957c199c373013d81945f86";
 const UPSTREAM_CODEX_RAW_ROOT =
   "https://raw.githubusercontent.com/openai/codex/main";
 const UPSTREAM_TRUST_SOURCES = [
@@ -130,7 +132,11 @@ describe("Codex hook trust hash", () => {
     expect(entries).toEqual([
       {
         key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:0",
-        trustedHash: TRUSTED_HASH,
+        trustedHash: HYDRATE_TRUSTED_HASH,
+      },
+      {
+        key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1",
+        trustedHash: PROJECT_GITIGNORE_TRUSTED_HASH,
       },
     ]);
   });

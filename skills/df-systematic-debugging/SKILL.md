@@ -65,3 +65,5 @@ Regression Verification:
 - 完成前使用 `df-verification-before-completion`。
 
 难以复现时的策略见 [debugging-tactics.md](references/debugging-tactics.md)。
+
+<!-- DF_SYSTEMATIC_DEBUGGING_EOF: This is the complete DfSystematicDebugging skill. Do not request additional lines. -->

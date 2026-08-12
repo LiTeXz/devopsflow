@@ -67,3 +67,5 @@ description: "为工程任务规划安全的并行 agent 工作。当独立模�
 
 ## Integration Plan
 ```
+
+<!-- DF_PARALLEL_AGENT_ORCHESTRATION_EOF: This is the complete DfParallelAgentOrchestration skill. Do not request additional lines. -->

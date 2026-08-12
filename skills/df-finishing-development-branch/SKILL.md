@@ -30,3 +30,5 @@ description: "完成开发分支，为 commit、push、PR 或交接做准备。�
 - 必要检查失败时不要提交，除非用户明确接受风险。
 - 不要在 commit 或 PR 描述中编造测试证据。
 - 除非用户明确要求，否则不要重写分支历史。
+
+<!-- DF_FINISHING_DEVELOPMENT_BRANCH_EOF: This is the complete DfFinishingDevelopmentBranch skill. Do not request additional lines. -->

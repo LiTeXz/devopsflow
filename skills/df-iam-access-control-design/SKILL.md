@@ -82,3 +82,5 @@ bun skills/df-iam-access-control-design/scripts/validate-authorization-identifie
 - 每个受保护 API operation 是否显式映射到共享 catalog？
 - 是否不存在 alias、wildcard、fallback translation 和旧式冒号名称？
 - 授权 metadata 缺失或无效时是否拒绝访问？
+
+<!-- DF_IAM_ACCESS_CONTROL_DESIGN_EOF: This is the complete DfIamAccessControlDesign skill. Do not request additional lines. -->

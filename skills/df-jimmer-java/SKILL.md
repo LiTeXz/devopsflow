@@ -47,3 +47,5 @@ description: "Java 专用 Jimmer ORM guardrail。当 Codex 修改 Java Jimmer SQ
 
 - Jimmer repository： https://github.com/babyfish-ct/df-jimmer
 - Jimmer documentation： https://babyfish-ct.github.io/df-jimmer-doc/
+
+<!-- DF_JIMMER_JAVA_EOF: This is the complete DfJimmerJava skill. Do not request additional lines. -->

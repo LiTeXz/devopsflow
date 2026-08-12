@@ -88,3 +88,5 @@ PR 或最终 handoff 前，报告：
 - 已进行或有意跳过的 skill update
 - verification command 与 exit code
 - incomplete item 或 blocker
+
+<!-- DF_RELEASE_GOAL_GOVERNANCE_EOF: This is the complete DfReleaseGoalGovernance skill. Do not request additional lines. -->
