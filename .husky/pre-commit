@@ -1,3 +1,4 @@
+bun scripts/ensure-skill-eof.ts
 bun run format:check
 bun run lint
 bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged

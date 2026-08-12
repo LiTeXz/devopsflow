@@ -93,3 +93,5 @@ Not Used Yet:
 - 尊重 worktree 中用户所有的变更。绝不要还原无关编辑。
 
 完整 skill 组合图见 [workflow-map.md](references/workflow-map.md)。
+
+<!-- DF_ENGINEERING_WORKFLOW_ROUTER_EOF: This is the complete DfEngineeringWorkflowRouter skill. Do not request additional lines. -->

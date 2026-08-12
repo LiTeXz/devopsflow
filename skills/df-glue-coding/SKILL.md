@@ -125,3 +125,5 @@ DDD 负责业务事实，Glue Coding 负责工程复用。
 - 应归入 `.ai/tracks/` 的持久 spec 或决策
 
 建议更新材料，但除非用户要求该范围，否则不要创建大范围 pattern 仓库。
+
+<!-- DF_GLUE_CODING_EOF: This is the complete DfGlueCoding skill. Do not request additional lines. -->

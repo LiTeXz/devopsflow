@@ -49,3 +49,5 @@ description: "通过聚焦缺陷的自查，为已实现的代码准备审查。
 - 不要隐瞒薄弱的测试证据。
 - 相关测试失败时，不要请求审查，除非审查明确针对该失败。
 - 不要在审查范围中包含无关清理。
+
+<!-- DF_REQUESTING_CODE_REVIEW_EOF: This is the complete DfRequestingCodeReview skill. Do not request additional lines. -->

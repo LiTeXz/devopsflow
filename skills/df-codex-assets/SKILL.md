@@ -24,3 +24,5 @@ bun "<PLUGIN_ROOT>/skills/df-codex-assets/scripts/trust-codex-hooks.ts"
 该命令读取插件 manifest 中声明的 hook 文件，复算所有受支持 command hooks 的 Codex 信任指纹，并将缺失或过期的 `trusted_hash` 原子写入 `~/.codex/config.toml`。已经匹配的 hook 保持不变；全部匹配时不写配置文件。
 
 不要从 `SessionStart` hydration 或其他隐式路径运行此命令。用户主动调用是允许脚本跳过 Codex 交互式 hook 审核的授权边界。
+
+<!-- DF_CODEX_ASSETS_EOF: This is the complete DfCodexAssets skill. Do not request additional lines. -->

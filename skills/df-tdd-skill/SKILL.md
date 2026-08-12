@@ -277,3 +277,5 @@ const currentTddState = {
 - [tdd_start.jsonl](templates/tdd_start.jsonl)、[tdd_state.jsonl](templates/tdd_state.jsonl)、[tdd_finish.jsonl](templates/tdd_finish.jsonl)：按需加载的 protocol block templates。
 - [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` 运行的 protocol validation script。
 - [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts)：使用 `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts` 运行的轻量回归套件；它检查有效示例通过且常见违规失败。
+
+<!-- DF_TDD_SKILL_EOF: This is the complete DfTddSkill skill. Do not request additional lines. -->
