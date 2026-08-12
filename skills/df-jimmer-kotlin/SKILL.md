@@ -46,3 +46,5 @@ description: "Kotlin 专用 Jimmer ORM guardrail。当 Codex 修改 Kotlin Jimme
 
 - Jimmer repository： https://github.com/babyfish-ct/df-jimmer
 - Jimmer documentation： https://babyfish-ct.github.io/df-jimmer-doc/
+
+<!-- DF_JIMMER_KOTLIN_EOF: This is the complete DfJimmerKotlin skill. Do not request additional lines. -->

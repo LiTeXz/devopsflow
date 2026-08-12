@@ -100,3 +100,5 @@ description: "将已确认的 DDD 事件风暴产物与需求可追踪关系转�
 - 当切片依赖可能改变模型但尚未确认的业务结论时，不要继续。
 
 紧凑示例参见 [mapping-examples.md](references/mapping-examples.md)。
+
+<!-- DF_DDD_TO_TDD_HANDOFF_EOF: This is the complete DfDddToTddHandoff skill. Do not request additional lines. -->
