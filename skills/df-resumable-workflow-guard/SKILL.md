@@ -121,3 +121,5 @@ df-resumable-workflow-guard
 ## References
 
 - [checkpoint-template.md](references/checkpoint-template.md)：创建新 checkpoint 时复制此结构。
+
+<!-- DF_RESUMABLE_WORKFLOW_GUARD_EOF: This is the complete DfResumableWorkflowGuard skill. Do not request additional lines. -->

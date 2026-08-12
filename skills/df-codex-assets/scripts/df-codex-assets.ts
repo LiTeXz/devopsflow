@@ -13,6 +13,7 @@ import { readScriptPayload, runLoggedScriptAsync } from "./script-logger";
 
 export const MANAGED_ASSET_PATHS = [
   "agents/df-publisher.toml",
+  "skills/df-codex-assets/assets/.gitignore",
   "scripts/prevent-git-github-operations.ts",
   "scripts/prevent-main-agent-write.ts",
   "scripts/prevent-protected-branch-push.ts",
@@ -28,6 +29,10 @@ export const MANAGED_ASSET_PATHS = [
 ] as const;
 
 export const HASH_FILE_PATH = "skills/df-codex-assets/assets/hash.txt";
+export const PROJECT_GITIGNORE_TEMPLATE_PATH =
+  "skills/df-codex-assets/assets/.gitignore";
+export const PROJECT_GITIGNORE_START = "# BEGIN DEVOPSFLOW MANAGED";
+export const PROJECT_GITIGNORE_END = "# END DEVOPSFLOW MANAGED";
 export const DEFAULT_REPOSITORY = "LiTeXz/devopsflow";
 
 export type FetchLike = (
@@ -62,6 +67,11 @@ export interface HookPayload {
 export interface SyncStagedHashResult {
   readonly hash: string;
   readonly staged: boolean;
+}
+
+export interface SyncProjectGitignoreResult {
+  readonly status: "created" | "updated" | "already-current" | "skipped";
+  readonly warning?: string;
 }
 
 export interface VersionAlignment {
@@ -415,6 +425,105 @@ export function installProjectAgent(
   return true;
 }
 
+function countMarkerLines(content: string, marker: string): number {
+  return content
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .filter((line) => line === marker).length;
+}
+
+function markerLineIndex(content: string, marker: string): number {
+  const matcher = new RegExp(
+    `(?:^|\\r?\\n)${marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=\\r?\\n|$)`,
+  );
+  const match = matcher.exec(content);
+  if (!match) return -1;
+  return (
+    match.index +
+    (match[0].startsWith("\r\n") ? 2 : match[0].startsWith("\n") ? 1 : 0)
+  );
+}
+
+function newlineFor(content: string): "\r\n" | "\n" {
+  return content.includes("\r\n") ? "\r\n" : "\n";
+}
+
+function normalizeTemplate(content: string, newline: "\r\n" | "\n"): string {
+  return `${content.replace(/\r\n?/g, "\n").trimEnd().replaceAll("\n", newline)}${newline}`;
+}
+
+export function syncProjectGitignore(
+  pluginRoot: string,
+  projectRoot: string,
+): SyncProjectGitignoreResult {
+  const sourcePath = join(pluginRoot, PROJECT_GITIGNORE_TEMPLATE_PATH);
+  if (!existsSync(sourcePath)) {
+    return {
+      status: "skipped",
+      warning: `Missing managed asset: ${PROJECT_GITIGNORE_TEMPLATE_PATH}; project .gitignore was not modified`,
+    };
+  }
+
+  const sourceContent = readFileSync(sourcePath, "utf-8");
+  if (
+    countMarkerLines(sourceContent, PROJECT_GITIGNORE_START) !== 1 ||
+    countMarkerLines(sourceContent, PROJECT_GITIGNORE_END) !== 1 ||
+    markerLineIndex(sourceContent, PROJECT_GITIGNORE_START) >=
+      markerLineIndex(sourceContent, PROJECT_GITIGNORE_END)
+  ) {
+    return {
+      status: "skipped",
+      warning: `Managed template markers are invalid; project .gitignore was not modified`,
+    };
+  }
+
+  const targetPath = join(projectRoot, ".devopsflow", ".gitignore");
+  if (!existsSync(targetPath)) {
+    mkdirSync(dirname(targetPath), { recursive: true });
+    writeFileSync(targetPath, normalizeTemplate(sourceContent, "\n"));
+    return { status: "created" };
+  }
+
+  const currentContent = readFileSync(targetPath, "utf-8");
+  const newline = newlineFor(currentContent);
+  const managedBlock = normalizeTemplate(sourceContent, newline);
+  const startCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_START);
+  const endCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_END);
+  let updatedContent: string;
+
+  if (startCount === 0 && endCount === 0) {
+    const prefix = currentContent.trimEnd();
+    updatedContent = prefix
+      ? `${prefix}${newline}${newline}${managedBlock}`
+      : managedBlock;
+  } else if (startCount === 1 && endCount === 1) {
+    const startIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_START);
+    const endIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_END);
+    if (startIndex < 0 || endIndex < startIndex) {
+      return {
+        status: "skipped",
+        warning: `Managed project .gitignore markers are malformed; file was not modified`,
+      };
+    }
+    const blockEnd = endIndex + PROJECT_GITIGNORE_END.length;
+    const trailingNewlineLength = currentContent.startsWith("\r\n", blockEnd)
+      ? 2
+      : currentContent.startsWith("\n", blockEnd)
+        ? 1
+        : 0;
+    updatedContent = `${currentContent.slice(0, startIndex)}${managedBlock}${currentContent.slice(blockEnd + trailingNewlineLength)}`;
+  } else {
+    return {
+      status: "skipped",
+      warning: `Managed project .gitignore markers are malformed; file was not modified`,
+    };
+  }
+
+  if (updatedContent === currentContent) return { status: "already-current" };
+  writeFileSync(targetPath, updatedContent);
+  return { status: "updated" };
+}
+
 function projectRootFromPayload(
   payload: HookPayload | null,
 ): string | undefined {
@@ -463,6 +572,13 @@ export async function runCli(
       if (projectRoot) installProjectAgent(pluginRoot, projectRoot);
       return 0;
     }
+    if (command === "sync-project-gitignore") {
+      const projectRoot = projectRootFromPayload(payload);
+      if (!projectRoot) return 0;
+      const result = syncProjectGitignore(pluginRoot, projectRoot);
+      if (result.warning) console.warn(result.warning);
+      return 0;
+    }
     if (command === "sync-staged") {
       const result = syncStagedManagedAssetHash(pluginRoot);
       console.log(`Managed Codex asset hash: ${result.hash}`);
@@ -475,7 +591,7 @@ export async function runCli(
     }
     console.error(`Unknown command: ${command}`);
     console.error(
-      "Usage: df-codex-assets.ts <check-versions-staged|compute|check|hydrate|sync-staged>",
+      "Usage: df-codex-assets.ts <check-versions-staged|compute|check|hydrate|sync-project-gitignore|sync-staged>",
     );
     return 2;
   } catch (error) {

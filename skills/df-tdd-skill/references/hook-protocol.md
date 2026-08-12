@@ -12,21 +12,67 @@ bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input .
 bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 ```
 
-将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` blocks 追加到 protocol file，然后对该文件运行脚本。除非用户要求保留审计记录，否则任务完成后可以删除该文件。
+将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` blocks 追加到 protocol file，然后对该文件运行脚本。该 `.jsonl` 文件是任务的永久审计记录，必须永久保留；不得在任务完成后删除、清空、截断或迁移到临时目录。
 
 ## State Machine
 
-推荐顺序：
+```typescript
+/**
+ * Enumerates the only lifecycle phases accepted by the protocol state machine.
+ */
+type TddPhase =
+  /** Scope and the first expected failure are recorded before production edits. */
+  | 'scope_defined'
+  /** The focused test exists and is ready to produce meaningful failure evidence. */
+  | 'test_written'
+  /** The focused test fails specifically because of the protected target risk. */
+  | 'red_observed'
+  /** The focused test passes after the smallest behavior correction. */
+  | 'green_reached'
+  /** Optional cleanup completed without losing the passing behavior evidence. */
+  | 'refactor_done'
+  /** All required verification evidence and todo reconciliation are complete. */
+  | 'final_verified'
+```
 
-1. `scope_defined`
-2. `test_written`
-3. `red_observed`
-4. `green_reached`
-5. `refactor_done`
-6. `final_verified`
+```typescript
+/**
+ * Records one legal phase transition and links it to evidence plus the host todo entry.
+ */
+interface TddStateTransition {
+  /** Previously validated phase from which the workflow advances. */
+  from: TddPhase
+  /** Newly reached phase supported by the recorded evidence. */
+  to: TddPhase
+  /** Concrete command, exit code, test name, and risk-related observation. */
+  evidence: string
+  /** Stable host todo identifier updated during the same transition. */
+  todoItemId: string
+}
+```
+
+```typescript
+/**
+ * Defines the complete ordered transition set enforced by the TDD protocol validator.
+ */
+declare const allowedTddTransitions: readonly [
+  /** Moves from declared scope to an executable focused test. */
+  TddStateTransition & { from: 'scope_defined', to: 'test_written' },
+  /** Accepts failure only after proving it is caused by the target risk. */
+  TddStateTransition & { from: 'test_written', to: 'red_observed' },
+  /** Accepts passing evidence only after the smallest production correction. */
+  TddStateTransition & { from: 'red_observed', to: 'green_reached' },
+  /** Either enters protected cleanup or proceeds directly to final verification. */
+  TddStateTransition & { from: 'green_reached', to: 'refactor_done' | 'final_verified' },
+  /** Completes verification after optional cleanup remains behavior-preserving. */
+  TddStateTransition & { from: 'refactor_done', to: 'final_verified' },
+]
+```
 
 `scope_defined` 由 `tdd_start` 表示；`final_verified` 由 `tdd_finish` 表示。`tdd_state.phase` 只使用中间四种状态：`test_written`、`red_observed`、`green_reached` 和 `refactor_done`。
 可以跳过 `refactor_done`，但 `tdd_finish.refactor_performed` 必须为 `false`。除非 `evidence` 说明如何证明一个已经 GREEN 的测试有效，否则在没有 `red_observed` 时，不得进入生产行为修改或最终完成阶段。
+
+每次状态转换都必须同步调用 todo list 工具更新 `todoItemId` 对应项。todo list 必须在 `scope_defined` 后创建，任一时刻仅有一个 `in_progress`；进入 `final_verified` 前必须逐项核对，不得在收尾时批量伪造完成状态。
 
 ## tdd_start
 
