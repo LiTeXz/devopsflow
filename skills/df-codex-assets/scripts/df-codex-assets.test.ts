@@ -25,6 +25,12 @@ import {
 } from "./df-codex-assets";
 
 const tempRoots: string[] = [];
+const PROJECT_GITIGNORE_TEMPLATE = [
+  "# BEGIN DEVOPSFLOW MANAGED",
+  ".tdd_checkpoints/**",
+  "# END DEVOPSFLOW MANAGED",
+  "",
+].join("\n");
 
 afterEach(() => {
   while (tempRoots.length) {
@@ -70,7 +76,7 @@ function fixtureFetch(root: string): FetchLike {
 }
 
 describe("df-codex-assets", () => {
-  it("uses a Windows-compatible SessionStart command", () => {
+  it("uses Windows-compatible SessionStart commands", () => {
     const hooks = JSON.parse(
       readFileSync(
         join(import.meta.dir, "..", "..", "..", "hooks", "hooks.codex.json"),
@@ -79,13 +85,16 @@ describe("df-codex-assets", () => {
     ) as {
       hooks: { SessionStart: Array<{ hooks: Array<{ command: string }> }> };
     };
-    const command = hooks.hooks.SessionStart[0]?.hooks[0]?.command;
+    const commands = hooks.hooks.SessionStart[0]?.hooks.map(
+      (hook) => hook.command,
+    );
     const pluginRootToken = ["$", "{PLUGIN_ROOT}"].join("");
 
-    expect(command).toBe(
+    expect(commands).toEqual([
       `bun "${pluginRootToken}/skills/df-codex-assets/scripts/df-codex-assets.ts" hydrate`,
-    );
-    expect(command).not.toMatch(/^\w+=/);
+      `bun "${pluginRootToken}/skills/df-codex-assets/scripts/df-codex-assets.ts" sync-project-gitignore`,
+    ]);
+    for (const command of commands ?? []) expect(command).not.toMatch(/^\w+=/);
   });
 
   it("injects df-publisher into the SessionStart project after hydration", async () => {
@@ -109,6 +118,146 @@ describe("df-codex-assets", () => {
         "utf-8",
       ),
     ).toBe('name = "df-publisher"\n');
+  });
+
+  it("creates the managed project gitignore from the plugin template", async () => {
+    const pluginRoot = tempRoot();
+    const projectRoot = tempRoot();
+    writeAsset(
+      pluginRoot,
+      "skills/df-codex-assets/assets/.gitignore",
+      PROJECT_GITIGNORE_TEMPLATE,
+    );
+    process.env.PLUGIN_ROOT = pluginRoot;
+
+    const exitCode = await runCli(["sync-project-gitignore"], {
+      cwd: projectRoot,
+      hook_event_name: "SessionStart",
+    });
+
+    expect(exitCode).toBe(0);
+    expect(
+      readFileSync(join(projectRoot, ".devopsflow", ".gitignore"), "utf-8"),
+    ).toBe(PROJECT_GITIGNORE_TEMPLATE);
+  });
+
+  it("appends and updates only the managed project gitignore block", async () => {
+    const pluginRoot = tempRoot();
+    const projectRoot = tempRoot();
+    const targetPath = join(projectRoot, ".devopsflow", ".gitignore");
+    writeAsset(
+      pluginRoot,
+      "skills/df-codex-assets/assets/.gitignore",
+      PROJECT_GITIGNORE_TEMPLATE,
+    );
+    writeAsset(projectRoot, ".devopsflow/.gitignore", "custom-cache/\n");
+    process.env.PLUGIN_ROOT = pluginRoot;
+
+    expect(await runCli(["sync-project-gitignore"], { cwd: projectRoot })).toBe(
+      0,
+    );
+    expect(readFileSync(targetPath, "utf-8")).toBe(
+      `custom-cache/\n\n${PROJECT_GITIGNORE_TEMPLATE}`,
+    );
+
+    writeFileSync(
+      targetPath,
+      [
+        "custom-cache/",
+        "",
+        "# BEGIN DEVOPSFLOW MANAGED",
+        "old-rule/",
+        "# END DEVOPSFLOW MANAGED",
+        "",
+        "keep-me/",
+        "",
+      ].join("\n"),
+    );
+
+    expect(await runCli(["sync-project-gitignore"], { cwd: projectRoot })).toBe(
+      0,
+    );
+    expect(readFileSync(targetPath, "utf-8")).toBe(
+      `custom-cache/\n\n${PROJECT_GITIGNORE_TEMPLATE}\nkeep-me/\n`,
+    );
+  });
+
+  it("does not rewrite an already current project gitignore", async () => {
+    const pluginRoot = tempRoot();
+    const projectRoot = tempRoot();
+    const targetPath = join(projectRoot, ".devopsflow", ".gitignore");
+    writeAsset(
+      pluginRoot,
+      "skills/df-codex-assets/assets/.gitignore",
+      PROJECT_GITIGNORE_TEMPLATE,
+    );
+    writeAsset(
+      projectRoot,
+      ".devopsflow/.gitignore",
+      PROJECT_GITIGNORE_TEMPLATE,
+    );
+    process.env.PLUGIN_ROOT = pluginRoot;
+    const before = Bun.file(targetPath).lastModified;
+
+    await Bun.sleep(10);
+    expect(await runCli(["sync-project-gitignore"], { cwd: projectRoot })).toBe(
+      0,
+    );
+
+    expect(Bun.file(targetPath).lastModified).toBe(before);
+  });
+
+  for (const [name, malformed] of [
+    [
+      "a missing end marker",
+      "custom-cache/\n# BEGIN DEVOPSFLOW MANAGED\nold-rule/\n",
+    ],
+    [
+      "reversed markers",
+      "custom-cache/\n# END DEVOPSFLOW MANAGED\nold-rule/\n# BEGIN DEVOPSFLOW MANAGED\n",
+    ],
+    [
+      "duplicate markers",
+      "custom-cache/\n# BEGIN DEVOPSFLOW MANAGED\nold-rule/\n# BEGIN DEVOPSFLOW MANAGED\n# END DEVOPSFLOW MANAGED\n",
+    ],
+  ] as const) {
+    it(`fails open without changing ${name}`, async () => {
+      const pluginRoot = tempRoot();
+      const projectRoot = tempRoot();
+      const targetPath = join(projectRoot, ".devopsflow", ".gitignore");
+      writeAsset(
+        pluginRoot,
+        "skills/df-codex-assets/assets/.gitignore",
+        PROJECT_GITIGNORE_TEMPLATE,
+      );
+      writeAsset(projectRoot, ".devopsflow/.gitignore", malformed);
+      process.env.PLUGIN_ROOT = pluginRoot;
+      const warnings: string[] = [];
+      const originalWarn = console.warn;
+      console.warn = (message?: unknown) => warnings.push(String(message));
+      try {
+        expect(
+          await runCli(["sync-project-gitignore"], { cwd: projectRoot }),
+        ).toBe(0);
+      } finally {
+        console.warn = originalWarn;
+      }
+
+      expect(readFileSync(targetPath, "utf-8")).toBe(malformed);
+      expect(warnings.join("\n")).toContain("not modified");
+    });
+  }
+
+  it("skips project gitignore synchronization without a payload cwd", async () => {
+    const pluginRoot = tempRoot();
+    writeAsset(
+      pluginRoot,
+      "skills/df-codex-assets/assets/.gitignore",
+      PROJECT_GITIGNORE_TEMPLATE,
+    );
+    process.env.PLUGIN_ROOT = pluginRoot;
+
+    expect(await runCli(["sync-project-gitignore"], null)).toBe(0);
   });
 
   it("sorts relative paths before hashing the manifest", () => {

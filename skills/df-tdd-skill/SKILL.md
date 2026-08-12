@@ -5,7 +5,117 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 
 # TDD Skill
 
-使用与项目无关的 TDD 节奏构建或修改行为：先定义下一个可观察行为，使其失败，使其通过，并且仅在 GREEN 后重构。
+使用与项目无关的 TDD 节奏构建或修改行为：先定义下一个可观察行为，使其失败，使其通过，并且仅在通过状态后重构。
+
+```typescript
+/**
+ * Identifies the delivery shape so the workflow can select the correct test-first strategy.
+ */
+type TddTaskType =
+  /** Introduces behavior that has no production implementation yet. */
+  | 'greenfield_feature'
+  /** Reproduces an incorrect behavior before applying the smallest correction. */
+  | 'bug_fix'
+  /** Preserves observable behavior while changing internal design. */
+  | 'pure_refactor'
+  /** Captures an existing contract before intentionally correcting it. */
+  | 'characterize_then_fix'
+```
+
+```typescript
+/**
+ * Represents the evidence-backed lifecycle phase currently reached by the active behavior slice.
+ */
+type TddPhase =
+  /** The protected behavior, stable boundary, and first test are explicitly recorded. */
+  | 'scope_defined'
+  /** The narrowest relevant test exists but has not yet produced accepted failure evidence. */
+  | 'test_written'
+  /** The test fails for the target risk rather than for setup or syntax errors. */
+  | 'red_observed'
+  /** The same test passes after the smallest production behavior change. */
+  | 'green_reached'
+  /** Internal cleanup is complete and the protected test remains passing. */
+  | 'refactor_done'
+  /** Required focused and broad checks have completed with recorded evidence. */
+  | 'final_verified'
+```
+
+```typescript
+/**
+ * Mirrors the host todo tool statuses used to coordinate executable TDD work.
+ */
+type TodoStatus =
+  /** The item is known but cannot start until the current behavior slice finishes. */
+  | 'pending'
+  /** The item is the single behavior slice currently receiving changes and evidence. */
+  | 'in_progress'
+  /** The item has satisfied its expected observation and verification gate. */
+  | 'completed'
+```
+
+```typescript
+/**
+ * Connects one host todo entry to one observable behavior slice or verification gate.
+ */
+interface TddTodoItem {
+  /** Stable identifier used when synchronizing phase transitions with the todo tool. */
+  id: string
+  /** Observable behavior or completion gate whose result can be verified. */
+  behavior: string
+  /** Current host todo status, with only one item allowed to be in progress. */
+  status: TodoStatus
+}
+```
+
+```typescript
+/**
+ * Defines the complete user-visible state required for one active TDD workflow.
+ */
+interface TddWorkflowState {
+  /** Strategy category selected before editing production behavior. */
+  taskType: TddTaskType
+  /** Furthest evidence-backed lifecycle phase reached by the active slice. */
+  phase: TddPhase
+  /** Permanent JSONL audit path that receives every protocol event in append order. */
+  checkpoint: `.devopsflow/.tdd_checkpoints/${string}.jsonl`
+  /** Literal retention policy preventing completion cleanup from deleting the audit file. */
+  checkpointRetention: 'retain'
+  /** Exact test name or command currently driving the behavior change. */
+  activeTest: string
+  /** Snapshot that must match the host todo tool after every phase transition. */
+  todos: readonly TddTodoItem[]
+}
+```
+
+```typescript
+/**
+ * Shows the required reporting shape and requires every placeholder to use live task evidence.
+ */
+const currentTddState = {
+  /** The current delivery strategy selected during scope definition. */
+  taskType: 'bug_fix',
+  /** The latest phase supported by commands and observable test output. */
+  phase: 'red_observed',
+  /** The permanent checkpoint path for the current task slug. */
+  checkpoint: '.devopsflow/.tdd_checkpoints/<task-slug>.jsonl',
+  /** The immutable policy requiring this checkpoint to remain after completion. */
+  checkpointRetention: 'retain',
+  /** The exact focused test or command currently producing phase evidence. */
+  activeTest: '<exact test name or command>',
+  /** The todo tool snapshot, including the single active behavior slice. */
+  todos: [
+    {
+      /** Stable todo identifier referenced by state transitions. */
+      id: 'behavior-1',
+      /** Observable result protected by the focused test. */
+      behavior: '<observable behavior>',
+      /** Active status proving this is the only item currently being executed. */
+      status: 'in_progress',
+    },
+  ],
+} as const satisfies TddWorkflowState
+```
 
 ## Protocol
 
@@ -20,10 +130,21 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 
 此 skill 无法注册平台级自动 hook。使用时，必须在固定阶段主动运行 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`：
 
-- 将当前任务的 protocol blocks 追加到 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`。
+- 将当前任务的 protocol blocks 追加到 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`。该文件是永久审计记录，完成任务后仍必须保留，不得删除、清空或移动到临时目录。
 - 编辑生产代码前：输出 `tdd_start`，然后运行 `--stage before_edit`。`validation failed` 时，先补全声明再编辑生产代码。
 - 观察到 RED/GREEN/REFACTOR 状态后：输出 `tdd_state`，然后运行 `--stage state`。`validation failed` 时，补充命令、退出码、测试名称、与风险相关的证据，或返回正确阶段。
 - 最终响应前：输出 `tdd_finish`，然后运行 `--stage finish`。`validation failed` 时，继续补充证据、执行测试或纠正工作流。
+
+## Todo List Coordination
+
+在输出并验证 `tdd_start` 后，立即调用宿主提供的 todo list 工具，例如 Codex 的 `update_plan` 或 ChatGPT 的 `todolist`，明确列出行为切片、当前测试、最小实现和最终验证。不要只在对话中口述计划。
+
+- 每个 todo 项对应一个可验证的行为切片或完成门禁，描述中包含预期观察结果。
+- 开始写测试时将对应项设为 `in_progress`；观察 `red_observed`、达到 `green_reached`、完成 `refactor_done` 和进入 `final_verified` 时都调用工具同步状态。
+- 任一时刻只有一个 `in_progress`。不要到最后一次性把所有项标为 `completed`。
+- 新发现的行为、风险或验证工作立即加入 todo list；不再需要的项保留并在说明中标明原因，不要静默删除。
+- 输出当前状态的 `typescript` code block 时，使 `todos` 与工具中的实际清单一致。
+- 输出 `tdd_finish` 前逐项核对 todo list。未完成项必须继续执行，或作为 `residual_risk` 明确交接。
 
 ## Core Loop
 
@@ -31,12 +152,12 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 2. 说明稳定边界：公共契约、传输边界、编排逻辑、核心逻辑、持久化边界、外部副作用或其他可观察接口。
 3. 将任务分类为 `greenfield_feature`、`bug_fix`、`pure_refactor` 或 `characterize_then_fix`。
 4. 先写测试：全新功能使用期望行为测试，缺陷修复使用复现测试，纯重构使用特征测试。
-5. 先观察 RED：记录失败命令、退出码、测试名称，以及失败与目标风险之间的关系。
+5. 先观察 `red_observed`：记录失败命令、退出码、测试名称，以及失败与目标风险之间的关系，并同步 todo list。
    - 如果测试因目标风险而失败，继续。
    - 如果测试因测试本身有问题而报错，修复测试，直至它因目标风险而失败。
    - 如果测试立即通过，停止操作；在编辑生产代码前，先证明它能够因目标风险而失败。
-6. 进行达到 GREEN 所需的最小生产代码修改。
-7. 在 GREEN 后重构；处于 RED 时不要进行结构清理。
+6. 进行达到 `green_reached` 所需的最小生产代码修改。
+7. 在 `green_reached` 后重构；处于 `red_observed` 时不要进行结构清理。
 8. 每个有意义的步骤后运行最小相关测试。
 9. 以小切片重复，直至目标行为和设计变更完成。
 
@@ -73,6 +194,8 @@ description: "适用于全新功能开发、缺陷修复、行为保持型重构
 - 仅在 GREEN 后重构。重构后，同一组相关测试仍应通过。
 - 不要把架构或技术栈规则伪装成 TDD 本身。框架边界相关时，使用对应的技术栈 skill。
 - 将 `tdd_start`、`tdd_state` 和 `tdd_finish` 视为唯一稳定的验证接口。半自动脚本不应推断项目目录或框架类型。
+- 永久保留 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`，不得把任务完成视为删除审计记录的授权。
+- 使用 todo list 工具明确列出并穿插更新 TDD 工作项，任一时刻只有一个 `in_progress`。
 - 不要使用含糊证据满足协议。RED 证据必须表明目标测试因目标风险而失败；GREEN 证据必须表明最小生产修改后，同一风险已受到保护。
 
 ## Pre-Edit Check
