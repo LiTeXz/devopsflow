@@ -38,25 +38,25 @@ function writeValidProject(projectRoot: string): void {
   writeFixture(
     projectRoot,
     "AGENTS.md",
-    `<!-- BEGIN /AGENTS.md -->
+    `<!-- BEGIN:/AGENTS.md -->
 
 # /AGENTS.md
 
 Write instruction files in English.
 
-<!-- END /AGENTS.md -->
+<!-- END:/AGENTS.md -->
 `,
   );
   writeFixture(
     projectRoot,
     "skills/AGENTS.md",
-    `<!-- BEGIN skills/AGENTS.md -->
+    `<!-- BEGIN:skills/AGENTS.md -->
 
 # skills/AGENTS.md
 
 Use the df- prefix for skills.
 
-<!-- END skills/AGENTS.md -->
+<!-- END:skills/AGENTS.md -->
 `,
   );
   writeFixture(
@@ -117,23 +117,23 @@ describe("agent instruction authoring validation", () => {
     writeFixture(
       projectRoot,
       "skills/AGENTS.md",
-      `<!-- BEGIN /AGENTS.md -->
+      `<!-- BEGIN:/AGENTS.md -->
 
 # Incorrect
 
 Use English.
 
-<!-- END /AGENTS.md -->
+<!-- END:/AGENTS.md -->
 `,
     );
 
     const messages = violationMessages(projectRoot);
 
     expect(messages).toContain(
-      'AGENTS.md must start with "<!-- BEGIN skills/AGENTS.md -->"',
+      'AGENTS.md must start with "<!-- BEGIN:skills/AGENTS.md -->"',
     );
     expect(messages).toContain(
-      'AGENTS.md must end with "<!-- END skills/AGENTS.md -->"',
+      'AGENTS.md must end with "<!-- END:skills/AGENTS.md -->"',
     );
     expect(messages).toContain(
       'AGENTS.md first H1 must be "# skills/AGENTS.md"',
@@ -199,13 +199,13 @@ description: "Example authoring validation skill"
     writeFixture(
       projectRoot,
       "AGENTS.md",
-      `<!-- BEGINE GLOBAL ~/.codex/ -->
+      `<!-- BEGINE_GLOBAL:~/.codex/ -->
 
-# ~/.codex/AGENTS.md: Global Codex Instructions
+# ~/.codex/AGENTS.md: Global Codex Constitution
 
 Use English for global instructions.
 
-<!-- END GLOBAL ~/.codex/ -->
+<!-- END_GLOBAL:~/.codex/ -->
 `,
     );
 
@@ -213,18 +213,18 @@ Use English for global instructions.
     writeFixture(
       projectRoot,
       "AGENTS.md",
-      `<!-- BEGIN GLOBAL ~/.codex/ -->
+      `<!-- BEGIN_GLOBAL:~/.codex/ -->
 
-# ~/.codex/AGENTS.md: Global Codex Instructions
+# ~/.codex/AGENTS.md: Global Codex Constitution
 
 Use English for global instructions.
 
-<!-- END GLOBAL ~/.codex/ -->
+<!-- END_GLOBAL:~/.codex/ -->
 `,
     );
 
     expect(validateGlobalAgentsFile(globalAgentsPath)[0]?.message).toBe(
-      'AGENTS.md must start with "<!-- BEGINE GLOBAL ~/.codex/ -->"',
+      'AGENTS.md must start with "<!-- BEGINE_GLOBAL:~/.codex/ -->"',
     );
   });
 
@@ -254,5 +254,28 @@ Use English for global instructions.
 
     expect(exitCode).toBe(0);
     expect(logs).toEqual(["Agent instruction validation passed."]);
+  });
+
+  it("rejects source-repository role descriptions and skill commands", () => {
+    const projectRoot = temporaryProject();
+    writeValidProject(projectRoot);
+    writeFixture(
+      projectRoot,
+      "agents/worker.toml",
+      'description = "DevopsFlow 中专注后端实现的 agent。"\n',
+    );
+    writeFixture(
+      projectRoot,
+      "skills/df-example/SKILL.md",
+      '---\nname: df-example\ndescription: "Example authoring validation skill"\n---\n\n# Example Skill\n\nRun `bun skills/df-example/scripts/check.ts`.\n',
+    );
+
+    const messages = violationMessages(projectRoot);
+    expect(messages).toContain(
+      "agent description must describe the current target project, not DevopsFlow as its runtime project",
+    );
+    expect(messages).toContain(
+      "skill instructions must use an installed skill/plugin root placeholder instead of the source repository path bun skills/...",
+    );
   });
 });

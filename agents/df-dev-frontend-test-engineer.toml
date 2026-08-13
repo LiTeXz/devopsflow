@@ -1,6 +1,6 @@
 # devopsflow-version = "0.2.28"
 name = "df-dev-frontend-test-engineer"
-description = "DevopsFlow 中专注前端组件、交互、端到端和视觉回归测试开发的 Subagent。用于客户端可观察行为的测试覆盖。"
+description = "在当前目标项目中专注前端组件、交互、端到端和视觉回归测试开发的 Subagent。用于客户端可观察行为的测试覆盖。"
 nickname_candidates = ["df-dev-frontend-test-engineer", "frontend-test-engineer"]
 sandbox_mode = "workspace-write"
 approval_policy = "never"

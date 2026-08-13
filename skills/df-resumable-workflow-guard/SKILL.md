@@ -5,7 +5,7 @@ description: "通过明确的 checkpoint、resume file 和交接说明保护长�
 
 # Resumable Workflow Guard
 
-将此 skill 作为现有 DevopsFlow 工作流的外层保护。它负责使长任务可续跑，不替代规划、TDD、调试、审查或验证 skills。
+将此 skill 作为当前目标项目工程工作的外层保护。它负责使长任务可续跑，不替代规划、TDD、调试、审查或验证 skills。
 
 ## Core Rule
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Doc Diagram Drawio"
-  short_description: "可编辑 SVG 文档图的创作、维护和迁移，处理 *.drawio.svg、*.drawio、mxfile XML、mxGraphModel 或 mxCell 内容，并将非矢量输入重构为 SVG。"
-  default_prompt: "使用 $df-doc-diagram-drawio 创建、编辑或迁移 *.drawio.svg / *.drawio 文件。"
+  short_description: "可编辑 SVG 文档图的创作、维护和迁移。当 Codex 需要处理 *.drawio.svg、*.drawio、mxfile XML、mxGraphModel 或 mxCell 内容，或将现有图文件迁移为 SVG 时使用。"
+  default_prompt: "Use $df-doc-diagram-drawio Create or Edit or Migrate *.drawio.svg / *.drawio file."

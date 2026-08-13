@@ -79,8 +79,8 @@ function validateAgentWrappers(
 ): AuthoringViolation[] {
   const expectedPath =
     relativePath === "AGENTS.md" ? "/AGENTS.md" : relativePath;
-  const expectedStart = `<!-- BEGIN ${expectedPath} -->`;
-  const expectedEnd = `<!-- END ${expectedPath} -->`;
+  const expectedStart = `<!-- BEGIN:${expectedPath} -->`;
+  const expectedEnd = `<!-- END:${expectedPath} -->`;
   const violations: AuthoringViolation[] = [];
   const displayName = basename(path);
 
@@ -117,6 +117,41 @@ function isGovernedFile(relativePath: string): boolean {
   if (!relativePath.startsWith("skills/")) return false;
   if (relativePath.endsWith("/SKILL.md")) return true;
   return /\/agents\/.+\.(?:json|md|toml|ya?ml)$/i.test(relativePath);
+}
+
+function validatePortableContext(
+  path: string,
+  relativePath: string,
+  content: string,
+): AuthoringViolation[] {
+  const normalized = normalizedPath(relativePath);
+  const violations: AuthoringViolation[] = [];
+  if (normalized.startsWith("agents/") && normalized.endsWith(".toml")) {
+    const descriptionLine = content
+      .split(/\r?\n/)
+      .find((line) => /^description\s*=/.test(line));
+    if (
+      descriptionLine &&
+      /DevopsFlow\s+(?:中|项目|仓库)/u.test(descriptionLine)
+    ) {
+      violations.push({
+        path,
+        message:
+          "agent description must describe the current target project, not DevopsFlow as its runtime project",
+      });
+    }
+  }
+  if (
+    normalized.startsWith("skills/") &&
+    /\bbun\s+(?:skills\/|test\s+skills\/)/u.test(content)
+  ) {
+    violations.push({
+      path,
+      message:
+        "skill instructions must use an installed skill/plugin root placeholder instead of the source repository path bun skills/...",
+    });
+  }
+  return violations;
 }
 
 export function findGovernedFiles(projectRoot: string): string[] {
@@ -157,6 +192,7 @@ export function validateProjectAuthoring(
     const content = readFileSync(path, "utf-8");
     violations.push(...validateHeadings(path, content));
     const relativePath = normalizedPath(relative(projectRoot, path));
+    violations.push(...validatePortableContext(path, relativePath, content));
     if (basename(relativePath) === "AGENTS.md") {
       violations.push(...validateAgentWrappers(path, relativePath, content));
     }
@@ -176,9 +212,9 @@ export function validateGlobalAgentsFile(
   const content = readFileSync(globalAgentsPath, "utf-8");
   const displayName = basename(globalAgentsPath);
   const violations = validateHeadings(globalAgentsPath, content);
-  const expectedStart = "<!-- BEGINE GLOBAL ~/.codex/ -->";
-  const expectedEnd = "<!-- END GLOBAL ~/.codex/ -->";
-  const expectedH1 = "~/.codex/AGENTS.md: Global Codex Instructions";
+  const expectedStart = "<!-- BEGINE_GLOBAL:~/.codex/ -->";
+  const expectedEnd = "<!-- END_GLOBAL:~/.codex/ -->";
+  const expectedH1 = "~/.codex/AGENTS.md: Global Codex Constitution";
 
   if (!content.startsWith(expectedStart)) {
     violations.push({

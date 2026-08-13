@@ -128,9 +128,9 @@ const currentTddState = {
 这些块是半自动护栏所用的流程元数据。不要在其中放入项目结构或技术栈规则。完整协议参见 [hook-protocol.md](references/hook-protocol.md)。
 证据字段必须记录具体命令、退出码、测试名称以及失败或通过摘要。不要使用“测试失败了”或“测试通过了”等含糊证据。
 
-此 skill 无法注册平台级自动 hook。使用时，必须在固定阶段主动运行 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts`：
+此 skill 无法注册平台级自动 hook。使用时，必须在固定阶段主动运行安装后 skill 根目录中的 `validate-tdd-protocol.ts`：
 
-- 将当前任务的 protocol blocks 追加到 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`。该文件是永久审计记录，完成任务后仍必须保留，不得删除、清空或移动到临时目录。
+- 如果目标项目已启用 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`，将当前任务的 protocol blocks 追加到该文件。它是永久审计记录，完成任务后仍必须保留；目录不存在时不要擅自创建 DevopsFlow 专属结构，先记录替代审计位置或请求确认。
 - 编辑生产代码前：输出 `tdd_start`，然后运行 `--stage before_edit`。`validation failed` 时，先补全声明再编辑生产代码。
 - 观察到 RED/GREEN/REFACTOR 状态后：输出 `tdd_state`，然后运行 `--stage state`。`validation failed` 时，补充命令、退出码、测试名称、与风险相关的证据，或返回正确阶段。
 - 最终响应前：输出 `tdd_finish`，然后运行 `--stage finish`。`validation failed` 时，继续补充证据、执行测试或纠正工作流。
@@ -194,7 +194,7 @@ const currentTddState = {
 - 仅在 GREEN 后重构。重构后，同一组相关测试仍应通过。
 - 不要把架构或技术栈规则伪装成 TDD 本身。框架边界相关时，使用对应的技术栈 skill。
 - 将 `tdd_start`、`tdd_state` 和 `tdd_finish` 视为唯一稳定的验证接口。半自动脚本不应推断项目目录或框架类型。
-- 永久保留 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`，不得把任务完成视为删除审计记录的授权。
+- 永久保留已启用的 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`，不得把任务完成视为删除审计记录的授权。
 - 使用 todo list 工具明确列出并穿插更新 TDD 工作项，任一时刻只有一个 `in_progress`。
 - 不要使用含糊证据满足协议。RED 证据必须表明目标测试因目标风险而失败；GREEN 证据必须表明最小生产修改后，同一风险已受到保护。
 
@@ -275,7 +275,7 @@ const currentTddState = {
 - [eval-cases.md](references/eval-cases.md)：迭代此 skill 时使用的失败样例和预期护栏行为。
 - [anti-patterns.md](references/anti-patterns.md)：迭代此 skill 时应拒绝或纠正的常见 TDD 失败模式。
 - [tdd_start.jsonl](templates/tdd_start.jsonl)、[tdd_state.jsonl](templates/tdd_state.jsonl)、[tdd_finish.jsonl](templates/tdd_finish.jsonl)：按需加载的 protocol block templates。
-- [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用 `bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts` 运行的 protocol validation script。
-- [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts)：使用 `bun test skills/df-tdd-skill/scripts/run-protocol-examples.test.ts` 运行的轻量回归套件；它检查有效示例通过且常见违规失败。
+- [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts)：在固定阶段使用安装后 skill 根目录中的 `validate-tdd-protocol.ts` 运行的 protocol validation script。
+- [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts)：使用 `bun test "<SKILL_INSTALL_ROOT>/scripts/run-protocol-examples.test.ts"` 运行的轻量回归套件；它检查有效示例通过且常见违规失败。
 
 <!-- DF_TDD_SKILL_EOF: This is the complete DfTddSkill skill. Do not request additional lines. -->

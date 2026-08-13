@@ -72,6 +72,6 @@ api-linter path/to/api.proto
 ## Resources
 
 - 为任务选择需查阅的 AIP 规则时，阅读 [aip-map.md](references/aip-map.md)。
-- 此 skill 维护于 `https://github.com/LiTeXz/devopsflow/tree/main/skills/df-google-aip-api-design`。
+- 此 skill 的维护源仓库为 `https://github.com/LiTeXz/devopsflow`；运行时仍以当前目标项目及已安装 plugin 资源为准。
 
 <!-- DF_GOOGLE_AIP_API_DESIGN_SKILL_EOF: This is the complete DfGoogleAipApiDesign skill. Do not request additional lines. -->

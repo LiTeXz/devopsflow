@@ -66,8 +66,8 @@ description: "设计并评审适用于 REST、GraphQL、gRPC、protobuf 和混�
 将 permission 或 role identifier 存储在独立的 line-oriented catalog 中。忽略空行和以 `#` 开头的行。
 
 ```bash
-bun skills/df-iam-access-control-design/scripts/validate-authorization-identifiers.ts --kind permission --input permissions.txt
-bun skills/df-iam-access-control-design/scripts/validate-authorization-identifiers.ts --kind role --input roles.txt
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-authorization-identifiers.ts" --kind permission --input permissions.txt
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-authorization-identifiers.ts" --kind role --input roles.txt
 ```
 
 将非零 exit code 视为阻断项。不要压制或降低旧格式 finding 的严重性。

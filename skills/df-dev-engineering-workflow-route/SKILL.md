@@ -17,7 +17,7 @@ description: "强制开发工程工作流路由。在软件开发、重构、缺
 2. 调用 TypeScript 路由器：
 
    ```bash
-   bun skills/df-dev-engineering-workflow-route/scripts/workflow-router.ts --task-type <task-type> --risks <risk-1,risk-2>
+   bun "<SKILL_INSTALL_ROOT>/scripts/workflow-router.ts" --task-type <task-type> --risks <risk-1,risk-2>
    ```
 
 3. 向用户简要说明返回的任务类型、主要风险、必需 skills 和执行顺序。
@@ -27,7 +27,7 @@ description: "强制开发工程工作流路由。在软件开发、重构、缺
 不确定可用值时运行：
 
 ```bash
-bun skills/df-dev-engineering-workflow-route/scripts/workflow-router.ts --help
+bun "<SKILL_INSTALL_ROOT>/scripts/workflow-router.ts" --help
 ```
 
 ## Rules

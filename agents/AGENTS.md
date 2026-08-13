@@ -1,9 +1,19 @@
-<!-- BEGIN agents/AGENTS.md -->
+<!-- BEGIN:agents/AGENTS.md -->
 # agents/AGENTS.md
 
 Codex Subagents 官方文档：[Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)。完整配置字段以 [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference) 为准。
 
 本目录维护 Codex custom agent 配置。新增、修改或审查 agent 时，如果对字段、继承优先级、model、reasoning effort、sandbox、permission、MCP、skill 或 subagent 调度行为存在任何不确定，必须先查询上述官方文档，不得依赖猜测或过时示例。
+
+## Hydrated Project Context
+
+本目录中的 agent 配置会被 hydration、复制或安装到其他项目后使用。编写时必须假定 spawned agent 当前处于用户指定的目标项目，而不是 DevopsFlow 源码仓库；agent 的职责是服务目标项目的实际任务。
+
+- `description`、`developer_instructions` 和示例不得把 DevopsFlow 写成默认代码仓库、工作目录、文件树或唯一业务领域。
+- 不得写入只在本仓库成立的相对路径、模块名、构建命令、分支名、临时状态或文件存在性假设；路径和命令必须从目标项目当前状态发现，或明确标注为可选/插件资源路径。
+- agent 可以提及 DevopsFlow 作为插件、产品、配置提供方或分发来源，但不得以“只服务 DevopsFlow 项目”的角色态位进行调度。
+- 指令需要访问文件或目录时，应以 session `cwd` 为目标项目根，先检查再操作；不要回到源仓库寻找实现材料。
+- 修改 agent 时必须同时审查文件名、TOML 字段、角色自称、默认 prompt 和验证要求，确保 hydration 后仍能访问目标项目并返回目标项目语境下的证据。
 
 ## Type Definitions
 
@@ -263,8 +273,6 @@ developer_instructions = """
 
 任务通过直接要求 Codex 使用 subagent，或由适用的 `AGENTS.md` / skill 指令触发；委托提示应说明如何拆分工作、是否等待全部 agent，以及期望汇总的内容。
 
-## Best Practices
-
 ## Naming Boundaries
 
 Agent 名称必须使用 `df-<category>-<role>` 前缀，前缀表示职责边界：
@@ -277,6 +285,8 @@ Agent 名称必须使用 `df-<category>-<role>` 前缀，前缀表示职责边�
 文件名、TOML `name` 和主要自称必须保持一致。新增 agent 选择唯一且最窄的分类；跨分类任务由主 agent 协调，不通过模糊命名扩大单个 agent 的职责。
 
 每个 agent TOML 必须以独占末行注释 `# DF_AGENT_EOF` 结尾。该标记位于 `developer_instructions` 的结束引号之后，用于确认配置完整；新增或修改 agent 时不得省略、移动或在其后追加内容。
+
+## Best Practices
 
 - 保持职责窄而明确。一个 agent 聚焦一种可判断的工作，例如代码探索、测试缺口审查或文档核验，避免把互相冲突的角色塞进同一配置。
 - 把 `description` 写成调度契约，说明适用任务、触发条件和边界；把稳定的执行规则放进 `developer_instructions`，不要只重复角色名称。
@@ -294,4 +304,4 @@ Agent 名称必须使用 `df-<category>-<role>` 前缀，前缀表示职责边�
 - [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)：custom agent 文件位置、必填字段、配置继承、触发方式、模型选择、并行策略和示例。
 - [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference)：`[agents]`、model、reasoning、sandbox、approval、MCP、skill 和其他 TOML 配置键的权威定义。
 
-<!-- END agents/AGENTS.md -->
+<!-- END:agents/AGENTS.md -->

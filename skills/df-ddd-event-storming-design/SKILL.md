@@ -654,6 +654,6 @@ Aggregate 由一组内聚且长期存在的业务能力定义，而不是由字�
 
 - [anti-patterns.md](references/anti-patterns.md)：需要拒绝或纠正的 DDD 建模 Anti-Pattern。
 - [eval-cases.md](references/eval-cases.md)：用于检查技能是否保持 Event Storming 纪律的评估用例。
-- [validate-ddd-design.ts](scripts/validate-ddd-design.ts)：用于 Markdown 草稿或 `event-storming/` 仓库的轻量启发式检查。使用 `bun skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts <path> [--require-sections]` 运行。
+- [validate-ddd-design.ts](scripts/validate-ddd-design.ts)：用于 Markdown 草稿或目标项目 `event-storming/` 目录的轻量启发式检查。使用 `bun "<SKILL_INSTALL_ROOT>/scripts/validate-ddd-design.ts" <path> [--require-sections]` 运行。
 
 <!-- DF_DDD_EVENT_STORMING_DESIGN_SKILL_EOF: This is the complete DfDddEventStormingDesign skill. Do not request additional lines. -->

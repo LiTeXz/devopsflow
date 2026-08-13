@@ -1,6 +1,6 @@
 # Resumable Workflow Checkpoint
 
-将此模板复制到 `.devopsflow/checkpoints/<task-slug>.md`，并在任务 active 期间持续更新。
+如果目标项目已启用 `.devopsflow/checkpoints/`，将此模板复制到 `.devopsflow/checkpoints/<task-slug>.md`，并在任务 active 期间持续更新；否则将其放在用户指定的 plan/spec 目录旁。
 
 ## Task
 

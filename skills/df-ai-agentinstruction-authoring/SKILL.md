@@ -75,7 +75,7 @@ bun run check:agent-instructions
 Validate the global file explicitly when it is in scope:
 
 ```bash
-bun skills/df-ai-agentinstruction-authoring/scripts/validate-agent-instructions.ts --global ~/.codex/AGENTS.md
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-agent-instructions.ts" --global ~/.codex/AGENTS.md
 ```
 
 将所有报告的违规视为阻断项。如果标题必须使用中文例外，保持规定的引号形式。
