@@ -2,3 +2,5 @@ interface:
   display_name: "Dev Backend Orm Jimmer"
   short_description: "unified 的 Java/Kotlin Jimmer ORM workflow. 当 Codex 修改 JVM project 中的 Jimmer SQL eneity, APT or KSP generate 源 code, type 安全 query, fetcher, DTO language file, graph save, repository, Spring Boot integration or 持久化 tests 时使用; 同时适用于 Java, Kotlin and 混合 source set."
   default_prompt: "修改 Java or Kotlin Jimmer ORM eneity, query, DTO, save or Spring Boot integration 时, 使用 $df-dev-backend-orm-jimmer."
+  icon-smaill: "./assets/jimmer-logo.png"
+  icon-large: "./assets/jimmer-logo.png"

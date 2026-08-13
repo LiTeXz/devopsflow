@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { runLoggedScript } from "@/shared/script-logger";
 
 const SKILL_PATH_PATTERN = /^skills\/([^/]+)\//;
@@ -36,6 +38,15 @@ function readHeadFile(root: string, path: string): string | undefined {
 
 function readStagedFile(root: string, path: string): string {
   return gitOutput(root, ["show", `:${path}`]);
+}
+
+function stageFile(root: string, path: string): void {
+  const result = git(root, ["add", "--", path]);
+  if (result.exitCode !== 0) {
+    throw new Error(
+      `Unable to stage ${path}: ${result.stderr.toString().trim()}`,
+    );
+  }
 }
 
 function changedSkills(root: string): string[] {
@@ -85,6 +96,22 @@ function incrementPatch(version: string): string {
   return `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
 }
 
+function replaceVersions(content: string, version: string): string {
+  const frontMatterPattern = /(^---\r?\n)([\s\S]*?)(\r?\n---(?:\r?\n|$))/;
+  return content.replace(
+    frontMatterPattern,
+    (_match, start, frontMatter, end) => {
+      const updated = frontMatter
+        .replace(/^(version:\s*)["']?[^"'\s]+["']?\s*$/m, `$1"${version}"`)
+        .replace(
+          /^(metadata:\s*\r?\n(?:^ {2}[^\r\n]+\r?\n)*?^ {2}version:\s*)["']?[^"'\s]+["']?\s*$/m,
+          `$1"${version}"`,
+        );
+      return `${start}${updated}${end}`;
+    },
+  );
+}
+
 export function checkStagedSkillVersions(root = process.cwd()): string[] {
   const checked: string[] = [];
   for (const skill of changedSkills(root)) {
@@ -92,11 +119,14 @@ export function checkStagedSkillVersions(root = process.cwd()): string[] {
     const staged = parseVersions(path, readStagedFile(root, path));
     const head = readHeadFile(root, path);
     if (head) {
-      const expected = incrementPatch(parseVersions(path, head).version);
+      const previous = parseVersions(path, head).version;
+      const expected = incrementPatch(previous);
       if (staged.version !== expected) {
-        throw new Error(
-          `${path} version must increment from "${parseVersions(path, head).version}" to "${expected}"`,
-        );
+        const updated = replaceVersions(readStagedFile(root, path), expected);
+        const target = join(root, path);
+        writeFileSync(target, updated, "utf8");
+        stageFile(root, path);
+        console.log(`${path}: version ${previous} -> ${expected}`);
       }
     }
     checked.push(path);

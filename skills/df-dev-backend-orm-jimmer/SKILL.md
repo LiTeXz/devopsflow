@@ -1,10 +1,10 @@
 ---
 name: df-dev-backend-orm-jimmer
 description: "unified 的 Java/Kotlin Jimmer ORM workflow. 当 Codex 修改 JVM project 中的 Jimmer SQL eneity, APT or KSP generate 源 code, type 安全 query, fetcher, DTO language file, graph save, repository, Spring Boot integration or 持久化 tests 时使用; 同时适用于 Java, Kotlin and 混合 source set."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # Dev Backend ORM Jimmer

@@ -108,8 +108,11 @@ describe("Husky managed asset hash", () => {
     writeSkill(root, "df-example", "1.2.3", "changed");
     git(root, "add", "skills/df-example/SKILL.md");
 
-    expect(() => checkStagedSkillVersions(root)).toThrow(
-      'skills/df-example/SKILL.md version must increment from "1.2.3" to "1.2.4"',
+    expect(checkStagedSkillVersions(root)).toEqual([
+      "skills/df-example/SKILL.md",
+    ]);
+    expect(git(root, "show", ":skills/df-example/SKILL.md")).toContain(
+      'version: "1.2.4"',
     );
   });
 
