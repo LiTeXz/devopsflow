@@ -206,6 +206,7 @@ export interface AgentsConfig {
   /**
    * Legacy alias for max_concurrent_threads_per_session.
    * @default Codex-selected limit
+   * @deprecated Legacy alias for max_concurrent_threads_per_session.
    */
   max_threads?: number;
 }
