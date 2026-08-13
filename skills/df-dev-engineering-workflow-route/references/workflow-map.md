@@ -8,25 +8,25 @@
 /** A selected skill and the reason it is required by the route. */
 interface SkillSelection {
   /** Canonical DevopsFlow skill identifier. */
-  readonly skill: Skill;
+  readonly skill: Skill
 
   /** English explanation of why the route requires this skill. */
-  readonly reason: string;
+  readonly reason: string
 }
 
 /** Complete deterministic result returned by the workflow router. */
 interface RouteDecision {
   /** Primary classification of the engineering request. */
-  readonly taskType: TaskType;
+  readonly taskType: TaskType
 
   /** Deduplicated risk dimensions in first-seen input order. */
-  readonly risks: readonly RiskDimension[];
+  readonly risks: readonly RiskDimension[]
 
   /** Required skills with English selection reasons, in execution order. */
-  readonly requiredSkills: readonly SkillSelection[];
+  readonly requiredSkills: readonly SkillSelection[]
 
   /** Unique skill identifiers in dependency-safe execution order. */
-  readonly executionOrder: readonly Skill[];
+  readonly executionOrder: readonly Skill[]
 }
 ```
 

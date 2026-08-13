@@ -11,50 +11,44 @@ this directory 用于维护 Codex Hooks. 新增, 修改 or 审查 Hook 时, if �
 /** Input delivered to a command hook when a subagent starts. */
 export interface SubagentStartInput {
   /** Current Codex session id; subagent hooks use the parent session id. */
-  session_id: string;
+  session_id: string
   /** Path to the session transcript, or null when unavailable. */
-  transcript_path: string | null;
+  transcript_path: string | null
   /** Working directory of the Codex session. */
-  cwd: string;
+  cwd: string
   /** Name of the lifecycle event. */
-  hook_event_name: "SubagentStart";
+  hook_event_name: 'SubagentStart'
   /** Active Codex model slug. */
-  model: string;
+  model: string
   /** Active Codex turn id. */
-  turn_id: string;
+  turn_id: string
   /** Identifier assigned to the subagent. */
-  agent_id: string;
+  agent_id: string
   /** Subagent type or profile used for this run. */
-  agent_type: string;
+  agent_type: string
   /** Current permission mode for the subagent. */
-  permission_mode:
-    | "default"
-    | "acceptEdits"
-    | "plan"
-    | "dontAsk"
-    | "bypassPermissions";
+  permission_mode: 'default' | 'acceptEdits' | 'plan' | 'dontAsk' | 'bypassPermissions'
 }
 ```
 
 ```typescript
-
 /** JSON output optionally returned by a SubagentStart command hook. */
 export interface SubagentStartOutput {
   /** Common lifecycle status; false is parsed but does not stop the subagent. */
-  continue?: boolean;
+  continue?: boolean
   /** Optional reason recorded when the hook reports a stop condition. */
-  stopReason?: string;
+  stopReason?: string
   /** Warning or informational message surfaced by Codex. */
-  systemMessage?: string;
+  systemMessage?: string
   /** Parsed for compatibility but not currently implemented. */
-  suppressOutput?: boolean;
+  suppressOutput?: boolean
   /** Event-specific context added to the subagent's developer context. */
   hookSpecificOutput?: {
     /** Name of the lifecycle event that produced this output. */
-    hookEventName: "SubagentStart";
+    hookEventName: 'SubagentStart'
     /** Additional instructions or context for the subagent. */
-    additionalContext?: string;
-  };
+    additionalContext?: string
+  }
 }
 ```
 

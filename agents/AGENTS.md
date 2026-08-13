@@ -21,33 +21,23 @@ this directory 中的 agent 配置会被 hydration, 复制 or install 到 other 
 
 ```typescript
 /** Reasoning levels accepted when supported by the selected model. */
-export type ModelReasoningEffort =
-  | "minimal"
-  | "low"
-  | "medium"
-  | "high"
-  | "xhigh"
-  | "max"
-  | "ultra";
+export type ModelReasoningEffort = 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' | 'ultra'
 
 /** Filesystem isolation applied to the custom agent session. */
-export type SandboxMode =
-  | "read-only"
-  | "workspace-write"
-  | "danger-full-access";
+export type SandboxMode = 'read-only' | 'workspace-write' | 'danger-full-access'
 
 /** Web-search source selected for the custom agent session. */
-export type WebSearchMode = "disabled" | "cached" | "indexed" | "live";
+export type WebSearchMode = 'disabled' | 'cached' | 'indexed' | 'live'
 
 /** Communication style used when the selected model supports personalities. */
-export type Personality = "none" | "friendly" | "pragmatic";
+export type Personality = 'none' | 'friendly' | 'pragmatic'
 
 /** Per-skill enablement override inherited by the custom agent session. */
 export interface SkillConfig {
   /** Path to a directory that contains SKILL.md. */
-  path: string;
+  path: string
   /** Enables or disables this skill for the agent. */
-  enabled: boolean;
+  enabled: boolean
 }
 
 /** Common MCP server settings that a custom agent may override. */
@@ -56,113 +46,113 @@ export interface McpServerConfig {
    * Executable used by a stdio MCP server.
    * @default undefined
    */
-  command?: string;
+  command?: string
   /**
    * Arguments passed to the stdio server executable.
    * @default []
    */
-  args?: string[];
+  args?: string[]
   /**
    * Working directory of the stdio server process.
    * @default Inherited session working directory
    */
-  cwd?: string;
+  cwd?: string
   /**
    * Streamable HTTP endpoint; use this instead of command for remote servers.
    * @default undefined
    */
-  url?: string;
+  url?: string
   /**
    * Enables or disables the server without deleting its configuration.
    * @default true
    */
-  enabled?: boolean;
+  enabled?: boolean
   /**
    * Makes agent startup fail when this server cannot initialize.
    * @default false
    */
-  required?: boolean;
+  required?: boolean
   /**
    * Maximum server startup time in seconds.
    * @default 10
    */
-  startup_timeout_sec?: number;
+  startup_timeout_sec?: number
   /**
    * Maximum time allowed for an MCP tool call in seconds.
    * @default 60
    */
-  tool_timeout_sec?: number;
+  tool_timeout_sec?: number
   /**
    * Allowlist of tools exposed from this server.
    * @default All server tools
    */
-  enabled_tools?: string[];
+  enabled_tools?: string[]
   /**
    * Denylist applied after enabled_tools.
    * @default []
    */
-  disabled_tools?: string[];
+  disabled_tools?: string[]
 }
 
 /** Schema for one standalone file under ~/.codex/agents or .codex/agents. */
 export interface CustomAgentConfig {
   /** Stable agent identifier used for spawning and references. */
-  name: string;
+  name: string
   /** Routing guidance describing when Codex should use this agent. */
-  description: string;
+  description: string
   /** Core role, constraints, workflow, validation, and output instructions. */
-  developer_instructions: string;
+  developer_instructions: string
 
   /**
    * Optional display aliases suggested for the agent.
    * @default []
    */
-  nickname_candidates?: string[];
+  nickname_candidates?: string[]
   /**
    * Overrides the model selected for this agent.
    * @default Resolved from the spawn value, [agents] default, then parent
    */
-  model?: string;
+  model?: string
   /**
    * Overrides reasoning effort when supported by the selected model.
    * @default Resolved from the spawn value, [agents] default, then parent
    */
-  model_reasoning_effort?: ModelReasoningEffort;
+  model_reasoning_effort?: ModelReasoningEffort
   /**
    * Overrides the inherited filesystem sandbox for this agent.
    * @default Inherited from the parent agent
    */
-  sandbox_mode?: SandboxMode;
+  sandbox_mode?: SandboxMode
   /**
    * Controls when this agent asks for approval before restricted actions.
    * @default Inherited from the parent agent
    */
-  approval_policy?: "untrusted" | "on-request" | "never";
+  approval_policy?: 'untrusted' | 'on-request' | 'never'
   /**
    * Selects the web-search source available to this agent.
    * @default Inherited; normally "cached", or "live" in full-access mode
    */
-  web_search?: WebSearchMode;
+  web_search?: WebSearchMode
   /**
    * Selects the agent communication style when supported by the model.
    * @default Inherited from the parent agent
    */
-  personality?: Personality;
+  personality?: Personality
   /**
    * Overrides the model context-window size known to Codex.
    * @default Derived from the selected model
    */
-  model_context_window?: number;
+  model_context_window?: number
   /**
    * Starts automatic compaction near this token count.
    * @default Derived from the selected model
    */
-  model_auto_compact_token_limit?: number;
+  model_auto_compact_token_limit?: number
   /**
    * Adds or overrides MCP servers available to this agent.
    * @default Inherited from the parent agent
    */
-  mcp_servers?: Record<string, McpServerConfig>;
+  mcp_servers?: Record<string, McpServerConfig>
   /**
    * Enables or disables individual skills for this agent.
    * @default Inherited from the parent agent
@@ -172,8 +162,8 @@ export interface CustomAgentConfig {
      * Per-skill enablement overrides.
      * @default Inherited from the parent agent
      */
-    config?: SkillConfig[];
-  };
+    config?: SkillConfig[]
+  }
 }
 
 /** Global subagent settings configured under [agents] in config.toml. */
@@ -182,33 +172,33 @@ export interface AgentsConfig {
    * Enables or disables multi-agent tools.
    * @default true
    */
-  enabled?: boolean;
+  enabled?: boolean
   /**
    * Caps concurrently open spawned-agent threads, excluding the primary.
    * @default Codex-selected limit
    */
-  max_concurrent_threads_per_session?: number;
+  max_concurrent_threads_per_session?: number
   /**
    * Default model used when neither the spawn nor agent file selects one.
    * @default Parent agent model
    */
-  default_subagent_model?: string;
+  default_subagent_model?: string
   /**
    * Default reasoning effort used when no more specific value is set.
    * @default Parent effort, or the selected model default after a model change
    */
-  default_subagent_reasoning_effort?: ModelReasoningEffort;
+  default_subagent_reasoning_effort?: ModelReasoningEffort
   /**
    * Records a model-visible message when an agent turn is interrupted.
    * @default true
    */
-  interrupt_message?: boolean;
+  interrupt_message?: boolean
   /**
    * Legacy alias for max_concurrent_threads_per_session.
    * @default Codex-selected limit
    * @deprecated Legacy alias for max_concurrent_threads_per_session.
    */
-  max_threads?: number;
+  max_threads?: number
 }
 ```
 

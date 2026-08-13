@@ -55,6 +55,19 @@ pnpm check:skill-metadata
 
 提交 PR 时，请说明已运行的命令及结果。未运行的检查也应注明原因。
 
+## Markdown Formatting
+
+开发文档中的 `ts`、`tsx`、`js`、`jsx`、`json`、`jsonc` fenced code block 使用 Biome 格式化：
+
+```bash
+bun run format:markdown README.md docs/example.md
+bun run format:markdown:write README.md docs/example.md
+```
+
+默认命令只检查并在发现差异时返回 `1`；`format:markdown:write` 才会写回文件。其他语言和无语言标签的 code block 会保持原样。
+
+Husky `pre-commit` 通过 `format:markdown:staged` 只检查已暂存的 Markdown 内容，不改写工作树。未格式化的 staged code block 会阻止提交，使用 `format:markdown:write` 后重新暂存即可。
+
 ## Commit Messages
 
 使用中文 Conventional Commits：

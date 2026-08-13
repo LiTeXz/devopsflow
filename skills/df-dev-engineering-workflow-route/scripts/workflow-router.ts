@@ -8,31 +8,31 @@
  */
 export enum TaskType {
   /** Introduces user-visible behavior or a new engineering capability. */
-  NewFeature = "new_feature",
+  NewFeature = 'new_feature',
   /** Corrects behavior that is defective, failing, or inconsistent. */
-  BugFix = "bug_fix",
+  BugFix = 'bug_fix',
   /** Changes internal structure while intentionally preserving behavior. */
-  PureRefactor = "pure_refactor",
+  PureRefactor = 'pure_refactor',
   /** Clarifies domain language, rules, events, aggregates, or boundaries. */
-  DomainModeling = "domain_modeling",
+  DomainModeling = 'domain_modeling',
   /** Implements behavior primarily by adapting established local patterns. */
-  GlueCoding = "glue_coding",
+  GlueCoding = 'glue_coding',
   /** Evaluates a proposed design without implementing production behavior. */
-  DesignReview = "design_review",
+  DesignReview = 'design_review',
   /** Reviews existing code or a change set for concrete engineering defects. */
-  CodeReview = "code_review",
+  CodeReview = 'code_review',
   /** Evaluates and addresses feedback received from a code review. */
-  ReviewFeedback = "review_feedback",
+  ReviewFeedback = 'review_feedback',
   /** Collects completion evidence without introducing a planned behavior change. */
-  Verification = "verification",
+  Verification = 'verification',
   /** Prepares an implemented and verified development branch for handoff. */
-  BranchFinish = "branch_finish",
+  BranchFinish = 'branch_finish',
   /** Prepares or performs a commit or pull-request publication workflow. */
-  CommitOrPullRequest = "commit_or_pr",
+  CommitOrPullRequest = 'commit_or_pr',
 }
 
 /** Runtime task values derived from {@link TaskType} for CLI help and validation. */
-export const TASK_TYPES = Object.values(TaskType);
+export const TASK_TYPES = Object.values(TaskType)
 
 /**
  * Independent risk signals that can extend the base route for a task type.
@@ -43,27 +43,27 @@ export const TASK_TYPES = Object.values(TaskType);
  */
 export enum RiskDimension {
   /** The task is long, multi-stage, resumable, or likely to cross sessions. */
-  LongRunning = "long_running",
+  LongRunning = 'long_running',
   /** Business language, rules, ownership, or domain boundaries are unclear. */
-  DomainAmbiguity = "domain_ambiguity",
+  DomainAmbiguity = 'domain_ambiguity',
   /** Existing repository patterns should guide the implementation structure. */
-  LocalPatternReuse = "local_pattern_reuse",
+  LocalPatternReuse = 'local_pattern_reuse',
   /** The task adds or modifies observable executable behavior. */
-  BehaviorChange = "behavior_change",
+  BehaviorChange = 'behavior_change',
   /** The change touches a Spring controller, HTTP contract, or web boundary. */
-  SpringWebBoundary = "spring_web_boundary",
+  SpringWebBoundary = 'spring_web_boundary',
   /** The design includes permissions, roles, RBAC, ABAC, or authorization checks. */
-  ApiAuthorization = "api_authorization",
+  ApiAuthorization = 'api_authorization',
   /** The design includes resource-oriented API or transport semantics. */
-  ApiResourceDesign = "api_resource_design",
+  ApiResourceDesign = 'api_resource_design',
   /** A failure exists but its earliest causal mechanism is not yet proven. */
-  UnknownRootCause = "unknown_root_cause",
+  UnknownRootCause = 'unknown_root_cause',
   /** Independent scopes can be delegated without overlapping ownership. */
-  Parallelizable = "parallelizable",
+  Parallelizable = 'parallelizable',
 }
 
 /** Runtime risk values derived from {@link RiskDimension} for CLI help and validation. */
-export const RISK_DIMENSIONS = Object.values(RiskDimension);
+export const RISK_DIMENSIONS = Object.values(RiskDimension)
 
 /**
  * Central registry of every skill identifier emitted by this router.
@@ -74,37 +74,37 @@ export const RISK_DIMENSIONS = Object.values(RiskDimension);
  */
 export enum Skill {
   /** Protects long-running work with checkpoints and resumable state. */
-  ResumableWorkflowGuard = "df-resumable-workflow-guard",
+  ResumableWorkflowGuard = 'df-resumable-workflow-guard',
   /** Clarifies domain behavior through event storming and DDD modeling. */
-  DomainEventStormingDesign = "df-ddd-event-storming-design",
+  DomainEventStormingDesign = 'df-ddd-event-storming-design',
   /** Reuses local repository patterns for thin implementation work. */
-  GlueCoding = "df-glue-coding",
+  GlueCoding = 'df-glue-coding',
   /** Defines IAM-style permissions, roles, bindings, and authorization checks. */
-  IamAccessControlDesign = "df-iam-access-control-design",
+  IamAccessControlDesign = 'df-iam-access-control-design',
   /** Designs resource-oriented APIs according to Google AIP conventions. */
-  GoogleAipApiDesign = "df-google-aip-api-design",
+  GoogleAipApiDesign = 'df-google-aip-api-design',
   /** Converts confirmed DDD artifacts into executable TDD slices. */
-  DddToTddHandoff = "df-ddd-to-tdd-handoff",
+  DddToTddHandoff = 'df-ddd-to-tdd-handoff',
   /** Produces a concrete, ordered, test-aware implementation plan. */
-  ImplementationPlanning = "df-implementation-planning",
+  ImplementationPlanning = 'df-implementation-planning',
   /** Executes an approved implementation plan step by step. */
-  ExecutingImplementationPlan = "df-executing-implementation-plan",
+  ExecutingImplementationPlan = 'df-executing-implementation-plan',
   /** Develops executable behavior with test-first feedback. */
-  Tdd = "df-tdd-skill",
+  Tdd = 'df-tdd-skill',
   /** Applies Spring Web controller and service-boundary guardrails. */
-  SpringWebBoundaries = "df-spring-web-boundaries",
+  SpringWebBoundaries = 'df-spring-web-boundaries',
   /** Establishes evidence for the root cause before applying a fix. */
-  SystematicDebugging = "df-systematic-debugging",
+  SystematicDebugging = 'df-systematic-debugging',
   /** Splits independent work across agents with explicit ownership. */
-  ParallelAgentOrchestration = "df-parallel-agent-orchestration",
+  ParallelAgentOrchestration = 'df-parallel-agent-orchestration',
   /** Performs a focused self-review after the main implementation. */
-  RequestingCodeReview = "df-requesting-code-review",
+  RequestingCodeReview = 'df-requesting-code-review',
   /** Classifies and addresses actionable review feedback. */
-  ReceivingCodeReview = "df-receiving-code-review",
+  ReceivingCodeReview = 'df-receiving-code-review',
   /** Verifies requirements, checks, evidence, and remaining risks. */
-  VerificationBeforeCompletion = "df-verification-before-completion",
+  VerificationBeforeCompletion = 'df-verification-before-completion',
   /** Prepares a verified branch for commit, push, pull request, or handoff. */
-  FinishingDevelopmentBranch = "df-finishing-development-branch",
+  FinishingDevelopmentBranch = 'df-finishing-development-branch',
 }
 
 /** Input supplied by an agent or by the command-line adapter. */
@@ -116,7 +116,7 @@ export interface RouteInput {
    * concerns must be expressed through `risks` instead of inventing a second
    * primary task type.
    */
-  readonly taskType: TaskType;
+  readonly taskType: TaskType
 
   /**
    * Optional cross-cutting risk signals that extend the baseline workflow.
@@ -126,7 +126,7 @@ export interface RouteInput {
    * array, removes duplicates, and uses the unique set to select skills.
    * Omitting this field is equivalent to passing an empty array.
    */
-  readonly risks?: readonly RiskDimension[];
+  readonly risks?: readonly RiskDimension[]
 }
 
 /** A selected skill together with the user-facing reason for selecting it. */
@@ -137,7 +137,7 @@ export interface SkillSelection {
    * The enum type ensures routing output cannot contain an identifier that is
    * absent from the central skill registry.
    */
-  readonly skill: Skill;
+  readonly skill: Skill
 
   /**
    * Concise explanation of why the skill is required for this route.
@@ -145,7 +145,7 @@ export interface SkillSelection {
    * This text is intended for user-facing route summaries. It is resolved from
    * `REASONS` and is therefore stable for every occurrence of the same skill.
    */
-  readonly reason: string;
+  readonly reason: string
 }
 
 /**
@@ -157,7 +157,7 @@ export interface SkillSelection {
  */
 export interface RouteDecision {
   /** The validated primary task classification copied from the input. */
-  readonly taskType: TaskType;
+  readonly taskType: TaskType
 
   /**
    * Deduplicated risk signals in first-seen input order.
@@ -165,7 +165,7 @@ export interface RouteDecision {
    * This field reports the normalized input. It does not represent execution
    * order; skill sequencing is available in `executionOrder`.
    */
-  readonly risks: readonly RiskDimension[];
+  readonly risks: readonly RiskDimension[]
 
   /**
    * Ordered selected skills with a user-facing reason for every skill.
@@ -173,7 +173,7 @@ export interface RouteDecision {
    * Entries are unique and use the same order as `executionOrder`. Consumers
    * should use this form when presenting or logging the routing decision.
    */
-  readonly requiredSkills: readonly SkillSelection[];
+  readonly requiredSkills: readonly SkillSelection[]
 
   /**
    * Unique canonical skill identifiers in dependency-safe execution order.
@@ -181,7 +181,7 @@ export interface RouteDecision {
    * Consumers should invoke skills in this exact order. The final sequence is
    * independent of the order in which task and risk mappings selected skills.
    */
-  readonly executionOrder: readonly Skill[];
+  readonly executionOrder: readonly Skill[]
 }
 
 /**
@@ -190,38 +190,23 @@ export interface RouteDecision {
  * until its explanation is defined here.
  */
 const REASONS: Record<Skill, string> = {
-  [Skill.ResumableWorkflowGuard]:
-    "The task is long-running, spans multiple stages, or requires resumable execution.",
-  [Skill.DomainEventStormingDesign]:
-    "Domain language, business rules, or ownership boundaries require clarification.",
-  [Skill.GlueCoding]:
-    "The implementation should reuse established repository patterns and local project materials.",
-  [Skill.IamAccessControlDesign]:
-    "The task involves permissions, roles, RBAC, ABAC, or API authorization mapping.",
-  [Skill.GoogleAipApiDesign]:
-    "The task involves resource-oriented API or transport design.",
-  [Skill.DddToTddHandoff]:
-    "The confirmed domain design must be converted into executable implementation slices.",
-  [Skill.ImplementationPlanning]:
-    "A multi-step or risky change requires a concrete implementation plan.",
-  [Skill.ExecutingImplementationPlan]:
-    "The confirmed implementation plan must be executed step by step.",
-  [Skill.Tdd]:
-    "New, corrected, or preserved executable behavior requires test-first development.",
-  [Skill.SpringWebBoundaries]: "The task changes a Spring Web boundary.",
-  [Skill.SystematicDebugging]:
-    "The root cause of a failure or defect has not yet been proven.",
-  [Skill.ParallelAgentOrchestration]:
-    "Independent scopes can be executed safely in parallel.",
-  [Skill.RequestingCodeReview]:
-    "The completed implementation requires a focused defect-oriented self-review.",
-  [Skill.ReceivingCodeReview]:
-    "Actionable code review feedback must be evaluated and addressed.",
-  [Skill.VerificationBeforeCompletion]:
-    "Requirements and evidence must be verified before declaring completion.",
-  [Skill.FinishingDevelopmentBranch]:
-    "The branch must be prepared for commit, push, pull request, or handoff.",
-};
+  [Skill.ResumableWorkflowGuard]: 'The task is long-running, spans multiple stages, or requires resumable execution.',
+  [Skill.DomainEventStormingDesign]: 'Domain language, business rules, or ownership boundaries require clarification.',
+  [Skill.GlueCoding]: 'The implementation should reuse established repository patterns and local project materials.',
+  [Skill.IamAccessControlDesign]: 'The task involves permissions, roles, RBAC, ABAC, or API authorization mapping.',
+  [Skill.GoogleAipApiDesign]: 'The task involves resource-oriented API or transport design.',
+  [Skill.DddToTddHandoff]: 'The confirmed domain design must be converted into executable implementation slices.',
+  [Skill.ImplementationPlanning]: 'A multi-step or risky change requires a concrete implementation plan.',
+  [Skill.ExecutingImplementationPlan]: 'The confirmed implementation plan must be executed step by step.',
+  [Skill.Tdd]: 'New, corrected, or preserved executable behavior requires test-first development.',
+  [Skill.SpringWebBoundaries]: 'The task changes a Spring Web boundary.',
+  [Skill.SystematicDebugging]: 'The root cause of a failure or defect has not yet been proven.',
+  [Skill.ParallelAgentOrchestration]: 'Independent scopes can be executed safely in parallel.',
+  [Skill.RequestingCodeReview]: 'The completed implementation requires a focused defect-oriented self-review.',
+  [Skill.ReceivingCodeReview]: 'Actionable code review feedback must be evaluated and addressed.',
+  [Skill.VerificationBeforeCompletion]: 'Requirements and evidence must be verified before declaring completion.',
+  [Skill.FinishingDevelopmentBranch]: 'The branch must be prepared for commit, push, pull request, or handoff.',
+}
 
 /**
  * Baseline workflow for each primary task classification.
@@ -238,43 +223,17 @@ const TASK_SKILLS: Record<TaskType, readonly Skill[]> = {
     Skill.RequestingCodeReview,
     Skill.VerificationBeforeCompletion,
   ],
-  [TaskType.BugFix]: [
-    Skill.SystematicDebugging,
-    Skill.Tdd,
-    Skill.VerificationBeforeCompletion,
-  ],
-  [TaskType.PureRefactor]: [
-    Skill.ImplementationPlanning,
-    Skill.Tdd,
-    Skill.ExecutingImplementationPlan,
-    Skill.VerificationBeforeCompletion,
-  ],
-  [TaskType.DomainModeling]: [
-    Skill.DomainEventStormingDesign,
-    Skill.VerificationBeforeCompletion,
-  ],
-  [TaskType.GlueCoding]: [
-    Skill.GlueCoding,
-    Skill.ImplementationPlanning,
-    Skill.ExecutingImplementationPlan,
-    Skill.VerificationBeforeCompletion,
-  ],
+  [TaskType.BugFix]: [Skill.SystematicDebugging, Skill.Tdd, Skill.VerificationBeforeCompletion],
+  [TaskType.PureRefactor]: [Skill.ImplementationPlanning, Skill.Tdd, Skill.ExecutingImplementationPlan, Skill.VerificationBeforeCompletion],
+  [TaskType.DomainModeling]: [Skill.DomainEventStormingDesign, Skill.VerificationBeforeCompletion],
+  [TaskType.GlueCoding]: [Skill.GlueCoding, Skill.ImplementationPlanning, Skill.ExecutingImplementationPlan, Skill.VerificationBeforeCompletion],
   [TaskType.DesignReview]: [Skill.VerificationBeforeCompletion],
   [TaskType.CodeReview]: [Skill.VerificationBeforeCompletion],
-  [TaskType.ReviewFeedback]: [
-    Skill.ReceivingCodeReview,
-    Skill.VerificationBeforeCompletion,
-  ],
+  [TaskType.ReviewFeedback]: [Skill.ReceivingCodeReview, Skill.VerificationBeforeCompletion],
   [TaskType.Verification]: [Skill.VerificationBeforeCompletion],
-  [TaskType.BranchFinish]: [
-    Skill.VerificationBeforeCompletion,
-    Skill.FinishingDevelopmentBranch,
-  ],
-  [TaskType.CommitOrPullRequest]: [
-    Skill.VerificationBeforeCompletion,
-    Skill.FinishingDevelopmentBranch,
-  ],
-};
+  [TaskType.BranchFinish]: [Skill.VerificationBeforeCompletion, Skill.FinishingDevelopmentBranch],
+  [TaskType.CommitOrPullRequest]: [Skill.VerificationBeforeCompletion, Skill.FinishingDevelopmentBranch],
+}
 
 /**
  * Additional capabilities introduced by each risk signal.
@@ -284,10 +243,7 @@ const TASK_SKILLS: Record<TaskType, readonly Skill[]> = {
  */
 const RISK_SKILLS: Record<RiskDimension, readonly Skill[]> = {
   [RiskDimension.LongRunning]: [Skill.ResumableWorkflowGuard],
-  [RiskDimension.DomainAmbiguity]: [
-    Skill.DomainEventStormingDesign,
-    Skill.DddToTddHandoff,
-  ],
+  [RiskDimension.DomainAmbiguity]: [Skill.DomainEventStormingDesign, Skill.DddToTddHandoff],
   [RiskDimension.LocalPatternReuse]: [Skill.GlueCoding],
   [RiskDimension.BehaviorChange]: [Skill.Tdd],
   [RiskDimension.SpringWebBoundary]: [Skill.SpringWebBoundaries],
@@ -295,7 +251,7 @@ const RISK_SKILLS: Record<RiskDimension, readonly Skill[]> = {
   [RiskDimension.ApiResourceDesign]: [Skill.GoogleAipApiDesign],
   [RiskDimension.UnknownRootCause]: [Skill.SystematicDebugging],
   [RiskDimension.Parallelizable]: [Skill.ParallelAgentOrchestration],
-};
+}
 
 /**
  * Global dependency order for every skill the router can emit.
@@ -322,7 +278,7 @@ const EXECUTION_PRIORITY: readonly Skill[] = [
   Skill.ReceivingCodeReview,
   Skill.VerificationBeforeCompletion,
   Skill.FinishingDevelopmentBranch,
-];
+]
 
 /**
  * Builds a stable workflow decision from a primary task type and risk signals.
@@ -344,25 +300,20 @@ const EXECUTION_PRIORITY: readonly Skill[] = [
  * values and share no mutable array reference with the input.
  */
 export function routeTask({ taskType, risks = [] }: RouteInput): RouteDecision {
-  const uniqueRisks = [...new Set(risks)];
-  const selected = new Set<Skill>(TASK_SKILLS[taskType]);
+  const uniqueRisks = [...new Set(risks)]
+  const selected = new Set<Skill>(TASK_SKILLS[taskType])
   for (const risk of uniqueRisks) {
-    for (const skill of RISK_SKILLS[risk]) selected.add(skill);
+    for (const skill of RISK_SKILLS[risk]) selected.add(skill)
   }
 
   // Domain discovery must be translated into executable slices before an
   // implementation plan is executed. Pure domain-modeling routes do not need
   // this bridge because they stop before implementation.
-  if (
-    selected.has(Skill.DomainEventStormingDesign) &&
-    selected.has(Skill.ExecutingImplementationPlan)
-  ) {
-    selected.add(Skill.DddToTddHandoff);
+  if (selected.has(Skill.DomainEventStormingDesign) && selected.has(Skill.ExecutingImplementationPlan)) {
+    selected.add(Skill.DddToTddHandoff)
   }
 
-  const executionOrder = EXECUTION_PRIORITY.filter((skill) =>
-    selected.has(skill),
-  );
+  const executionOrder = EXECUTION_PRIORITY.filter((skill) => selected.has(skill))
   return {
     taskType,
     risks: uniqueRisks,
@@ -371,7 +322,7 @@ export function routeTask({ taskType, risks = [] }: RouteInput): RouteDecision {
       reason: REASONS[skill],
     })),
     executionOrder,
-  };
+  }
 }
 
 /**
@@ -383,10 +334,10 @@ export function routeTask({ taskType, risks = [] }: RouteInput): RouteDecision {
  */
 function usage(): string {
   return [
-    "Usage: workflow-router.ts --task-type <type> [--risks <risk,...>]",
-    `Task types: ${TASK_TYPES.join(", ")}`,
-    `Risks: ${RISK_DIMENSIONS.join(", ")}`,
-  ].join("\n");
+    'Usage: workflow-router.ts --task-type <type> [--risks <risk,...>]',
+    `Task types: ${TASK_TYPES.join(', ')}`,
+    `Risks: ${RISK_DIMENSIONS.join(', ')}`,
+  ].join('\n')
 }
 
 /**
@@ -401,8 +352,8 @@ function usage(): string {
  * the returned value.
  */
 function readOption(name: string): string | undefined {
-  const index = Bun.argv.indexOf(name);
-  return index < 0 ? undefined : Bun.argv[index + 1];
+  const index = Bun.argv.indexOf(name)
+  return index < 0 ? undefined : Bun.argv[index + 1]
 }
 
 // CLI input is read from `Bun.argv`. Successful output is either human-readable
@@ -410,19 +361,17 @@ function readOption(name: string): string | undefined {
 // stderr and sets exit code 1. Keeping these concerns at the boundary ensures
 // importing the module exposes the pure router without process side effects.
 if (import.meta.main) {
-  if (Bun.argv.includes("--help")) {
-    console.log(usage());
+  if (Bun.argv.includes('--help')) {
+    console.log(usage())
   } else {
-    const taskType = readOption("--task-type");
-    const risks = (readOption("--risks") ?? "").split(",").filter(Boolean);
+    const taskType = readOption('--task-type')
+    const risks = (readOption('--risks') ?? '').split(',').filter(Boolean)
     if (!TASK_TYPES.includes(taskType as TaskType)) {
-      console.error(usage());
-      process.exitCode = 1;
-    } else if (
-      risks.some((risk) => !RISK_DIMENSIONS.includes(risk as RiskDimension))
-    ) {
-      console.error(usage());
-      process.exitCode = 1;
+      console.error(usage())
+      process.exitCode = 1
+    } else if (risks.some((risk) => !RISK_DIMENSIONS.includes(risk as RiskDimension))) {
+      console.error(usage())
+      process.exitCode = 1
     } else {
       console.log(
         JSON.stringify(
@@ -433,7 +382,7 @@ if (import.meta.main) {
           null,
           2,
         ),
-      );
+      )
     }
   }
 }

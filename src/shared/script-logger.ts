@@ -1,1 +1,1 @@
-export * from "../../skills/df-codex-assets/scripts/script-logger";
+export * from '../../skills/df-codex-assets/scripts/script-logger'

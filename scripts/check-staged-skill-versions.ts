@@ -1,64 +1,54 @@
 #!/usr/bin/env bun
 
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { runLoggedScript } from "@/shared/script-logger";
+import { writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { runLoggedScript } from '@/shared/script-logger'
 
-const SKILL_PATH_PATTERN = /^skills\/([^/]+)\//;
-const SKILL_MARKDOWN_PATH = (skill: string) => `skills/${skill}/SKILL.md`;
+const SKILL_PATH_PATTERN = /^skills\/([^/]+)\//
+const SKILL_MARKDOWN_PATH = (skill: string) => `skills/${skill}/SKILL.md`
 
 interface SkillVersions {
-  version: string;
-  metadataVersion: string;
+  version: string
+  metadataVersion: string
 }
 
 function git(root: string, args: string[]): Bun.ReadableSyncSubprocess {
   return Bun.spawnSync({
-    cmd: ["git", ...args],
+    cmd: ['git', ...args],
     cwd: root,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+    stderr: 'pipe',
+    stdout: 'pipe',
+  })
 }
 
 function gitOutput(root: string, args: string[]): string {
-  const result = git(root, args);
+  const result = git(root, args)
   if (result.exitCode !== 0) {
-    throw new Error(result.stderr.toString().trim());
+    throw new Error(result.stderr.toString().trim())
   }
-  return result.stdout.toString();
+  return result.stdout.toString()
 }
 
 function readHeadFile(root: string, path: string): string | undefined {
-  const result = git(root, ["show", `HEAD:${path}`]);
-  if (result.exitCode === 0) return result.stdout.toString();
-  if (result.exitCode === 128) return undefined;
-  throw new Error(result.stderr.toString().trim());
+  const result = git(root, ['show', `HEAD:${path}`])
+  if (result.exitCode === 0) return result.stdout.toString()
+  if (result.exitCode === 128) return undefined
+  throw new Error(result.stderr.toString().trim())
 }
 
 function readStagedFile(root: string, path: string): string {
-  return gitOutput(root, ["show", `:${path}`]);
+  return gitOutput(root, ['show', `:${path}`])
 }
 
 function stageFile(root: string, path: string): void {
-  const result = git(root, ["add", "--", path]);
+  const result = git(root, ['add', '--', path])
   if (result.exitCode !== 0) {
-    throw new Error(
-      `Unable to stage ${path}: ${result.stderr.toString().trim()}`,
-    );
+    throw new Error(`Unable to stage ${path}: ${result.stderr.toString().trim()}`)
   }
 }
 
 function changedSkills(root: string): string[] {
-  const paths = gitOutput(root, [
-    "diff",
-    "--cached",
-    "--name-only",
-    "--diff-filter=ACMR",
-    "HEAD",
-    "--",
-    "skills",
-  ]);
+  const paths = gitOutput(root, ['diff', '--cached', '--name-only', '--diff-filter=ACMR', 'HEAD', '--', 'skills'])
   return [
     ...new Set(
       paths
@@ -66,84 +56,68 @@ function changedSkills(root: string): string[] {
         .map((path) => path.match(SKILL_PATH_PATTERN)?.[1])
         .filter((skill): skill is string => Boolean(skill)),
     ),
-  ].sort();
+  ].sort()
 }
 
 function parseVersions(path: string, content: string): SkillVersions {
-  const frontMatter = content.match(
-    /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/,
-  )?.[1];
-  if (!frontMatter) throw new Error(`${path} is missing YAML front matter`);
+  const frontMatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1]
+  if (!frontMatter) throw new Error(`${path} is missing YAML front matter`)
 
-  const version = frontMatter.match(
-    /^version:\s*["']?([^"'\s]+)["']?\s*$/m,
-  )?.[1];
-  const metadataVersion = frontMatter.match(
-    /^metadata:\s*\r?\n(?:^ {2}[^\r\n]+\r?\n)*?^ {2}version:\s*["']?([^"'\s]+)["']?\s*$/m,
-  )?.[1];
+  const version = frontMatter.match(/^version:\s*["']?([^"'\s]+)["']?\s*$/m)?.[1]
+  const metadataVersion = frontMatter.match(/^metadata:\s*\r?\n(?:^ {2}[^\r\n]+\r?\n)*?^ {2}version:\s*["']?([^"'\s]+)["']?\s*$/m)?.[1]
   if (!version || !metadataVersion) {
-    throw new Error(`${path} must define version and metadata.version`);
+    throw new Error(`${path} must define version and metadata.version`)
   }
   if (version !== metadataVersion) {
-    throw new Error(`${path} version and metadata.version must match`);
+    throw new Error(`${path} version and metadata.version must match`)
   }
-  return { version, metadataVersion };
+  return { version, metadataVersion }
 }
 
 function incrementPatch(version: string): string {
-  const match = version.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) throw new Error(`version "${version}" must be MAJOR.MINOR.PATCH`);
-  return `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)$/)
+  if (!match) throw new Error(`version "${version}" must be MAJOR.MINOR.PATCH`)
+  return `${match[1]}.${match[2]}.${Number(match[3]) + 1}`
 }
 
 function replaceVersions(content: string, version: string): string {
-  const frontMatterPattern = /(^---\r?\n)([\s\S]*?)(\r?\n---(?:\r?\n|$))/;
-  return content.replace(
-    frontMatterPattern,
-    (_match, start, frontMatter, end) => {
-      const updated = frontMatter
-        .replace(/^(version:\s*)["']?[^"'\s]+["']?\s*$/m, `$1"${version}"`)
-        .replace(
-          /^(metadata:\s*\r?\n(?:^ {2}[^\r\n]+\r?\n)*?^ {2}version:\s*)["']?[^"'\s]+["']?\s*$/m,
-          `$1"${version}"`,
-        );
-      return `${start}${updated}${end}`;
-    },
-  );
+  const frontMatterPattern = /(^---\r?\n)([\s\S]*?)(\r?\n---(?:\r?\n|$))/
+  return content.replace(frontMatterPattern, (_match, start, frontMatter, end) => {
+    const updated = frontMatter
+      .replace(/^(version:\s*)["']?[^"'\s]+["']?\s*$/m, `$1"${version}"`)
+      .replace(/^(metadata:\s*\r?\n(?:^ {2}[^\r\n]+\r?\n)*?^ {2}version:\s*)["']?[^"'\s]+["']?\s*$/m, `$1"${version}"`)
+    return `${start}${updated}${end}`
+  })
 }
 
 export function checkStagedSkillVersions(root = process.cwd()): string[] {
-  const checked: string[] = [];
+  const checked: string[] = []
   for (const skill of changedSkills(root)) {
-    const path = SKILL_MARKDOWN_PATH(skill);
-    const staged = parseVersions(path, readStagedFile(root, path));
-    const head = readHeadFile(root, path);
+    const path = SKILL_MARKDOWN_PATH(skill)
+    const staged = parseVersions(path, readStagedFile(root, path))
+    const head = readHeadFile(root, path)
     if (head) {
-      const previous = parseVersions(path, head).version;
-      const expected = incrementPatch(previous);
+      const previous = parseVersions(path, head).version
+      const expected = incrementPatch(previous)
       if (staged.version !== expected) {
-        const updated = replaceVersions(readStagedFile(root, path), expected);
-        const target = join(root, path);
-        writeFileSync(target, updated, "utf8");
-        stageFile(root, path);
-        console.log(`${path}: version ${previous} -> ${expected}`);
+        const updated = replaceVersions(readStagedFile(root, path), expected)
+        const target = join(root, path)
+        writeFileSync(target, updated, 'utf8')
+        stageFile(root, path)
+        console.log(`${path}: version ${previous} -> ${expected}`)
       }
     }
-    checked.push(path);
+    checked.push(path)
   }
-  return checked;
+  return checked
 }
 
 function main(): number {
-  const checked = checkStagedSkillVersions();
-  console.log(`Staged skill versions checked: ${checked.length}`);
-  return 0;
+  const checked = checkStagedSkillVersions()
+  console.log(`Staged skill versions checked: ${checked.length}`)
+  return 0
 }
 
 if (import.meta.main) {
-  process.exit(
-    runLoggedScript({ scriptName: "check-staged-skill-versions" }, () =>
-      main(),
-    ),
-  );
+  process.exit(runLoggedScript({ scriptName: 'check-staged-skill-versions' }, () => main()))
 }

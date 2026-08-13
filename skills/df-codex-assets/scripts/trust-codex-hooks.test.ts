@@ -1,273 +1,238 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import {
-  collectPluginHookTrustEntries,
-  trustPluginHooks,
-} from "./trust-codex-hooks";
+import { afterEach, describe, expect, it } from 'bun:test'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join, resolve } from 'node:path'
+import { collectPluginHookTrustEntries, trustPluginHooks } from './trust-codex-hooks'
 
-const HYDRATE_TRUSTED_HASH =
-  "sha256:305ae7b1f4f2f18f7c332dce056d7497053fa701e09d1cdf907e395c3b58a433";
-const PROJECT_GITIGNORE_TRUSTED_HASH =
-  "sha256:39210d1328456c36f5ce55b27763b5771d9156ad4957c199c373013d81945f86";
-const UPDATE_PROTECTED_BRANCHES_TRUSTED_HASH =
-  "sha256:8a1a02b997bfb1f67eee33057663d1e5455d9651f13072732cc6f92317914767";
-const PREVENT_GIT_MUTATION_TRUSTED_HASH =
-  "sha256:7b0cf546dc5e358b8b216001f5d4a1edbdc7a604dc09e932f5f2ecf1cd4c8c95";
-const UPSTREAM_CODEX_RAW_ROOT =
-  "https://raw.githubusercontent.com/openai/codex/main";
+const HYDRATE_TRUSTED_HASH = 'sha256:305ae7b1f4f2f18f7c332dce056d7497053fa701e09d1cdf907e395c3b58a433'
+const PROJECT_GITIGNORE_TRUSTED_HASH = 'sha256:39210d1328456c36f5ce55b27763b5771d9156ad4957c199c373013d81945f86'
+const UPDATE_PROTECTED_BRANCHES_TRUSTED_HASH = 'sha256:8a1a02b997bfb1f67eee33057663d1e5455d9651f13072732cc6f92317914767'
+const PREVENT_GIT_MUTATION_TRUSTED_HASH = 'sha256:7b0cf546dc5e358b8b216001f5d4a1edbdc7a604dc09e932f5f2ecf1cd4c8c95'
+const UPSTREAM_CODEX_RAW_ROOT = 'https://raw.githubusercontent.com/openai/codex/main'
 const UPSTREAM_TRUST_SOURCES = [
   {
-    path: "codex-rs/hooks/src/engine/discovery.rs",
+    path: 'codex-rs/hooks/src/engine/discovery.rs',
     slices: [
       {
-        start: "                HookHandlerConfig::Command {\n",
-        end: "                HookHandlerConfig::McpTool {",
+        start: '                HookHandlerConfig::Command {\n',
+        end: '                HookHandlerConfig::McpTool {',
       },
       {
-        start: "            let NormalizedHandler {\n",
-        end: "            let key = ",
+        start: '            let NormalizedHandler {\n',
+        end: '            let key = ',
       },
       {
-        start:
-          "/// Hash a normalized, config-derived identity instead of source text",
-        end: "fn hook_trust_status(",
+        start: '/// Hash a normalized, config-derived identity instead of source text',
+        end: 'fn hook_trust_status(',
       },
     ],
-    fingerprint:
-      "sha256:0aed89fd5d366e92a410fd904a4ca782714204addf702a1fa89fa719e62c5fa4",
+    fingerprint: 'sha256:0aed89fd5d366e92a410fd904a4ca782714204addf702a1fa89fa719e62c5fa4',
   },
   {
-    path: "codex-rs/config/src/fingerprint.rs",
-    slices: [{ start: "pub fn version_for_toml(" }],
-    fingerprint:
-      "sha256:5a132e504a6fe88b34c5606c71304df3e7f064d6ea7403a191820bac548c635d",
+    path: 'codex-rs/config/src/fingerprint.rs',
+    slices: [{ start: 'pub fn version_for_toml(' }],
+    fingerprint: 'sha256:5a132e504a6fe88b34c5606c71304df3e7f064d6ea7403a191820bac548c635d',
   },
-] as const;
-const tempRoots: string[] = [];
+] as const
+const tempRoots: string[] = []
 
 afterEach(() => {
   while (tempRoots.length) {
-    const root = tempRoots.pop();
-    if (root) rmSync(root, { recursive: true, force: true });
+    const root = tempRoots.pop()
+    if (root) rmSync(root, { recursive: true, force: true })
   }
-});
+})
 
 function tempRoot(): string {
-  const root = mkdtempSync(join(tmpdir(), "devopsflow-trust-hooks-"));
-  tempRoots.push(root);
-  return root;
+  const root = mkdtempSync(join(tmpdir(), 'devopsflow-trust-hooks-'))
+  tempRoots.push(root)
+  return root
 }
 
-function writeFixturePlugin(
-  root: string,
-  hooks: Record<string, unknown>,
-): void {
+function writeFixturePlugin(root: string, hooks: Record<string, unknown>): void {
   writeFile(
     root,
-    ".codex-plugin/plugin.json",
+    '.codex-plugin/plugin.json',
     JSON.stringify({
-      name: "devopsflow",
-      hooks: "./hooks/hooks.codex.json",
+      name: 'devopsflow',
+      hooks: './hooks/hooks.codex.json',
     }),
-  );
-  writeFile(
-    root,
-    ".codex-plugin/marketplace.json",
-    JSON.stringify({ name: "devopsflow" }),
-  );
-  writeFile(root, "hooks/hooks.codex.json", JSON.stringify({ hooks }));
+  )
+  writeFile(root, '.codex-plugin/marketplace.json', JSON.stringify({ name: 'devopsflow' }))
+  writeFile(root, 'hooks/hooks.codex.json', JSON.stringify({ hooks }))
 }
 
 function writeFile(root: string, path: string, content: string): void {
-  const absolutePath = join(root, path);
-  mkdirSync(dirname(absolutePath), { recursive: true });
-  writeFileSync(absolutePath, content);
+  const absolutePath = join(root, path)
+  mkdirSync(dirname(absolutePath), { recursive: true })
+  writeFileSync(absolutePath, content)
 }
 
-function hookState(
-  configPath: string,
-): Record<string, { trusted_hash: string }> {
-  const parsed = Bun.TOML.parse(readFileSync(configPath, "utf-8")) as {
-    hooks?: { state?: Record<string, { trusted_hash: string }> };
-  };
-  return parsed.hooks?.state ?? {};
+function hookState(configPath: string): Record<string, { trusted_hash: string }> {
+  const parsed = Bun.TOML.parse(readFileSync(configPath, 'utf-8')) as {
+    hooks?: { state?: Record<string, { trusted_hash: string }> }
+  }
+  return parsed.hooks?.state ?? {}
 }
 
-function extractSourceSlices(
-  source: string,
-  slices: readonly { start: string; end?: string }[],
-): string {
-  const normalized = source.replaceAll("\r\n", "\n");
+function extractSourceSlices(source: string, slices: readonly { start: string; end?: string }[]): string {
+  const normalized = source.replaceAll('\r\n', '\n')
   return slices
     .map(({ start, end }) => {
-      const startIndex = normalized.indexOf(start);
-      if (startIndex < 0)
-        throw new Error(`Upstream start marker missing: ${start}`);
-      const endIndex = end
-        ? normalized.indexOf(end, startIndex + start.length)
-        : normalized.length;
-      if (endIndex < 0) throw new Error(`Upstream end marker missing: ${end}`);
-      return normalized.slice(startIndex, endIndex).trimEnd();
+      const startIndex = normalized.indexOf(start)
+      if (startIndex < 0) throw new Error(`Upstream start marker missing: ${start}`)
+      const endIndex = end ? normalized.indexOf(end, startIndex + start.length) : normalized.length
+      if (endIndex < 0) throw new Error(`Upstream end marker missing: ${end}`)
+      return normalized.slice(startIndex, endIndex).trimEnd()
     })
-    .join("\n\n");
+    .join('\n\n')
 }
 
 function sha256(value: string): string {
-  const hasher = new Bun.CryptoHasher("sha256");
-  hasher.update(value);
-  return `sha256:${hasher.digest("hex")}`;
+  const hasher = new Bun.CryptoHasher('sha256')
+  hasher.update(value)
+  return `sha256:${hasher.digest('hex')}`
 }
 
-describe("Codex hook trust hash", () => {
-  it("reproduces the stable current and trusted hashes from the real manifest", () => {
-    const pluginRoot = resolve(import.meta.dir, "../../..");
+describe('Codex hook trust hash', () => {
+  it('reproduces the stable current and trusted hashes from the real manifest', () => {
+    const pluginRoot = resolve(import.meta.dir, '../../..')
 
-    const entries = collectPluginHookTrustEntries(pluginRoot, "win32");
+    const entries = collectPluginHookTrustEntries(pluginRoot, 'win32')
 
     expect(entries).toEqual([
       {
-        key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:0",
+        key: 'devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:0',
         trustedHash: HYDRATE_TRUSTED_HASH,
       },
       {
-        key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1",
+        key: 'devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1',
         trustedHash: PROJECT_GITIGNORE_TRUSTED_HASH,
       },
       {
-        key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:2",
+        key: 'devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:2',
         trustedHash: UPDATE_PROTECTED_BRANCHES_TRUSTED_HASH,
       },
       {
-        key: "devopsflow@devopsflow:hooks/hooks.codex.json:pre_tool_use:0:0",
+        key: 'devopsflow@devopsflow:hooks/hooks.codex.json:pre_tool_use:0:0',
         trustedHash: PREVENT_GIT_MUTATION_TRUSTED_HASH,
       },
-    ]);
-  });
+    ])
+  })
 
-  it("matches the upstream Codex hook trust implementation on main", async () => {
+  it('matches the upstream Codex hook trust implementation on main', async () => {
     const results = await Promise.all(
       UPSTREAM_TRUST_SOURCES.map(async ({ path, slices, fingerprint }) => {
         const response = await fetch(`${UPSTREAM_CODEX_RAW_ROOT}/${path}`, {
           signal: AbortSignal.timeout(30_000),
-        });
+        })
         if (!response.ok) {
-          throw new Error(
-            `Unable to fetch upstream Codex source ${path}: ${response.status} ${response.statusText}`,
-          );
+          throw new Error(`Unable to fetch upstream Codex source ${path}: ${response.status} ${response.statusText}`)
         }
         return {
           path,
           actual: sha256(extractSourceSlices(await response.text(), slices)),
           expected: fingerprint,
-        };
+        }
       }),
-    );
+    )
 
     for (const { path, actual, expected } of results) {
-      expect(actual, `${path} trust logic changed upstream`).toBe(expected);
+      expect(actual, `${path} trust logic changed upstream`).toBe(expected)
     }
-  }, 40_000);
+  }, 40_000)
 
-  it("creates trust entries for asynchronous command hooks", () => {
-    const pluginRoot = tempRoot();
+  it('creates trust entries for asynchronous command hooks', () => {
+    const pluginRoot = tempRoot()
     writeFixturePlugin(pluginRoot, {
       PreToolUse: [
         {
-          matcher: "shell_command",
+          matcher: 'shell_command',
           hooks: [
             {
-              type: "command",
-              command: "bun audit.ts",
+              type: 'command',
+              command: 'bun audit.ts',
               async: true,
             },
           ],
         },
       ],
-    });
+    })
 
-    expect(collectPluginHookTrustEntries(pluginRoot, "win32")).toHaveLength(1);
-  });
+    expect(collectPluginHookTrustEntries(pluginRoot, 'win32')).toHaveLength(1)
+  })
 
-  it("keeps SessionEnd async in the trust identity even though execution is synchronous", () => {
-    const pluginRoot = tempRoot();
+  it('keeps SessionEnd async in the trust identity even though execution is synchronous', () => {
+    const pluginRoot = tempRoot()
     writeFixturePlugin(pluginRoot, {
       SessionEnd: [
         {
           hooks: [
             {
-              type: "command",
-              command: "bun cleanup.ts",
+              type: 'command',
+              command: 'bun cleanup.ts',
               async: true,
             },
           ],
         },
       ],
-    });
-    const [asyncEntry] = collectPluginHookTrustEntries(pluginRoot, "win32");
+    })
+    const [asyncEntry] = collectPluginHookTrustEntries(pluginRoot, 'win32')
 
     writeFixturePlugin(pluginRoot, {
       SessionEnd: [
         {
           hooks: [
             {
-              type: "command",
-              command: "bun cleanup.ts",
+              type: 'command',
+              command: 'bun cleanup.ts',
               async: false,
             },
           ],
         },
       ],
-    });
-    const [syncEntry] = collectPluginHookTrustEntries(pluginRoot, "win32");
+    })
+    const [syncEntry] = collectPluginHookTrustEntries(pluginRoot, 'win32')
 
-    expect(asyncEntry?.trustedHash).not.toBe(syncEntry?.trustedHash);
-  });
-});
+    expect(asyncEntry?.trustedHash).not.toBe(syncEntry?.trustedHash)
+  })
+})
 
-describe("trustPluginHooks", () => {
-  it("runs as a Bun CLI against an isolated CODEX_HOME", () => {
-    const pluginRoot = tempRoot();
-    const codexRoot = tempRoot();
-    const configPath = join(codexRoot, "config.toml");
+describe('trustPluginHooks', () => {
+  it('runs as a Bun CLI against an isolated CODEX_HOME', () => {
+    const pluginRoot = tempRoot()
+    const codexRoot = tempRoot()
+    const configPath = join(codexRoot, 'config.toml')
     writeFixturePlugin(pluginRoot, {
-      SessionStart: [{ hooks: [{ type: "command", command: "bun first.ts" }] }],
-    });
+      SessionStart: [{ hooks: [{ type: 'command', command: 'bun first.ts' }] }],
+    })
 
     const result = Bun.spawnSync({
-      cmd: [process.execPath, join(import.meta.dir, "trust-codex-hooks.ts")],
+      cmd: [process.execPath, join(import.meta.dir, 'trust-codex-hooks.ts')],
       cwd: pluginRoot,
       env: { ...process.env, CODEX_HOME: codexRoot, PLUGIN_ROOT: pluginRoot },
-      stderr: "pipe",
-      stdout: "pipe",
-    });
+      stderr: 'pipe',
+      stdout: 'pipe',
+    })
 
-    expect(result.exitCode, result.stderr.toString()).toBe(0);
-    expect(result.stdout.toString()).toContain("Trusted 1 DevopsFlow hooks");
-    expect(Object.keys(hookState(configPath))).toHaveLength(1);
-  });
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(result.stdout.toString()).toContain('Trusted 1 DevopsFlow hooks')
+    expect(Object.keys(hookState(configPath))).toHaveLength(1)
+  })
 
-  it("writes every command hook fingerprint while preserving other config", () => {
-    const pluginRoot = tempRoot();
-    const codexRoot = tempRoot();
-    const configPath = join(codexRoot, "config.toml");
+  it('writes every command hook fingerprint while preserving other config', () => {
+    const pluginRoot = tempRoot()
+    const codexRoot = tempRoot()
+    const configPath = join(codexRoot, 'config.toml')
     writeFixturePlugin(pluginRoot, {
       SessionStart: [
         {
           hooks: [
-            { type: "command", command: "bun first.ts" },
+            { type: 'command', command: 'bun first.ts' },
             {
-              type: "command",
-              command: "bun fallback.ts",
-              commandWindows: "bun windows.ts",
+              type: 'command',
+              command: 'bun fallback.ts',
+              commandWindows: 'bun windows.ts',
               timeout: 30,
             },
           ],
@@ -275,99 +240,95 @@ describe("trustPluginHooks", () => {
       ],
       PreToolUse: [
         {
-          matcher: "shell_command|apply_patch",
-          hooks: [{ type: "command", command: "bun guard.ts" }],
+          matcher: 'shell_command|apply_patch',
+          hooks: [{ type: 'command', command: 'bun guard.ts' }],
         },
       ],
-    });
-    writeFileSync(configPath, '# keep this comment\nmodel = "gpt-5.6"\n');
+    })
+    writeFileSync(configPath, '# keep this comment\nmodel = "gpt-5.6"\n')
 
     const result = trustPluginHooks({
       configPath,
-      platform: "win32",
+      platform: 'win32',
       pluginRoot,
-    });
+    })
 
-    const config = readFileSync(configPath, "utf-8");
-    const state = hookState(configPath);
-    expect(result).toEqual({ status: "updated", trusted: 3, unchanged: 0 });
-    expect(config).toStartWith('# keep this comment\nmodel = "gpt-5.6"\n');
+    const config = readFileSync(configPath, 'utf-8')
+    const state = hookState(configPath)
+    expect(result).toEqual({ status: 'updated', trusted: 3, unchanged: 0 })
+    expect(config).toStartWith('# keep this comment\nmodel = "gpt-5.6"\n')
     expect(Object.keys(state).sort()).toEqual([
-      "devopsflow@devopsflow:hooks/hooks.codex.json:pre_tool_use:0:0",
-      "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:0",
-      "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1",
-    ]);
+      'devopsflow@devopsflow:hooks/hooks.codex.json:pre_tool_use:0:0',
+      'devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:0',
+      'devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1',
+    ])
     expect(Object.values(state)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           trusted_hash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
         }),
       ]),
-    );
-  });
+    )
+  })
 
-  it("updates stale trust and leaves an already trusted config byte-for-byte unchanged", () => {
-    const pluginRoot = tempRoot();
-    const codexRoot = tempRoot();
-    const configPath = join(codexRoot, "config.toml");
+  it('updates stale trust and leaves an already trusted config byte-for-byte unchanged', () => {
+    const pluginRoot = tempRoot()
+    const codexRoot = tempRoot()
+    const configPath = join(codexRoot, 'config.toml')
     writeFixturePlugin(pluginRoot, {
-      SessionStart: [{ hooks: [{ type: "command", command: "bun first.ts" }] }],
-    });
-    const [entry] = collectPluginHookTrustEntries(pluginRoot, "win32");
-    if (!entry) throw new Error("fixture must produce one trust entry");
+      SessionStart: [{ hooks: [{ type: 'command', command: 'bun first.ts' }] }],
+    })
+    const [entry] = collectPluginHookTrustEntries(pluginRoot, 'win32')
+    if (!entry) throw new Error('fixture must produce one trust entry')
     writeFileSync(
       configPath,
       [
-        "# preserve surrounding config",
+        '# preserve surrounding config',
         `[hooks.state."${entry.key}"]`,
         'trusted_hash = "sha256:stale"',
-        "",
+        '',
         '[projects."C:\\\\workspace"]',
         'trust_level = "trusted"',
-        "",
-      ].join("\n"),
-    );
+        '',
+      ].join('\n'),
+    )
 
     const updated = trustPluginHooks({
       configPath,
-      platform: "win32",
+      platform: 'win32',
       pluginRoot,
-    });
-    const trustedContent = readFileSync(configPath, "utf-8");
+    })
+    const trustedContent = readFileSync(configPath, 'utf-8')
     const unchanged = trustPluginHooks({
       configPath,
-      platform: "win32",
+      platform: 'win32',
       pluginRoot,
-    });
+    })
 
-    expect(updated).toEqual({ status: "updated", trusted: 1, unchanged: 0 });
-    expect(trustedContent).toContain("# preserve surrounding config");
-    expect(trustedContent).toContain('[projects."C:\\\\workspace"]');
-    expect(hookState(configPath)[entry.key]?.trusted_hash).toBe(
-      entry.trustedHash,
-    );
+    expect(updated).toEqual({ status: 'updated', trusted: 1, unchanged: 0 })
+    expect(trustedContent).toContain('# preserve surrounding config')
+    expect(trustedContent).toContain('[projects."C:\\\\workspace"]')
+    expect(hookState(configPath)[entry.key]?.trusted_hash).toBe(entry.trustedHash)
     expect(unchanged).toEqual({
-      status: "already-trusted",
+      status: 'already-trusted',
       trusted: 0,
       unchanged: 1,
-    });
-    expect(readFileSync(configPath, "utf-8")).toBe(trustedContent);
-  });
+    })
+    expect(readFileSync(configPath, 'utf-8')).toBe(trustedContent)
+  })
 
-  it("does not overwrite invalid TOML", () => {
-    const pluginRoot = tempRoot();
-    const codexRoot = tempRoot();
-    const configPath = join(codexRoot, "config.toml");
+  it('does not overwrite invalid TOML', () => {
+    const pluginRoot = tempRoot()
+    const codexRoot = tempRoot()
+    const configPath = join(codexRoot, 'config.toml')
     writeFixturePlugin(pluginRoot, {
-      SessionStart: [{ hooks: [{ type: "command", command: "bun first.ts" }] }],
-    });
-    const invalidConfig = 'model = "unterminated';
-    writeFileSync(configPath, invalidConfig);
+      SessionStart: [{ hooks: [{ type: 'command', command: 'bun first.ts' }] }],
+    })
+    const invalidConfig = 'model = "unterminated'
+    writeFileSync(configPath, invalidConfig)
 
-    expect(() =>
-      trustPluginHooks({ configPath, pluginRoot, platform: "win32" }),
-    ).toThrow("Unable to parse Codex config");
-    expect(readFileSync(configPath, "utf-8")).toBe(invalidConfig);
-    expect(existsSync(`${configPath}.tmp`)).toBe(false);
-  });
-});
+    expect(() => trustPluginHooks({ configPath, pluginRoot, platform: 'win32' })).toThrow('Unable to parse Codex config')
+    expect(readFileSync(configPath, 'utf-8')).toBe(invalidConfig)
+    expect(existsSync(`${configPath}.tmp`)).toBe(false)
+  })
+})

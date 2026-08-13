@@ -9,16 +9,7 @@
   "homepage": "https://github.com/LiTeXz/devopsflow",
   "repository": "https://github.com/LiTeXz/devopsflow",
   "license": "GPL-3.0-only",
-  "keywords": [
-    "codex",
-    "skills",
-    "hooks",
-    "mcp",
-    "agents",
-    "workflow",
-    "ddd",
-    "tdd"
-  ],
+  "keywords": ["codex", "skills", "hooks", "mcp", "agents", "workflow", "ddd", "tdd"],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.codex.json",
   "interface": {

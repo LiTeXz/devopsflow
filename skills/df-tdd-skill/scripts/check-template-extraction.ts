@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { runLoggedScript } from "@/shared/script-logger";
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { runLoggedScript } from '@/shared/script-logger'
 
 // biome-ignore lint/style/noNonNullAssertion: import.meta.dir is always defined at runtime
-const ROOT = dirname(import.meta.dir!);
-const SKILL = join(ROOT, "SKILL.md");
-const TEMPLATES = join(ROOT, "templates");
+const ROOT = dirname(import.meta.dir!)
+const SKILL = join(ROOT, 'SKILL.md')
+const TEMPLATES = join(ROOT, 'templates')
 
 const EXPECTED_TEMPLATES: Record<string, string[]> = {
-  "tdd_start.jsonl": [
+  'tdd_start.jsonl': [
     '"tdd_start":',
     '"task_type":',
     '"protected_behavior":',
@@ -20,14 +20,8 @@ const EXPECTED_TEMPLATES: Record<string, string[]> = {
     '"current_contract_wrong":',
     '"wrong_contract_plan":',
   ],
-  "tdd_state.jsonl": [
-    '"tdd_state":',
-    '"phase":',
-    '"command":',
-    '"exit_code":',
-    '"evidence":',
-  ],
-  "tdd_finish.jsonl": [
+  'tdd_state.jsonl': ['"tdd_state":', '"phase":', '"command":', '"exit_code":', '"evidence":'],
+  'tdd_finish.jsonl': [
     '"tdd_finish":',
     '"task_type":',
     '"red_observed":',
@@ -43,46 +37,42 @@ const EXPECTED_TEMPLATES: Record<string, string[]> = {
     '"wrong_contract_fixed":',
     '"residual_risk":',
   ],
-};
+}
 
 function fail(message: string): number {
-  console.error(`ERROR: ${message}`);
-  return 1;
+  console.error(`ERROR: ${message}`)
+  return 1
 }
 
 function main(): number {
-  const skillText = readFileSync(SKILL, "utf-8");
+  const skillText = readFileSync(SKILL, 'utf-8')
 
-  for (const blockName of ["tdd_start", "tdd_state", "tdd_finish"]) {
+  for (const blockName of ['tdd_start', 'tdd_state', 'tdd_finish']) {
     if (!new RegExp(`templates/${blockName}\\.jsonl`).test(skillText)) {
-      return fail(`SKILL.md must reference templates/${blockName}.jsonl`);
+      return fail(`SKILL.md must reference templates/${blockName}.jsonl`)
     }
-    if (
-      new RegExp(`\`\`\`jsonl\\s*\\n\\{\\"${blockName}\\":`).test(skillText)
-    ) {
-      return fail(`SKILL.md must not inline the ${blockName} JSONL schema`);
+    if (new RegExp(`\`\`\`jsonl\\s*\\n\\{\\"${blockName}\\":`).test(skillText)) {
+      return fail(`SKILL.md must not inline the ${blockName} JSONL schema`)
     }
   }
 
   for (const [filename, requiredTokens] of Object.entries(EXPECTED_TEMPLATES)) {
-    const path = join(TEMPLATES, filename);
+    const path = join(TEMPLATES, filename)
     if (!existsSync(path)) {
-      return fail(`Missing template: ${filename}`);
+      return fail(`Missing template: ${filename}`)
     }
-    const templateText = readFileSync(path, "utf-8");
+    const templateText = readFileSync(path, 'utf-8')
     for (const token of requiredTokens) {
       if (!templateText.includes(token)) {
-        return fail(`${filename} is missing ${token}`);
+        return fail(`${filename} is missing ${token}`)
       }
     }
   }
 
-  console.log("Template extraction valid");
-  return 0;
+  console.log('Template extraction valid')
+  return 0
 }
 
 if (import.meta.main) {
-  process.exit(
-    runLoggedScript({ scriptName: "check-template-extraction" }, () => main()),
-  );
+  process.exit(runLoggedScript({ scriptName: 'check-template-extraction' }, () => main()))
 }

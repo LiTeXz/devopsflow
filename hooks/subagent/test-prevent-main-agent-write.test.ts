@@ -1,1 +1,1 @@
-import "./prevent-main-agent-write.test";
+import './prevent-main-agent-write.test'

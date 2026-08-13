@@ -57,15 +57,15 @@ interface TddStateTransition {
  */
 declare const allowedTddTransitions: readonly [
   /** Moves from declared scope to an executable focused test. */
-  TddStateTransition & { from: 'scope_defined', to: 'test_written' },
+  TddStateTransition & { from: 'scope_defined'; to: 'test_written' },
   /** Accepts failure only after proving it is caused by the target risk. */
-  TddStateTransition & { from: 'test_written', to: 'red_observed' },
+  TddStateTransition & { from: 'test_written'; to: 'red_observed' },
   /** Accepts passing evidence only after the smallest production correction. */
-  TddStateTransition & { from: 'red_observed', to: 'green_reached' },
+  TddStateTransition & { from: 'red_observed'; to: 'green_reached' },
   /** Either enters protected cleanup or proceeds directly to final verification. */
-  TddStateTransition & { from: 'green_reached', to: 'refactor_done' | 'final_verified' },
+  TddStateTransition & { from: 'green_reached'; to: 'refactor_done' | 'final_verified' },
   /** Completes verification after optional cleanup remains behavior-preserving. */
-  TddStateTransition & { from: 'refactor_done', to: 'final_verified' },
+  TddStateTransition & { from: 'refactor_done'; to: 'final_verified' },
 ]
 ```
 
