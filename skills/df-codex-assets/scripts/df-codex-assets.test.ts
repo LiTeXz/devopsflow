@@ -301,8 +301,20 @@ describe("df-codex-assets", () => {
     expect(mismatch?.storedHash).toBe("old-hash");
     expect(mismatch?.correctHash).toMatch(/^[a-f0-9]{64}$/);
     expect(mismatch?.updateCommand).toBe(
-      "bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > skills/df-codex-assets/assets/hash.txt",
+      "bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > skills/df-codex-assets/assets/all.lock",
     );
+  });
+
+  it("keeps the staged managed asset lock under Husky control", () => {
+    const preCommit = readFileSync(
+      join(import.meta.dir, "..", "..", "..", ".husky", "pre-commit"),
+      "utf-8",
+    );
+
+    expect(preCommit).toContain(
+      "bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged",
+    );
+    expect(preCommit).not.toContain("all.lock");
   });
 
   it("prints check mismatch details from the CLI", async () => {

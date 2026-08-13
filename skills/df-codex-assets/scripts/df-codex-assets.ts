@@ -28,7 +28,7 @@ export const MANAGED_ASSET_PATHS = [
   "tsconfig.json",
 ] as const;
 
-export const HASH_FILE_PATH = "skills/df-codex-assets/assets/hash.txt";
+export const HASH_FILE_PATH = "skills/df-codex-assets/assets/all.lock";
 export const PROJECT_GITIGNORE_TEMPLATE_PATH =
   "skills/df-codex-assets/assets/.gitignore";
 export const PROJECT_GITIGNORE_START = "# BEGIN DEVOPSFLOW MANAGED";

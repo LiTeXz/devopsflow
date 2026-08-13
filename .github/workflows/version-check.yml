@@ -50,7 +50,7 @@ jobs:
       - name: Check managed Codex asset hash
         run: |
           set -euo pipefail
-          HASH_FILE="skills/df-codex-assets/assets/hash.txt"
+          HASH_FILE="skills/df-codex-assets/assets/all.lock"
           COMPUTED_HASH=$(bun skills/df-codex-assets/scripts/df-codex-assets.ts compute)
           STORED_HASH=$(tr -d '[:space:]' < "$HASH_FILE")
 
@@ -70,7 +70,7 @@ jobs:
           VERSION=$(bun -e "console.log(require('./package.json').version)")
           TAG="v${VERSION}"
           REPO=$(bun -e "const p=require('./.codex-plugin/plugin.json'); const repo=String(p.repository||'https://github.com/LiTeXz/devopsflow'); const m=repo.match(/github\\.com[:/]([^/]+\\/[^/.#]+)(?:\\.git)?/); console.log(m ? m[1] : 'LiTeXz/devopsflow')")
-          HASH_FILE="skills/df-codex-assets/assets/hash.txt"
+          HASH_FILE="skills/df-codex-assets/assets/all.lock"
           STORED_HASH=$(tr -d '[:space:]' < "$HASH_FILE")
 
           if ! git ls-remote --exit-code --tags "https://github.com/${REPO}.git" "refs/tags/${TAG}" >/dev/null 2>&1; then
