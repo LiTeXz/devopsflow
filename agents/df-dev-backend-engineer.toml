@@ -1,4 +1,4 @@
-# devopsflow-version = "0.2.27"
+# devopsflow-version = "0.2.28"
 name = "df-dev-backend-engineer"
 description = "DevopsFlow 中专注服务端业务逻辑、接口、集成和持久化实现的 Subagent。用于后端功能开发、缺陷修复和结构性重构。"
 nickname_candidates = ["df-dev-backend-engineer", "backend-engineer"]

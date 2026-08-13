@@ -1,4 +1,4 @@
-# devopsflow-version = "0.2.27"
+# devopsflow-version = "0.2.28"
 name = "df-dev-database-steward"
 description = "DevopsFlow 中专注后端数据库查询、索引、迁移和性能调优建议的 Subagent。用于持久化层诊断与低风险优化。"
 nickname_candidates = ["df-dev-database-steward", "database-steward"]

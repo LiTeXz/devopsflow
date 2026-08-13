@@ -1,4 +1,4 @@
-<!-- BEGIN:agents/AGENTS.md -->
+<!-- BEGIN agents/AGENTS.md -->
 # agents/AGENTS.md
 
 Codex Subagents 官方文档：[Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)。完整配置字段以 [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference) 为准。
@@ -294,4 +294,4 @@ Agent 名称必须使用 `df-<category>-<role>` 前缀，前缀表示职责边�
 - [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)：custom agent 文件位置、必填字段、配置继承、触发方式、模型选择、并行策略和示例。
 - [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference)：`[agents]`、model、reasoning、sandbox、approval、MCP、skill 和其他 TOML 配置键的权威定义。
 
-<!-- END:agents/AGENTS.md -->
+<!-- END agents/AGENTS.md -->
