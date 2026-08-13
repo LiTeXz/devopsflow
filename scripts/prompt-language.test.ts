@@ -151,6 +151,9 @@ describe("prompt language", () => {
         );
         return [...links].flatMap((match) => {
           const [, label, target] = match;
+          if (/^https?:\/\//.test(target)) {
+            return [];
+          }
           const resolved = resolve(dirname(path), target);
           return existsSync(resolved) && label === basename(target)
             ? []
