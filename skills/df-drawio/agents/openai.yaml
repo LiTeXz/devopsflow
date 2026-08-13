@@ -1,4 +1,0 @@
-interface:
-  display_name: "Drawio"
-  short_description: "Draw.io / diagrams.net diagram 创作与维护。当 Codex 需要创建、编辑、评审、修复或解释应能在 diagrams.net 中正常打开的 .df-drawio.svg 文件、.df-drawio 文件、mxfile XML、mxGraphModel、mxCell node/edge、architecture diagram、flowchart、sequence-like diagram、data-flow diagram、deployment diagram 或 repository documentation diagram 时使用。"
-  default_prompt: "使用 $df-drawio 创建、编辑或评审 .df-drawio.svg / diagrams.net diagram 文件。"
