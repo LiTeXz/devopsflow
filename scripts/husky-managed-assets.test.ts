@@ -15,6 +15,7 @@ import {
   HASH_FILE_PATH,
   MANAGED_ASSET_PATHS,
 } from "../skills/df-codex-assets/scripts/df-codex-assets";
+import { checkStagedSkillVersions } from "./check-staged-skill-versions";
 
 const AGENT_EOF_MARKER = "# DF_AGENT_EOF";
 
@@ -72,7 +73,71 @@ function git(root: string, ...args: string[]): string {
   return result.stdout.toString().trim();
 }
 
+function writeSkill(
+  root: string,
+  skill: string,
+  version: string,
+  body = "baseline",
+): string {
+  const path = join(root, "skills", skill, "SKILL.md");
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(
+    path,
+    [
+      "---",
+      `name: ${skill}`,
+      `version: "${version}"`,
+      "metadata:",
+      `  version: "${version}"`,
+      "---",
+      "",
+      body,
+      "",
+    ].join("\n"),
+  );
+  return path;
+}
+
 describe("Husky managed asset hash", () => {
+  it("requires a changed staged skill to increment both version fields once", () => {
+    const root = createRepository();
+    writeSkill(root, "df-example", "1.2.3");
+    git(root, "add", "skills/df-example/SKILL.md");
+    git(root, "commit", "--no-verify", "-m", "test: add skill");
+
+    writeSkill(root, "df-example", "1.2.3", "changed");
+    git(root, "add", "skills/df-example/SKILL.md");
+
+    expect(() => checkStagedSkillVersions(root)).toThrow(
+      'skills/df-example/SKILL.md version must increment from "1.2.3" to "1.2.4"',
+    );
+  });
+
+  it("accepts a changed staged skill when both version fields increment once", () => {
+    const root = createRepository();
+    writeSkill(root, "df-example", "1.2.3");
+    git(root, "add", "skills/df-example/SKILL.md");
+    git(root, "commit", "--no-verify", "-m", "test: add skill");
+
+    writeSkill(root, "df-example", "1.2.4", "changed");
+    git(root, "add", "skills/df-example/SKILL.md");
+
+    expect(checkStagedSkillVersions(root)).toEqual([
+      "skills/df-example/SKILL.md",
+    ]);
+  });
+
+  it("ignores unstaged skill changes", () => {
+    const root = createRepository();
+    writeSkill(root, "df-example", "1.2.3");
+    git(root, "add", "skills/df-example/SKILL.md");
+    git(root, "commit", "--no-verify", "-m", "test: add skill");
+
+    writeSkill(root, "df-example", "1.2.3", "unstaged change");
+
+    expect(checkStagedSkillVersions(root)).toEqual([]);
+  });
+
   it("manages every distributable subagent TOML", () => {
     expect(AGENT_TOML_PATHS).toEqual([
       "agents/df-dev-backend-engineer.toml",
@@ -162,6 +227,7 @@ describe("Husky managed asset hash", () => {
         "bun run check:skill-eof",
         "bun run format:check",
         "bun run lint",
+        "bun run check:skill-versions",
         "bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged",
         "bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged",
       ].join("\n"),

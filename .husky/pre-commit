@@ -1,5 +1,6 @@
 bun run check:skill-eof
 bun run format:check
 bun run lint
+bun run check:skill-versions
 bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged
 bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged
