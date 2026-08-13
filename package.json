@@ -18,6 +18,9 @@
     "typecheck": "bunx tsc --noEmit",
     "format": "bunx biome format --write .",
     "format:check": "bunx biome format .",
+    "format:markdown": "bun scripts/format-markdown-codeblocks.ts",
+    "format:markdown:staged": "bun scripts/format-markdown-codeblocks.ts --staged",
+    "format:markdown:write": "bun scripts/format-markdown-codeblocks.ts --write",
     "lint": "bunx biome check .",
     "prepare": "husky"
   },

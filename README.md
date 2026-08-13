@@ -54,6 +54,19 @@ codex plugin add devopsflow@devopsflow
 2. 像平常一样描述需求。
 3. DevopsFlow 会选择所需工作流，并引导任务完成澄清、实现和验证。
 
+### Markdown Code Blocks
+
+使用 Bun 提取 Markdown 中的 `ts`、`tsx`、`js`、`jsx`、`json`、`jsonc` fenced code block，并交给 Biome 格式化：
+
+```bash
+bun run format:markdown README.md docs/example.md
+bun run format:markdown:write README.md docs/example.md
+```
+
+默认命令只检查并在发现差异时返回 `1`；`format:markdown:write` 才会写回文件。其他语言和无语言标签的 code block 会保持原样。
+
+Husky `pre-commit` 会通过 `format:markdown:staged` 只检查已暂存的 Markdown 内容；它不会改写工作树。未格式化的 staged code block 会阻止提交，使用 `format:markdown:write` 后重新暂存即可。
+
 ## Notes
 
 在 `main`、`dev`、`develop`、`devlop` 等集成分支上，DevopsFlow 会提醒创建新分支，
