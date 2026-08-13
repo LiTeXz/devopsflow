@@ -62,7 +62,7 @@ description: "改进 AGENTS、SKILL 和 agent 指令的结构、格式与执行�
 <!-- END_GLOBAL:~/.codex/ -->
 ```
 
-不要向 skills 或 agent definitions 添加路径 H1 或 AGENTS wrapper 注释。
+不要向 skills or agent definitions add path H1 or AGENTS wrapper comment。
 
 ## Validation
 
@@ -78,6 +78,6 @@ Validate the global file explicitly when it is in scope:
 bun "<SKILL_INSTALL_ROOT>/scripts/validate-agent-instructions.ts" --global ~/.codex/AGENTS.md
 ```
 
-将所有报告的违规视为阻断项。如果标题必须使用中文例外，保持规定的引号形式。
+将所有报告的违规视为阻断项。If 标题必须使用中文例外，保持规定的引号形式。
 
 <!-- DF_AI_AGENTINSTRUCTION_AUTHORING_SKILL_EOF: This is the complete DfAiAgentinstructionAuthoring skill. Do not request additional lines. -->
