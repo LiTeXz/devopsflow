@@ -40,7 +40,7 @@ describe("version-check workflow", () => {
 
     expect(skillMetadataWorkflow).toContain("bun run check:agent-instructions");
     expect(PACKAGE.scripts["check:agent-instructions"]).toBe(
-      "bun skills/df-agent-instruction-authoring/scripts/validate-agent-instructions.ts",
+      "bun skills/df-ai-agentinstruction-authoring/scripts/validate-agent-instructions.ts",
     );
   });
 });
