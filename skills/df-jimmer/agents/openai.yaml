@@ -1,4 +1,0 @@
-interface:
-  display_name: "Jimmer"
-  short_description: "通用 Jimmer ORM 工作流与语言路由器。当 Codex 修改 JVM 项目中的 Jimmer 实体、编译期生成源码、SQL DSL 查询、fetcher、DTO language 文件、graph save、repository、Spring Boot 集成或持久化测试时使用。Kotlin-first Jimmer 项目继续使用 df-jimmer-kotlin，Java-first Jimmer 项目继续使用 df-jimmer-java。"
-  default_prompt: "修改 Jimmer ORM 实体、query、DTO、save 或 Spring Boot 集成时，使用 $df-jimmer。"

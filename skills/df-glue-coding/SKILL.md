@@ -126,4 +126,4 @@ DDD 负责业务事实，Glue Coding 负责工程复用。
 
 建议更新材料，但除非用户要求该范围，否则不要创建大范围 pattern 仓库。
 
-<!-- DF_GLUE_CODING_EOF: This is the complete DfGlueCoding skill. Do not request additional lines. -->
+<!-- DF_GLUE_CODING_SKILL_EOF: This is the complete DfGlueCoding skill. Do not request additional lines. -->

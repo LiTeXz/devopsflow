@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Backend Orm Jimmer"
+  short_description: "统一的 Java/Kotlin Jimmer ORM 工作流。当 Codex 修改 JVM 项目中的 Jimmer SQL 实体、APT 或 KSP 生成源码、类型安全 query、fetcher、DTO language 文件、graph save、repository、Spring Boot 集成或持久化测试时使用；同时适用于 Java、Kotlin 和混合 source set。"
+  default_prompt: "修改 Java 或 Kotlin Jimmer ORM 实体、query、DTO、save 或 Spring Boot 集成时，使用 $df-dev-backend-orm-jimmer。"

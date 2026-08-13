@@ -53,7 +53,7 @@ describe("ensureSkillEofMarkers", () => {
     expect(result).toEqual({ found: 1, updated: 1 });
     expect(await readFile(skillPath, "utf8")).toBe(
       "---\nname: apiClient-v2\ndescription: Example\n---\n\n# API Client\n\n" +
-        "<!-- API_CLIENT_V2_EOF: This is the complete ApiClientV2 skill. Do not request additional lines. -->\n",
+        "<!-- API_CLIENT_V2_SKILL_EOF: This is the complete ApiClientV2 skill. Do not request additional lines. -->\n",
     );
   });
 
@@ -68,7 +68,7 @@ describe("ensureSkillEofMarkers", () => {
     await ensureSkillEofMarkers(repositoryRoot);
 
     expect(await readFile(skillPath, "utf8")).toEndWith(
-      "<!-- RELEASE_GOAL_EOF: This is the complete ReleaseGoal skill. Do not request additional lines. -->\n",
+      "<!-- RELEASE_GOAL_SKILL_EOF: This is the complete ReleaseGoal skill. Do not request additional lines. -->\n",
     );
   });
 

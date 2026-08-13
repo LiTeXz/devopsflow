@@ -66,7 +66,7 @@ export interface SubagentStartOutput {
 
 `hooks.codex.json` 当前只注册一个 `SessionStart` matcher group，并按顺序声明两个 `type: "command"` handler：
 
-- 使用 `${PLUGIN_ROOT}` 定位插件安装目录，运行 `df-codex-assets.ts hydrate`，确保 `df-publisher` agent 配置存在。
+- 使用 `${PLUGIN_ROOT}` 定位插件安装目录，运行 `df-codex-assets.ts hydrate`，确保受管 subagent 配置集合存在。
 - 运行 `df-codex-assets.ts sync-project-gitignore`，确保项目 `.gitignore` 规则存在。
 
 新增或修改 Hook 时必须同步检查插件清单、脚本路径、Windows 行为、信任提示和相关测试；不要把本目录的当前配置误写成 Codex 的全部默认事件。

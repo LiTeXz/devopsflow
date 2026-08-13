@@ -31,4 +31,4 @@ description: "将仅供人工使用的脚本、一次性维护 helper、本地�
 - 除非存在明确的兼容性原因，否则不要让项目根目录同时暴露 Groovy 和 Kotlin DSL Gradle 约定。
 - 在将独立发布的 submodule 中工作时，所有指导必须保持项目中立。
 
-<!-- DF_REPOSITORY_TOOLING_HYGIENE_EOF: This is the complete DfRepositoryToolingHygiene skill. Do not request additional lines. -->
+<!-- DF_REPOSITORY_TOOLING_HYGIENE_SKILL_EOF: This is the complete DfRepositoryToolingHygiene skill. Do not request additional lines. -->

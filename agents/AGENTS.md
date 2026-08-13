@@ -265,6 +265,19 @@ developer_instructions = """
 
 ## Best Practices
 
+## Naming Boundaries
+
+Agent 名称必须使用 `df-<category>-<role>` 前缀，前缀表示职责边界：
+
+- `df-dev-*`：开发工作，包括后端、前端、测试开发、数据库实现与调优。
+- `df-ops-*`：运维与交付，包括发布制品、Docker、Jenkins、CI/CD、环境和代码托管。
+- `df-doc-*`：文档编纂，包括维护说明、迁移指南、变更记录、示例和一致性检查。
+- `df-ai-*`：AI 相关工作，包括 agent 提示词、模型交互策略、评测、上下文编排和 AI 工具集成。
+
+文件名、TOML `name` 和主要自称必须保持一致。新增 agent 选择唯一且最窄的分类；跨分类任务由主 agent 协调，不通过模糊命名扩大单个 agent 的职责。
+
+每个 agent TOML 必须以独占末行注释 `# DF_AGENT_EOF` 结尾。该标记位于 `developer_instructions` 的结束引号之后，用于确认配置完整；新增或修改 agent 时不得省略、移动或在其后追加内容。
+
 - 保持职责窄而明确。一个 agent 聚焦一种可判断的工作，例如代码探索、测试缺口审查或文档核验，避免把互相冲突的角色塞进同一配置。
 - 把 `description` 写成调度契约，说明适用任务、触发条件和边界；把稳定的执行规则放进 `developer_instructions`，不要只重复角色名称。
 - 明确输入、输出和完成标准。要求 subagent 返回经过提炼的结论、证据和文件引用，不要把大段日志或未经整理的中间输出带回主线程。

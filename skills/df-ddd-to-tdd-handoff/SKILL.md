@@ -101,4 +101,4 @@ description: "将已确认的 DDD 事件风暴产物与需求可追踪关系转�
 
 紧凑示例参见 [mapping-examples.md](references/mapping-examples.md)。
 
-<!-- DF_DDD_TO_TDD_HANDOFF_EOF: This is the complete DfDddToTddHandoff skill. Do not request additional lines. -->
+<!-- DF_DDD_TO_TDD_HANDOFF_SKILL_EOF: This is the complete DfDddToTddHandoff skill. Do not request additional lines. -->

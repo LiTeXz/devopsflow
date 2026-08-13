@@ -66,4 +66,4 @@ Regression Verification:
 
 难以复现时的策略见 [debugging-tactics.md](references/debugging-tactics.md)。
 
-<!-- DF_SYSTEMATIC_DEBUGGING_EOF: This is the complete DfSystematicDebugging skill. Do not request additional lines. -->
+<!-- DF_SYSTEMATIC_DEBUGGING_SKILL_EOF: This is the complete DfSystematicDebugging skill. Do not request additional lines. -->

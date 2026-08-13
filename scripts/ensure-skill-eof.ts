@@ -63,12 +63,15 @@ const buildMarker = (name: string) => {
   }
 
   const upperSnakeName = words.map((word) => word.toUpperCase()).join("_");
+  const markerName = upperSnakeName.endsWith("_SKILL")
+    ? upperSnakeName
+    : `${upperSnakeName}_SKILL`;
   const pascalCaseName = words
     .map(
       (word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`,
     )
     .join("");
-  return `<!-- ${upperSnakeName}_EOF: This is the complete ${pascalCaseName} skill. Do not request additional lines. -->`;
+  return `<!-- ${markerName}_EOF: This is the complete ${pascalCaseName} skill. Do not request additional lines. -->`;
 };
 
 const ensureMarker = async (skillPath: string) => {

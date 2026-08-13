@@ -56,4 +56,4 @@ Completion Status:
 - 不要忽略 dirty worktree 中的变更。应将自己的编辑与无关变更分开。
 - 如果缺少必要证据，不要提交，除非用户明确接受该风险。
 
-<!-- DF_VERIFICATION_BEFORE_COMPLETION_EOF: This is the complete DfVerificationBeforeCompletion skill. Do not request additional lines. -->
+<!-- DF_VERIFICATION_BEFORE_COMPLETION_SKILL_EOF: This is the complete DfVerificationBeforeCompletion skill. Do not request additional lines. -->

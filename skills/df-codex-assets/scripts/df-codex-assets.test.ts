@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
+  AGENT_TOML_PATHS,
   checkManagedAssetHash,
   computeManagedAssetHash,
   DEFAULT_REPOSITORY,
@@ -97,12 +98,10 @@ describe("df-codex-assets", () => {
     for (const command of commands ?? []) expect(command).not.toMatch(/^\w+=/);
   });
 
-  it("injects df-publisher into the SessionStart project after hydration", async () => {
+  it("injects every managed subagent into the SessionStart project after hydration", async () => {
     const pluginRoot = tempRoot();
     const projectRoot = tempRoot();
-    writeManagedAssets(pluginRoot, {
-      "agents/df-publisher.toml": 'name = "df-publisher"\n',
-    });
+    writeManagedAssets(pluginRoot);
     writeStoredHash(pluginRoot, computeManagedAssetHash(pluginRoot));
     process.env.PLUGIN_ROOT = pluginRoot;
 
@@ -112,12 +111,11 @@ describe("df-codex-assets", () => {
     });
 
     expect(exitCode).toBe(0);
-    expect(
-      readFileSync(
-        join(projectRoot, ".codex", "agents", "df-publisher.toml"),
-        "utf-8",
-      ),
-    ).toBe('name = "df-publisher"\n');
+    for (const path of AGENT_TOML_PATHS) {
+      expect(readFileSync(join(projectRoot, ".codex", path), "utf-8")).toBe(
+        `${path}\n`,
+      );
+    }
   });
 
   it("creates the managed project gitignore from the plugin template", async () => {
@@ -395,7 +393,7 @@ describe("df-codex-assets", () => {
           new Response("missing", { status: 404 })) as FetchLike,
         tagExists: async () => true,
       }),
-    ).rejects.toThrow("Failed to download agents/df-publisher.toml");
+    ).rejects.toThrow(`Failed to download ${AGENT_TOML_PATHS[0]}`);
   });
 
   it("fails closed when hydrated assets do not match the stored hash", async () => {

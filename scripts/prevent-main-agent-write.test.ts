@@ -499,7 +499,7 @@ describe("MainAgentWriteGuard", () => {
   });
 });
 
-describe("df-publisher push exemption", () => {
+describe("df-ops-vcs-manager push exemption", () => {
   beforeEach(() => {
     cleanupState();
   });
@@ -508,8 +508,8 @@ describe("df-publisher push exemption", () => {
     cleanupState();
   });
 
-  it("allows df-publisher to git push", () => {
-    startSubagent("dfpub-1", "df-publisher");
+  it("allows df-ops-vcs-manager to git push", () => {
+    startSubagent("dfpub-1", "df-ops-vcs-manager");
     expect(
       shouldBlockTool(
         "Bash",
@@ -520,7 +520,7 @@ describe("df-publisher push exemption", () => {
     stopSubagent("dfpub-1");
   });
 
-  it("blocks non-df-publisher worker git push", () => {
+  it("blocks non-df-ops-vcs-manager worker git push", () => {
     startSubagent("worker-1", "some-worker");
     expect(
       shouldBlockTool(
@@ -532,8 +532,8 @@ describe("df-publisher push exemption", () => {
     stopSubagent("worker-1");
   });
 
-  it("allows df-publisher to git add and commit", () => {
-    startSubagent("dfpub-1", "df-publisher");
+  it("allows df-ops-vcs-manager to git add and commit", () => {
+    startSubagent("dfpub-1", "df-ops-vcs-manager");
     expect(
       shouldBlockTool("Bash", { command: "git add README.md" }, "dfpub-1"),
     ).toBeUndefined();

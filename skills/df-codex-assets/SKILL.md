@@ -25,4 +25,4 @@ bun "<PLUGIN_ROOT>/skills/df-codex-assets/scripts/trust-codex-hooks.ts"
 
 不要从 `SessionStart` hydration 或其他隐式路径运行此命令。用户主动调用是允许脚本跳过 Codex 交互式 hook 审核的授权边界。
 
-<!-- DF_CODEX_ASSETS_EOF: This is the complete DfCodexAssets skill. Do not request additional lines. -->
+<!-- DF_CODEX_ASSETS_SKILL_EOF: This is the complete DfCodexAssets skill. Do not request additional lines. -->

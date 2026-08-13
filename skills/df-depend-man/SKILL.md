@@ -36,4 +36,4 @@ description: "审计并安全清理 JavaScript、Gradle、Maven 和 GitHub 依�
 
 选择 ecosystem 工具时加载 [dependency-tool-matrix.md](references/dependency-tool-matrix.md)，审查架构或新依赖时加载 [dependency-policy.md](references/dependency-policy.md)，生成 GitHub 更新配置时加载 [dependabot-policy.md](references/dependabot-policy.md)。只有调整命令和可用 ecosystems 后，才能将 [dependency-governance.yml](assets/dependency-governance.yml) 复制到宿主仓库。
 
-<!-- DF_DEPEND_MAN_EOF: This is the complete DfDependMan skill. Do not request additional lines. -->
+<!-- DF_DEPEND_MAN_SKILL_EOF: This is the complete DfDependMan skill. Do not request additional lines. -->

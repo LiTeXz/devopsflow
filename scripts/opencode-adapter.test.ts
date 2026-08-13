@@ -88,7 +88,7 @@ describe("OpenCode adapter", () => {
     expect(decision?.reason).toInclude("main");
   });
 
-  it("blocks git push for non-df-publisher agents", () => {
+  it("blocks git push for non-df-ops-vcs-manager agents", () => {
     const decision = shouldBlockOpenCodeToolInput({
       tool: "bash",
       args: { command: "git push origin feature/demo" },
@@ -97,7 +97,7 @@ describe("OpenCode adapter", () => {
     });
 
     expect(decision).not.toBeNull();
-    expect(decision?.reason).toInclude("df-publisher");
+    expect(decision?.reason).toInclude("df-ops-vcs-manager");
   });
 
   it("allows git status for non-df-publisher main agents", () => {
@@ -110,12 +110,12 @@ describe("OpenCode adapter", () => {
     expect(decision).toBeUndefined();
   });
 
-  it("allows df-publisher to run git commands", () => {
+  it("allows df-ops-vcs-manager to run git commands", () => {
     expect(
       shouldBlockOpenCodeToolInput({
         tool: { name: "bash" },
         args: { command: "git push origin feature/demo" },
-        agent: { mode: "subagent", name: "df-publisher" },
+        agent: { mode: "subagent", name: "df-ops-vcs-manager" },
         project: { directory: featureRepo },
       }),
     ).toBeUndefined();
@@ -123,7 +123,7 @@ describe("OpenCode adapter", () => {
       shouldBlockOpenCodeToolInput({
         tool: { name: "bash" },
         args: { command: "git status --short" },
-        agent: { mode: "subagent", name: "df-publisher" },
+        agent: { mode: "subagent", name: "df-ops-vcs-manager" },
         project: { directory: featureRepo },
       }),
     ).toBeUndefined();

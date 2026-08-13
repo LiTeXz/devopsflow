@@ -92,4 +92,4 @@ description: "编码前编写具体的小步实施计划。适用于多步功能
 - 没有明确理由时，不要规划把遗留代码或 anti-pattern 当作目标 pattern 的重构。
 - 不要假定风险性范围扩张已获批准；应明确指出。
 
-<!-- DF_IMPLEMENTATION_PLANNING_EOF: This is the complete DfImplementationPlanning skill. Do not request additional lines. -->
+<!-- DF_IMPLEMENTATION_PLANNING_SKILL_EOF: This is the complete DfImplementationPlanning skill. Do not request additional lines. -->

@@ -94,4 +94,4 @@ Not Used Yet:
 
 完整 skill 组合图见 [workflow-map.md](references/workflow-map.md)。
 
-<!-- DF_ENGINEERING_WORKFLOW_ROUTER_EOF: This is the complete DfEngineeringWorkflowRouter skill. Do not request additional lines. -->
+<!-- DF_ENGINEERING_WORKFLOW_ROUTER_SKILL_EOF: This is the complete DfEngineeringWorkflowRouter skill. Do not request additional lines. -->

@@ -6,7 +6,7 @@
           {
             "type": "command",
             "command": "bun \"${PLUGIN_ROOT}/skills/df-codex-assets/scripts/df-codex-assets.ts\" hydrate",
-            "statusMessage": "devopsflow: ensuring df-publisher agent toml exists"
+            "statusMessage": "devopsflow: ensuring managed subagent tomls exist"
           },
           {
             "type": "command",

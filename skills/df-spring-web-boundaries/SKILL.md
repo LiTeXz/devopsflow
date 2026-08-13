@@ -60,4 +60,4 @@ Service 不应引入新的 Web/Servlet 依赖：
 
 完成前，确认已修改 controller 的 public endpoint 具有 API boundary test。如果没有，应在最终报告中说明现有 coverage 为何足够。
 
-<!-- DF_SPRING_WEB_BOUNDARIES_EOF: This is the complete DfSpringWebBoundaries skill. Do not request additional lines. -->
+<!-- DF_SPRING_WEB_BOUNDARIES_SKILL_EOF: This is the complete DfSpringWebBoundaries skill. Do not request additional lines. -->
