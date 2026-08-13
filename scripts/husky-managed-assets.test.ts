@@ -159,7 +159,7 @@ describe("Husky managed asset hash", () => {
     expect(existsSync(hookPath)).toBe(true);
     expect(readFileSync(hookPath, "utf-8").trim()).toBe(
       [
-        "bun scripts/ensure-skill-eof.ts",
+        "bun run check:skill-eof",
         "bun run format:check",
         "bun run lint",
         "bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged",

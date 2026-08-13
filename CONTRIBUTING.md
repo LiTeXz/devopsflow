@@ -48,7 +48,7 @@ pnpm lint
 也可以按改动范围运行专项验证：
 
 ```bash
-pnpm test:hooks
+bun run test:repository-scripts
 pnpm test:validators
 pnpm check:skill-metadata
 ```

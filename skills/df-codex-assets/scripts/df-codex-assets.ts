@@ -25,9 +25,9 @@ export const AGENT_TOML_PATHS = [
 export const MANAGED_ASSET_PATHS = [
   ...AGENT_TOML_PATHS,
   "skills/df-codex-assets/assets/.gitignore",
-  "scripts/prevent-git-github-operations.ts",
-  "scripts/prevent-main-agent-write.ts",
-  "scripts/prevent-protected-branch-push.ts",
+  "hooks/pre-tool-use/prevent-git-github-operations.ts",
+  "hooks/subagent/prevent-main-agent-write.ts",
+  "hooks/session-start/prevent-protected-branch-push.ts",
   "src/shared/branch.ts",
   "src/shared/command-parser.ts",
   "src/shared/opencode-adapter.ts",

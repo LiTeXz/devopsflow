@@ -9,8 +9,8 @@ const PROMPT_VISIBLE_FILES = [
   "README.md",
   ".codex-plugin/plugin.json",
   "agents/df-ops-vcs-manager.toml",
-  "scripts/prevent-git-github-operations.ts",
-  "scripts/prevent-main-agent-write.ts",
+  "hooks/pre-tool-use/prevent-git-github-operations.ts",
+  "hooks/subagent/prevent-main-agent-write.ts",
 ];
 
 describe("prompt-visible Codex role vocabulary", () => {

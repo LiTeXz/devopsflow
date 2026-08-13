@@ -485,6 +485,7 @@ describe("MainAgentWriteGuard", () => {
       const manifestPath = join(
         import.meta.dir,
         "..",
+        "..",
         "hooks",
         "hooks.codex.json",
       );

@@ -340,7 +340,7 @@ describe("df-codex-assets", () => {
     const source = tempRoot();
     const target = tempRoot();
     writeManagedAssets(source, {
-      "scripts/prevent-main-agent-write.ts": "line\r\nfrom tag\r\n",
+      "hooks/subagent/prevent-main-agent-write.ts": "line\r\nfrom tag\r\n",
     });
     const storedHash = computeManagedAssetHash(source);
     writeStoredHash(source, storedHash);
@@ -364,7 +364,7 @@ describe("df-codex-assets", () => {
     expect(result.hash).toBe(storedHash);
     expect(
       readFileSync(
-        join(target, "scripts/prevent-main-agent-write.ts"),
+        join(target, "hooks", "subagent", "prevent-main-agent-write.ts"),
         "utf-8",
       ),
     ).toBe("line\nfrom tag\n");

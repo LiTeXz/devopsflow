@@ -18,7 +18,7 @@ import {
 import { runLoggedScript } from "@/shared/script-logger";
 import { isDfOpsVcsManagerSession } from "@/shared/state-store";
 import type { Payload } from "@/shared/types";
-import { installProjectAgent } from "../skills/df-codex-assets/scripts/df-codex-assets";
+import { installProjectAgent } from "../../skills/df-codex-assets/scripts/df-codex-assets";
 
 export function ensureManagedSubagents(
   cwd: string,

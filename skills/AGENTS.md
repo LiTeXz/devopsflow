@@ -25,7 +25,7 @@ this file 补充根 [AGENTS.md](../AGENTS.md), 适用于 `skills/` 子树.
 - 每个 skill 必须 include `agents/openai.yaml`.
 - `interface.display_name` 必须等于 directory 名移除 `df-` 后按单词首字母大 write 得到的 name.
 - `interface.short_description` 必须 and `SKILL.md` front matter 的 `description` exactly match.
-- 元数据判定以 [check-skill-metadata.ts](../scripts/check-skill-metadata.ts) 为准.
+- 元数据判定以 `bun run check:skill-metadata` 的 result 为准.
 
 ## Changes
 

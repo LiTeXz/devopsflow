@@ -9,7 +9,7 @@ import {
   shouldBlockTool,
 } from "./prevent-git-github-operations";
 
-const ROOT = join(import.meta.dir, "..");
+const ROOT = join(import.meta.dir, "..", "..");
 const tempRoots: string[] = [];
 const statePath = join(tmpdir(), "devopsflow-test-gitgh-sessions.json");
 

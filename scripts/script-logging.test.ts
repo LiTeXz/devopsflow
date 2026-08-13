@@ -24,9 +24,9 @@ const tempDirs: string[] = [];
 const repositoryRoot = join(import.meta.dir, "..");
 const operationalScriptPaths = [
   "scripts/check-skill-metadata.ts",
-  "scripts/prevent-git-github-operations.ts",
-  "scripts/prevent-main-agent-write.ts",
-  "scripts/prevent-protected-branch-push.ts",
+  "hooks/pre-tool-use/prevent-git-github-operations.ts",
+  "hooks/subagent/prevent-main-agent-write.ts",
+  "hooks/session-start/prevent-protected-branch-push.ts",
   "skills/df-codex-assets/scripts/df-codex-assets.ts",
   "skills/df-codex-assets/scripts/trust-codex-hooks.ts",
   "skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts",
@@ -241,7 +241,7 @@ describe("operational script logging coverage", () => {
     );
 
     const result = Bun.spawnSync({
-      cmd: [process.execPath, "scripts/prevent-main-agent-write.ts"],
+      cmd: [process.execPath, "hooks/subagent/prevent-main-agent-write.ts"],
       cwd: repositoryRoot,
       env: { ...process.env, PLUGIN_ROOT: pluginRoot },
       stderr: "pipe",

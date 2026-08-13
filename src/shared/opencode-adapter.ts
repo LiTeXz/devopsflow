@@ -1,5 +1,5 @@
 import type { BlockDecision, ToolInput } from "@/shared/types";
-import { shouldBlockOpenCodeTool } from "../../scripts/prevent-main-agent-write";
+import { shouldBlockOpenCodeTool } from "../../hooks/subagent/prevent-main-agent-write";
 
 type UnknownRecord = Record<string, unknown>;
 
