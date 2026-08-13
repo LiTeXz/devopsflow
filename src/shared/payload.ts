@@ -37,6 +37,7 @@ export const SHELL_TOOL_NAMES = new Set([
   "shell",
   "exec",
   "exec_command",
+  "shell_command",
   "unified_exec",
 ]);
 export const DIRECT_WRITE_TOOL_NAMES = new Set([

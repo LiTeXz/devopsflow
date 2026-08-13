@@ -12,6 +12,25 @@
             "type": "command",
             "command": "bun \"${PLUGIN_ROOT}/skills/df-codex-assets/scripts/df-codex-assets.ts\" sync-project-gitignore",
             "statusMessage": "devopsflow: ensuring project gitignore rules exist"
+          },
+          {
+            "type": "command",
+            "command": "bun \"${PLUGIN_ROOT}/hooks/session-start/update-protected-branches.ts\"",
+            "timeout": 120,
+            "statusMessage": "devopsflow: updating protected branches"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|exec_command|shell_command|shell|exec|unified_exec",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"${PLUGIN_ROOT}/hooks/pre-tool-use/prevent-git-push-protected-commit.ts\"",
+            "timeout": 10,
+            "statusMessage": "devopsflow: checking Git mutation policy"
           }
         ]
       }

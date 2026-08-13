@@ -1,4 +1,10 @@
-export const PROTECTED_BRANCHES = new Set(["main", "dev", "develop", "devlop"]);
+export const PROTECTED_BRANCHES = new Set([
+  "main",
+  "master",
+  "dev",
+  "develop",
+  "devlop",
+]);
 
 export function currentBranch(cwd: string): string | undefined {
   try {

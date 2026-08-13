@@ -89,13 +89,13 @@ describe("Bun and TypeScript runtime migration", () => {
     );
 
     expect(dddSkill).toContain(
-      "bun skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts",
+      'bun "<SKILL_INSTALL_ROOT>/scripts/validate-ddd-design.ts"',
     );
     expect(tddSkill).toContain(
-      "bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts",
+      "install 后 skill 根 directory 中的 `validate-tdd-protocol.ts`",
     );
     expect(hookProtocol).toContain(
-      "bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts",
+      'bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts"',
     );
   });
 

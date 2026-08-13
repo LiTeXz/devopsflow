@@ -208,7 +208,6 @@ function normalizedCommandHook(
     platform === "win32" && handler.commandWindows !== undefined
       ? handler.commandWindows
       : handler.command;
-  if (handler.async && eventKey !== "session_end") return undefined;
   if (!command.trim()) return undefined;
 
   const normalized: Record<string, unknown> = {

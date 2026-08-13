@@ -94,6 +94,7 @@ describe("df-codex-assets", () => {
     expect(commands).toEqual([
       `bun "${pluginRootToken}/skills/df-codex-assets/scripts/df-codex-assets.ts" hydrate`,
       `bun "${pluginRootToken}/skills/df-codex-assets/scripts/df-codex-assets.ts" sync-project-gitignore`,
+      `bun "${pluginRootToken}/hooks/session-start/update-protected-branches.ts"`,
     ]);
     for (const command of commands ?? []) expect(command).not.toMatch(/^\w+=/);
   });

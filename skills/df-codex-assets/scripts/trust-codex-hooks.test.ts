@@ -18,6 +18,10 @@ const HYDRATE_TRUSTED_HASH =
   "sha256:305ae7b1f4f2f18f7c332dce056d7497053fa701e09d1cdf907e395c3b58a433";
 const PROJECT_GITIGNORE_TRUSTED_HASH =
   "sha256:39210d1328456c36f5ce55b27763b5771d9156ad4957c199c373013d81945f86";
+const UPDATE_PROTECTED_BRANCHES_TRUSTED_HASH =
+  "sha256:8a1a02b997bfb1f67eee33057663d1e5455d9651f13072732cc6f92317914767";
+const PREVENT_GIT_MUTATION_TRUSTED_HASH =
+  "sha256:7b0cf546dc5e358b8b216001f5d4a1edbdc7a604dc09e932f5f2ecf1cd4c8c95";
 const UPSTREAM_CODEX_RAW_ROOT =
   "https://raw.githubusercontent.com/openai/codex/main";
 const UPSTREAM_TRUST_SOURCES = [
@@ -39,7 +43,7 @@ const UPSTREAM_TRUST_SOURCES = [
       },
     ],
     fingerprint:
-      "sha256:5fa6482a3364e3cab7d20c987c4a2068c148f87790234ee894e4bec493c2bd88",
+      "sha256:0aed89fd5d366e92a410fd904a4ca782714204addf702a1fa89fa719e62c5fa4",
   },
   {
     path: "codex-rs/config/src/fingerprint.rs",
@@ -138,6 +142,14 @@ describe("Codex hook trust hash", () => {
         key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:1",
         trustedHash: PROJECT_GITIGNORE_TRUSTED_HASH,
       },
+      {
+        key: "devopsflow@devopsflow:hooks/hooks.codex.json:session_start:0:2",
+        trustedHash: UPDATE_PROTECTED_BRANCHES_TRUSTED_HASH,
+      },
+      {
+        key: "devopsflow@devopsflow:hooks/hooks.codex.json:pre_tool_use:0:0",
+        trustedHash: PREVENT_GIT_MUTATION_TRUSTED_HASH,
+      },
     ]);
   });
 
@@ -164,6 +176,61 @@ describe("Codex hook trust hash", () => {
       expect(actual, `${path} trust logic changed upstream`).toBe(expected);
     }
   }, 40_000);
+
+  it("creates trust entries for asynchronous command hooks", () => {
+    const pluginRoot = tempRoot();
+    writeFixturePlugin(pluginRoot, {
+      PreToolUse: [
+        {
+          matcher: "shell_command",
+          hooks: [
+            {
+              type: "command",
+              command: "bun audit.ts",
+              async: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(collectPluginHookTrustEntries(pluginRoot, "win32")).toHaveLength(1);
+  });
+
+  it("keeps SessionEnd async in the trust identity even though execution is synchronous", () => {
+    const pluginRoot = tempRoot();
+    writeFixturePlugin(pluginRoot, {
+      SessionEnd: [
+        {
+          hooks: [
+            {
+              type: "command",
+              command: "bun cleanup.ts",
+              async: true,
+            },
+          ],
+        },
+      ],
+    });
+    const [asyncEntry] = collectPluginHookTrustEntries(pluginRoot, "win32");
+
+    writeFixturePlugin(pluginRoot, {
+      SessionEnd: [
+        {
+          hooks: [
+            {
+              type: "command",
+              command: "bun cleanup.ts",
+              async: false,
+            },
+          ],
+        },
+      ],
+    });
+    const [syncEntry] = collectPluginHookTrustEntries(pluginRoot, "win32");
+
+    expect(asyncEntry?.trustedHash).not.toBe(syncEntry?.trustedHash);
+  });
 });
 
 describe("trustPluginHooks", () => {
