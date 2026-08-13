@@ -8,7 +8,7 @@ import { detectPackageManager, scanJavaScript } from "./check-js-dependencies";
 import { scanMaven } from "./check-maven-dependencies";
 
 function fixture(run: (root: string) => void): void {
-  const root = mkdtempSync(join(tmpdir(), "depend-man-"));
+  const root = mkdtempSync(join(tmpdir(), "ops-dependcy-man-"));
   try {
     run(root);
   } finally {

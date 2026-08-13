@@ -1,4 +1,4 @@
 interface:
-  display_name: "Depend Man"
+  display_name: "Ops Dependcy Man"
   short_description: "审计并安全清理 JavaScript、Gradle、Maven 和 GitHub 依赖，识别无效、传递、重复、作用域错误、漂移或滥用的声明，并审查 Dependabot 规则。"
-  default_prompt: "使用 $df-depend-man 审计仓库依赖、提出或安全应用清理方案，并验证依赖治理。"
+  default_prompt: "使用 $df-ops-dependcy-man 审计仓库依赖、提出或安全应用清理方案，并验证依赖治理。"
