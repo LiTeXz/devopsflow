@@ -130,6 +130,41 @@ describe('Husky managed asset hash', () => {
     expect(result.stderr.toString()).toContain('Version mismatch: package.json=1.0.0, plugin.json=2.0.0')
   })
 
+  it('syncs and stages release versions from the staged package version', () => {
+    const root = createRepository()
+    const packagePath = join(root, 'package.json')
+    writeFileSync(packagePath, JSON.stringify({ version: '2.0.0' }))
+    git(root, 'add', 'package.json')
+
+    const result = runAssetCli(root, 'sync-versions-staged')
+
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(result.stdout.toString()).toContain('Staged release versions synchronized: 2.0.0')
+    expect(JSON.parse(git(root, 'show', ':.codex-plugin/plugin.json')).version).toBe('2.0.0')
+    for (const path of AGENT_TOML_PATHS) {
+      expect(git(root, 'show', `:${path}`)).toContain('# devopsflow-version = "2.0.0"')
+    }
+    expect(runAssetCli(root, 'check-versions-staged').exitCode).toBe(0)
+  })
+
+  it('preserves unstaged release metadata while synchronizing the Git index', () => {
+    const root = createRepository()
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '2.0.0' }))
+    git(root, 'add', 'package.json')
+    const pluginPath = join(root, '.codex-plugin', 'plugin.json')
+    writeFileSync(pluginPath, JSON.stringify({ version: '1.0.0', note: 'keep unstaged' }))
+    const agentPath = AGENT_TOML_PATHS[0]
+    writeFileSync(join(root, agentPath), '# devopsflow-version = "1.0.0"\nname = "unstaged-agent"\n')
+
+    const result = runAssetCli(root, 'sync-versions-staged')
+
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(JSON.parse(readFileSync(pluginPath, 'utf-8'))).toEqual({ version: '1.0.0', note: 'keep unstaged' })
+    expect(JSON.parse(git(root, 'show', ':.codex-plugin/plugin.json'))).toEqual({ version: '2.0.0' })
+    expect(readFileSync(join(root, agentPath), 'utf-8')).toContain('name = "unstaged-agent"')
+    expect(git(root, 'show', `:${agentPath}`)).toBe('# devopsflow-version = "2.0.0"\nname = "test-agent"')
+  })
+
   it('syncs and stages a hash for the exact Git index contents', () => {
     const root = createRepository()
     const managedPath = MANAGED_ASSET_PATHS[0]
@@ -172,7 +207,7 @@ describe('Husky managed asset hash', () => {
         'bun run format:check',
         'bun run lint',
         'bun run check:skill-versions',
-        'bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged',
+        'bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-versions-staged',
         'bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged',
       ].join('\n'),
     )
