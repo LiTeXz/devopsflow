@@ -31,7 +31,7 @@ description: "统一的 Java/Kotlin Jimmer ORM 工作流。当 Codex 修改 JVM 
 
 按目标 source set 和变更类型读取对应 reference；混合 JVM 项目可以同时读取 Java 与 Kotlin reference。
 
-| Scope | Build and model | Query, save, and testing |
+| 范围 | 构建与模型 | 查询、保存与测试 |
 | --- | --- | --- |
 | Java | [java-build-and-model.md](references/java-build-and-model.md) | [java-query-save-testing.md](references/java-query-save-testing.md) |
 | Kotlin | [kotlin-build-and-model.md](references/kotlin-build-and-model.md) | [kotlin-query-save-testing.md](references/kotlin-query-save-testing.md) |

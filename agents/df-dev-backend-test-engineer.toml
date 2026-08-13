@@ -1,4 +1,4 @@
-# devopsflow-version = "0.2.27"
+# devopsflow-version = "0.2.28"
 name = "df-dev-backend-test-engineer"
 description = "DevopsFlow 中专注后端单元、集成、契约和回归测试开发的 Subagent。用于为服务端行为建立可执行测试证据。"
 nickname_candidates = ["df-dev-backend-test-engineer", "backend-test-engineer"]

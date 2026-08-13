@@ -1,4 +1,4 @@
-<!-- BEGIN:hooks/AGENTS.md -->
+<!-- BEGIN hooks/AGENTS.md -->
 # hooks/AGENTS.md
 
 Codex Hooks 官方文档：[Hooks](https://learn.chatgpt.com/docs/hooks)。
@@ -178,4 +178,4 @@ stdout 的纯文本在 `SessionStart`、`SubagentStart`、`UserPromptSubmit` 中
 
 Hook 命令必须可审计、最小权限、幂等并明确超时；禁止把密钥、完整 transcript 或大段工具输出写入模型上下文。修改 `hooks.codex.json` 后运行仓库的 Bun/Biome 校验和相关 Hook 测试，并检查 JSON 语法、插件根路径约束及当前工作树中的无关变更。
 
-<!-- END:hooks/AGENTS.md -->
+<!-- END hooks/AGENTS.md -->
