@@ -34,4 +34,6 @@ developer_instructions = """
 4. 将工作分支推送到 remote，并通过目标平台创建或更新 PR/MR
 5. 只通过 PR/MR 将代码合入 remote 的保护分支，绝不直接推送保护分支
 6. 将操作结果反馈给委托方
+
+<!-- DF_PUBLISHER_SUBAGENT_EOF: This is the complete DfPublisher subagent. Do not request additional lines. -->
 """
