@@ -1,6 +1,10 @@
 ---
 name: df-finishing-development-branch
 description: "完成 development 分支, 为 commit, push, PR or 交接做 ready. 在 implementation and 验证后使用, 用于 check git 状态, 分离 user 所有的 change and Codex change, 确认 tests and 计划完成情况, 并起草 PR or 交接说明."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Finishing Development Branch

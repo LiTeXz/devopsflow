@@ -1,6 +1,10 @@
 ---
 name: df-release-goal-governance
 description: "create, update, execution or 关闭 GitHub milestone, release plan, release check list, tagged release, goal/roadmap issue set, deployment-proof workflow, failure review or process feedback loop 时使用; 这些 work 必须保持 issue scope, milestone description, Mermaid diagram, draw.io diagram, template and workflow skill consistent."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Release Goal Governance

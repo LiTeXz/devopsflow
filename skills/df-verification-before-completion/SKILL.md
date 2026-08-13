@@ -1,6 +1,10 @@
 ---
 name: df-verification-before-completion
 description: "工程 work 的强制完成 gate. 在宣称 development, refactor, 缺陷 fix, 建模, 审查, 文档, 配置, commit or PR task 完成前使用, 用于核验 user 需求, change file, 已 run 命令及 exit code, 跳过的 check, 手动验证, 残余风险以及无关 change."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Verification Before Completion

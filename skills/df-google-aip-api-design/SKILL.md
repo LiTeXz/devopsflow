@@ -1,6 +1,10 @@
 ---
 name: df-google-aip-api-design
 description: 使用 Google API Improvement Proposals (AIP) 设计, 评审 and refactor resource-oriented HTTP, REST, gRPC transcoding, protobuf and OpenAPI API. 当 Codex 需要依据 Google AIP 指南 create or 评议 API endpoint, REST URI version prefix, resource name, standard method, custom method, pagination, filtering, field mask, error, long-running operation, protobuf service definition or api-linter 配置时使用.
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Google AIP API Design

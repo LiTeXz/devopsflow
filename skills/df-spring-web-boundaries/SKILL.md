@@ -1,6 +1,10 @@
 ---
 name: df-spring-web-boundaries
 description: "用于 Java/Spring Boot refactor 的 Spring Web boundary guardrail. 当 Codex 修改 Spring 应用中的 controller, REST endpoint, request/response mapping, validation, security, file 上传/下载, export or service/controller 分层时使用. 这是 TDD skill 的可选架构 and 技术栈配套 skill; 不要将其用作通用 TDD methodology skill."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Spring Web Boundaries

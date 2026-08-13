@@ -1,6 +1,10 @@
 ---
 name: df-executing-implementation-plan
 description: "安全地 execution 实施计划. 当 Codex 已有书面计划 or 即将遵循规划的工程步骤时使用: 先审查计划是否存在 tests 缺失, 步骤过大, 顺序错误 or 假设过时, 再逐项 execution task 并记录验证证据."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Executing Implementation Plan

@@ -1,6 +1,10 @@
 ---
 name: df-glue-coding
 description: "面向 AI implementation 的 Glue Coding workflow, 应复用 local project 材料, 同时避免盲目复制旧结构. 在 domain 歧义已解决 or 被声明为很薄后, 实施规划 or code 前使用, 适用于 and 现有 CRUD 页面, 列表/表单/详情界面, import/导出, 端点, adapter, command handler, projection, tests, 配置, refactor, 迁移, 现代化 or other 可重复 project pattern 相似的 task. 此 skill 会发现 local style pack, 参考 code, example, 文档, AGENTS.md rule and 附近的生产 implementation, 将其归类为 target pattern, legacy pattern, anti-pattern or behavior evidence, 保留正确约定, 并将新 code 限制在预期差异内."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Glue Coding

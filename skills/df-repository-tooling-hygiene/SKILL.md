@@ -1,6 +1,10 @@
 ---
 name: df-repository-tooling-hygiene
 description: "将仅供人工使用的 script, 1 次完成维护 helper, local 环境 launcher and Gradle init script 移出高显著性的 repository 根 directory. 清理 agent context 噪声, 将 reset or run script 迁移到文档/skills, or 把 Groovy init. gradle 片段转换为 Kotlin DSL init. gradle. kts 模板时使用."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Repository Tooling Hygiene

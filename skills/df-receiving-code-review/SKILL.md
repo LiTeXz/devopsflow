@@ -1,6 +1,10 @@
 ---
 name: df-receiving-code-review
 description: "安全处理 code 审查反馈. 当 Codex 收到 PR 评论, 审查线程, change 请求, 行内 code 审查反馈 or 维护者建议, 需要对评论 category, 决定 fix or 讨论, 应用聚焦 change, 验证每项 fix 并避免无关 refactor 时使用."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Receiving Code Review

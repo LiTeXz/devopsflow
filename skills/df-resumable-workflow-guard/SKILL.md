@@ -1,6 +1,10 @@
 ---
 name: df-resumable-workflow-guard
 description: "via 明确的 checkpoint, resume file and 交接说明保护长时间 or 易中断的工程 work. task 可能跨多轮 or 多个会话, 耗时超过约 30 分钟, 涉及多个 workflow 阶段, 需要重复验证, 接近 context 限制, 在中断 or 压缩后 resume, or user 提到 continue, resume, checkpoint, long task, handoff, 中断, 继续, 续跑, checkpoint, 长 task or 交接时使用."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Resumable Workflow Guard

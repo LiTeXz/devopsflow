@@ -1,6 +1,10 @@
 ---
 name: df-parallel-agent-orchestration
 description: "为工程 task 规划安全的并行 agent work. 当独立 module, 计划审查, implementation, 验证 or code 审查可在 file 所有权互不重叠的 context 中 run, or 需要全新审查 context 以避免复杂 work 中的自我确认时使用."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Parallel Agent Orchestration

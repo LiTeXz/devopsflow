@@ -1,6 +1,10 @@
 ---
 name: df-systematic-debugging
 description: "面向 tests 失败, 生产缺陷, 回归, flaky 行为 or 根因不清问题的证据 driven debugging workflow. 当 Codex 必须复现问题, 定位最早错误点, 添加观察 or 最小 tests, 识别根因证据, 每次 fix 1 个原因, 并在完成前添加回归覆盖时使用."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Systematic Debugging

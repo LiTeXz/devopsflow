@@ -1,6 +1,10 @@
 ---
 name: df-requesting-code-review
 description: "via 聚焦缺陷的自查, 为已 implementation 的 code ready 审查. 在主要 implementation 完成后, 交接, PR or 最终完成前使用, check 差异中是否存在行为回归, tests 缺失, 契约风险, 数据 consistency, 安全, 错误处理 and 验证证据不清等问题."
+version: "0.2.28"
+license: "GPL-3.0-only"
+metadata:
+  version: "0.2.28"
 ---
 
 # Requesting Code Review
