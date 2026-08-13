@@ -10,10 +10,13 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
+  AGENT_TOML_PATHS,
   computeManagedAssetHash,
   HASH_FILE_PATH,
   MANAGED_ASSET_PATHS,
 } from "../skills/df-codex-assets/scripts/df-codex-assets";
+
+const AGENT_EOF_MARKER = "# DF_AGENT_EOF";
 
 const ROOT = join(import.meta.dir, "..");
 const tempRoots: string[] = [];
@@ -39,10 +42,12 @@ function createRepository(): string {
   const pluginPath = join(root, ".codex-plugin", "plugin.json");
   mkdirSync(dirname(pluginPath), { recursive: true });
   writeFileSync(pluginPath, JSON.stringify({ version: "1.0.0" }));
-  writeFileSync(
-    join(root, "agents", "df-publisher.toml"),
-    '# devopsflow-version = "1.0.0"\nname = "df-publisher"\n',
-  );
+  for (const path of AGENT_TOML_PATHS) {
+    writeFileSync(
+      join(root, path),
+      '# devopsflow-version = "1.0.0"\nname = "test-agent"\n',
+    );
+  }
   const hashPath = join(root, HASH_FILE_PATH);
   mkdirSync(dirname(hashPath), { recursive: true });
   writeFileSync(hashPath, "baseline-hash\n");
@@ -68,6 +73,27 @@ function git(root: string, ...args: string[]): string {
 }
 
 describe("Husky managed asset hash", () => {
+  it("manages every distributable subagent TOML", () => {
+    expect(AGENT_TOML_PATHS).toEqual([
+      "agents/df-dev-backend-engineer.toml",
+      "agents/df-dev-backend-test-engineer.toml",
+      "agents/df-dev-database-steward.toml",
+      "agents/df-doc-documentation-writer.toml",
+      "agents/df-dev-frontend-engineer.toml",
+      "agents/df-dev-frontend-test-engineer.toml",
+      "agents/df-ops-artifact-manager.toml",
+      "agents/df-ops-vcs-manager.toml",
+    ]);
+  });
+
+  it("requires every distributable subagent TOML to end with its EOF marker", () => {
+    for (const path of AGENT_TOML_PATHS) {
+      expect(readFileSync(join(ROOT, path), "utf-8").trimEnd()).toEndWith(
+        AGENT_EOF_MARKER,
+      );
+    }
+  });
+
   it("blocks a commit when staged versions are not aligned", () => {
     const root = createRepository();
     const pluginPath = join(root, ".codex-plugin", "plugin.json");
@@ -78,7 +104,7 @@ describe("Husky managed asset hash", () => {
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr.toString()).toContain(
-      "Version mismatch: package.json=1.0.0, plugin.json=2.0.0, df-publisher.toml=1.0.0",
+      "Version mismatch: package.json=1.0.0, plugin.json=2.0.0",
     );
   });
 

@@ -318,7 +318,7 @@ describe("ProtectedBranchPushHook", () => {
 
 import { loadState, saveState } from "@/shared/state-store";
 
-describe("df-publisher push exemption", () => {
+describe("df-ops-vcs-manager push exemption", () => {
   beforeAll(() => {
     const stateFile = join(tempDir, "pb-dfpub-sessions.json");
     process.env.DEVOPSFLOW_MAIN_AGENT_WRITE_STATE = stateFile;
@@ -330,18 +330,18 @@ describe("df-publisher push exemption", () => {
     saveState(state);
   });
 
-  it("allows df-publisher push on feature branch", () => {
+  it("allows df-ops-vcs-manager push on feature branch", () => {
     const state = loadState();
-    state["dfpub-1"] = { agent: "df-publisher" };
+    state["dfpub-1"] = { agent: "df-ops-vcs-manager" };
     saveState(state);
     expect(
       shouldBlock("git push origin feature/demo", featureRepo, true),
     ).toBeUndefined();
   });
 
-  it("blocks df-publisher push on protected branch", () => {
+  it("blocks df-ops-vcs-manager push on protected branch", () => {
     const state = loadState();
-    state["dfpub-1"] = { agent: "df-publisher" };
+    state["dfpub-1"] = { agent: "df-ops-vcs-manager" };
     saveState(state);
     const decision = shouldBlock("git push origin", devRepo, true);
     expect(decision).not.toBeNull();

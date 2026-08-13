@@ -87,4 +87,4 @@ description: "Draw.io / diagrams.net diagram 创作与维护。当 Codex 需要�
 - Diagram generation docs： https://www.df-drawio.com/docs/reference/diagram-generation/
 - draw.io desktop export： https://github.com/jgraph/df-drawio-desktop
 
-<!-- DF_DRAWIO_EOF: This is the complete DfDrawio skill. Do not request additional lines. -->
+<!-- DF_DRAWIO_SKILL_EOF: This is the complete DfDrawio skill. Do not request additional lines. -->

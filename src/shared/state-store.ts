@@ -57,11 +57,11 @@ export function isRegisteredSubagentSession(sessionId: string): boolean {
   return sessionId in loadState();
 }
 
-export const DF_PUBLISHER_AGENT_NAME = "df-publisher";
+export const DF_OPS_VCS_MANAGER_AGENT_NAME = "df-ops-vcs-manager";
 
-export function isDfPublisherSession(sessionId: string): boolean {
+export function isDfOpsVcsManagerSession(sessionId: string): boolean {
   const state = loadState();
   const session = state[sessionId];
   if (!session?.agent) return false;
-  return session.agent.toLowerCase().includes(DF_PUBLISHER_AGENT_NAME);
+  return session.agent.toLowerCase().includes(DF_OPS_VCS_MANAGER_AGENT_NAME);
 }

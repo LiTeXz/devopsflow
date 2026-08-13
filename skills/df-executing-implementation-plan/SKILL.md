@@ -60,4 +60,4 @@ Evidence: <short concrete detail>
 - 未更新计划或说明原因，不要扩大文件范围。
 - 在 `df-verification-before-completion` 检查完整结果前，不要宣称完成。
 
-<!-- DF_EXECUTING_IMPLEMENTATION_PLAN_EOF: This is the complete DfExecutingImplementationPlan skill. Do not request additional lines. -->
+<!-- DF_EXECUTING_IMPLEMENTATION_PLAN_SKILL_EOF: This is the complete DfExecutingImplementationPlan skill. Do not request additional lines. -->

@@ -80,4 +80,4 @@ bun skills/df-agent-instruction-authoring/scripts/validate-agent-instructions.ts
 
 将所有报告的违规视为阻断项。如果标题必须使用中文例外，保持规定的引号形式。
 
-<!-- DF_AGENT_INSTRUCTION_AUTHORING_EOF: This is the complete DfAgentInstructionAuthoring skill. Do not request additional lines. -->
+<!-- DF_AGENT_INSTRUCTION_AUTHORING_SKILL_EOF: This is the complete DfAgentInstructionAuthoring skill. Do not request additional lines. -->

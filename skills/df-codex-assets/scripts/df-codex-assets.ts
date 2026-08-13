@@ -11,8 +11,19 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { readScriptPayload, runLoggedScriptAsync } from "./script-logger";
 
+export const AGENT_TOML_PATHS = [
+  "agents/df-dev-backend-engineer.toml",
+  "agents/df-dev-backend-test-engineer.toml",
+  "agents/df-dev-database-steward.toml",
+  "agents/df-doc-documentation-writer.toml",
+  "agents/df-dev-frontend-engineer.toml",
+  "agents/df-dev-frontend-test-engineer.toml",
+  "agents/df-ops-artifact-manager.toml",
+  "agents/df-ops-vcs-manager.toml",
+] as const;
+
 export const MANAGED_ASSET_PATHS = [
-  "agents/df-publisher.toml",
+  ...AGENT_TOML_PATHS,
   "skills/df-codex-assets/assets/.gitignore",
   "scripts/prevent-git-github-operations.ts",
   "scripts/prevent-main-agent-write.ts",
@@ -28,7 +39,9 @@ export const MANAGED_ASSET_PATHS = [
   "tsconfig.json",
 ] as const;
 
-export const HASH_FILE_PATH = "skills/df-codex-assets/assets/hash.txt";
+export const HASH_FILE_PATH = "skills/df-codex-assets/assets/all.lock";
+export const SUBAGENT_HASH_FILE_PATH =
+  "skills/df-codex-assets/assets/subagent.lock";
 export const PROJECT_GITIGNORE_TEMPLATE_PATH =
   "skills/df-codex-assets/assets/.gitignore";
 export const PROJECT_GITIGNORE_START = "# BEGIN DEVOPSFLOW MANAGED";
@@ -66,6 +79,7 @@ export interface HookPayload {
 
 export interface SyncStagedHashResult {
   readonly hash: string;
+  readonly subagentHash: string;
   readonly staged: boolean;
 }
 
@@ -113,22 +127,44 @@ export function computeManagedAssetHash(
     .digest("hex");
 }
 
-export function readStoredHash(pluginRoot: string): string {
-  const hashPath = join(pluginRoot, HASH_FILE_PATH);
+export function computeSubagentHash(pluginRoot: string): string {
+  return computeManagedAssetHash(pluginRoot, AGENT_TOML_PATHS);
+}
+
+export function readStoredHash(
+  pluginRoot: string,
+  hashFilePath = HASH_FILE_PATH,
+): string {
+  const hashPath = join(pluginRoot, hashFilePath);
   if (!existsSync(hashPath)) {
-    throw new Error(`Missing stored asset hash: ${HASH_FILE_PATH}`);
+    throw new Error(`Missing stored asset hash: ${hashFilePath}`);
   }
   return readFileSync(hashPath, "utf-8").trim();
 }
 
-export function writeStoredHash(pluginRoot: string, hash: string): void {
-  const hashPath = join(pluginRoot, HASH_FILE_PATH);
+export function writeStoredHash(
+  pluginRoot: string,
+  hash: string,
+  hashFilePath = HASH_FILE_PATH,
+): void {
+  const hashPath = join(pluginRoot, hashFilePath);
   mkdirSync(dirname(hashPath), { recursive: true });
   writeFileSync(hashPath, `${hash}\n`);
 }
 
 export function computeStagedManagedAssetHash(pluginRoot: string): string {
-  const manifest = [...MANAGED_ASSET_PATHS]
+  return computeStagedHash(pluginRoot, MANAGED_ASSET_PATHS);
+}
+
+export function computeStagedSubagentHash(pluginRoot: string): string {
+  return computeStagedHash(pluginRoot, AGENT_TOML_PATHS);
+}
+
+function computeStagedHash(
+  pluginRoot: string,
+  paths: readonly string[],
+): string {
+  const manifest = [...paths]
     .sort((left, right) => left.localeCompare(right))
     .map((relativePath) => {
       return `${relativePath}\0${hashContent(readStagedFile(pluginRoot, relativePath))}\n`;
@@ -148,26 +184,27 @@ export function checkStagedVersionAlignment(
     ".codex-plugin/plugin.json",
     readStagedFile(pluginRoot, ".codex-plugin/plugin.json"),
   );
-  const agentContent = readStagedFile(
-    pluginRoot,
-    "agents/df-publisher.toml",
-  ).toString("utf-8");
-  if (/^version\s*=/m.test(agentContent)) {
+  const agentVersions = AGENT_TOML_PATHS.map((path) => {
+    const agentContent = readStagedFile(pluginRoot, path).toString("utf-8");
+    if (/^version\s*=/m.test(agentContent)) {
+      throw new Error(
+        `${path} must use # devopsflow-version = "..." instead of a top-level version field`,
+      );
+    }
+    const version = agentContent.match(
+      /^#\s*devopsflow-version\s*=\s*"([^"]+)"/m,
+    )?.[1];
+    if (!version) {
+      throw new Error(`${path} is missing its devopsflow-version marker`);
+    }
+    return { path, version };
+  });
+  const mismatchedAgents = agentVersions.filter(
+    ({ version }) => version !== packageVersion,
+  );
+  if (packageVersion !== pluginVersion || mismatchedAgents.length > 0) {
     throw new Error(
-      'agents/df-publisher.toml must use # devopsflow-version = "..." instead of a top-level version field',
-    );
-  }
-  const agentVersion = agentContent.match(
-    /^#\s*devopsflow-version\s*=\s*"([^"]+)"/m,
-  )?.[1];
-  if (!agentVersion) {
-    throw new Error(
-      "agents/df-publisher.toml is missing its devopsflow-version marker",
-    );
-  }
-  if (packageVersion !== pluginVersion || packageVersion !== agentVersion) {
-    throw new Error(
-      `Version mismatch: package.json=${packageVersion}, plugin.json=${pluginVersion}, df-publisher.toml=${agentVersion}`,
+      `Version mismatch: package.json=${packageVersion}, plugin.json=${pluginVersion}, ${agentVersions.map(({ path, version }) => `${path}=${version}`).join(", ")}`,
     );
   }
   return { version: packageVersion };
@@ -213,11 +250,23 @@ export function syncStagedManagedAssetHash(
   pluginRoot: string,
 ): SyncStagedHashResult {
   const hash = computeStagedManagedAssetHash(pluginRoot);
+  const subagentHash = computeStagedSubagentHash(pluginRoot);
   writeStoredHash(pluginRoot, hash);
+  writeStoredHash(pluginRoot, subagentHash, SUBAGENT_HASH_FILE_PATH);
   const addResult = git(pluginRoot, ["add", "--", HASH_FILE_PATH]);
   if (addResult.exitCode !== 0) {
     throw new Error(
       `Unable to stage ${HASH_FILE_PATH}: ${addResult.stderr.toString().trim()}`,
+    );
+  }
+  const addSubagentResult = git(pluginRoot, [
+    "add",
+    "--",
+    SUBAGENT_HASH_FILE_PATH,
+  ]);
+  if (addSubagentResult.exitCode !== 0) {
+    throw new Error(
+      `Unable to stage ${SUBAGENT_HASH_FILE_PATH}: ${addSubagentResult.stderr.toString().trim()}`,
     );
   }
   const diffResult = git(pluginRoot, [
@@ -232,7 +281,7 @@ export function syncStagedManagedAssetHash(
       `Unable to inspect staged ${HASH_FILE_PATH}: ${diffResult.stderr.toString().trim()}`,
     );
   }
-  return { hash, staged: diffResult.exitCode === 1 };
+  return { hash, subagentHash, staged: diffResult.exitCode === 1 };
 }
 
 function git(pluginRoot: string, args: string[]): Bun.ReadableSyncSubprocess {
@@ -258,6 +307,19 @@ export function checkManagedAssetHash(
     storedHash,
     correctHash,
     updateCommand: assetHashUpdateCommand(),
+  };
+}
+
+export function checkSubagentHash(
+  pluginRoot: string,
+): HashMismatch | undefined {
+  const storedHash = readStoredHash(pluginRoot, SUBAGENT_HASH_FILE_PATH);
+  const correctHash = computeSubagentHash(pluginRoot);
+  if (storedHash === correctHash) return undefined;
+  return {
+    storedHash,
+    correctHash,
+    updateCommand: `bun skills/df-codex-assets/scripts/df-codex-assets.ts compute-subagents > ${SUBAGENT_HASH_FILE_PATH}`,
   };
 }
 
@@ -408,21 +470,25 @@ export function installProjectAgent(
   pluginRoot: string,
   projectRoot: string,
 ): boolean {
-  const sourcePath = join(pluginRoot, "agents", "df-publisher.toml");
-  const targetPath = join(projectRoot, ".codex", "agents", "df-publisher.toml");
-  if (!existsSync(sourcePath)) {
-    throw new Error(`Missing managed asset: agents/df-publisher.toml`);
+  let changed = false;
+  for (const relativePath of AGENT_TOML_PATHS) {
+    const sourcePath = join(pluginRoot, relativePath);
+    const targetPath = join(projectRoot, ".codex", relativePath);
+    if (!existsSync(sourcePath)) {
+      throw new Error(`Missing managed asset: ${relativePath}`);
+    }
+    if (
+      existsSync(targetPath) &&
+      hashContent(readFileSync(targetPath)) ===
+        hashContent(readFileSync(sourcePath))
+    ) {
+      continue;
+    }
+    mkdirSync(dirname(targetPath), { recursive: true });
+    copyFileSync(sourcePath, targetPath);
+    changed = true;
   }
-  if (
-    existsSync(targetPath) &&
-    hashContent(readFileSync(targetPath)) ===
-      hashContent(readFileSync(sourcePath))
-  ) {
-    return false;
-  }
-  mkdirSync(dirname(targetPath), { recursive: true });
-  copyFileSync(sourcePath, targetPath);
-  return true;
+  return changed;
 }
 
 function countMarkerLines(content: string, marker: string): number {
@@ -558,10 +624,19 @@ export async function runCli(
       console.log(computeManagedAssetHash(pluginRoot));
       return 0;
     }
+    if (command === "compute-subagents") {
+      console.log(computeSubagentHash(pluginRoot));
+      return 0;
+    }
     if (command === "check") {
       const mismatch = checkManagedAssetHash(pluginRoot);
       if (mismatch) {
         printCheckMismatch(mismatch, console.error);
+        return 1;
+      }
+      const subagentMismatch = checkSubagentHash(pluginRoot);
+      if (subagentMismatch) {
+        printCheckMismatch(subagentMismatch, console.error);
         return 1;
       }
       return 0;
@@ -582,6 +657,7 @@ export async function runCli(
     if (command === "sync-staged") {
       const result = syncStagedManagedAssetHash(pluginRoot);
       console.log(`Managed Codex asset hash: ${result.hash}`);
+      console.log(`Managed subagent hash: ${result.subagentHash}`);
       return 0;
     }
     if (command === "check-versions-staged") {
@@ -591,7 +667,7 @@ export async function runCli(
     }
     console.error(`Unknown command: ${command}`);
     console.error(
-      "Usage: df-codex-assets.ts <check-versions-staged|compute|check|hydrate|sync-project-gitignore|sync-staged>",
+      "Usage: df-codex-assets.ts <check-versions-staged|compute|compute-subagents|check|hydrate|sync-project-gitignore|sync-staged>",
     );
     return 2;
   } catch (error) {

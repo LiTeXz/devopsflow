@@ -38,7 +38,7 @@ import {
 } from "@/shared/payload";
 import { runLoggedScript } from "@/shared/script-logger";
 import {
-  isDfPublisherSession,
+  isDfOpsVcsManagerSession,
   isRegisteredSubagentSession,
   loadState,
   saveState,
@@ -61,7 +61,7 @@ export function shouldBlockTool(
   if (!decision) return undefined;
   if (decision.escalation) return decision;
   if (isGlobalGitPushDecision(decision)) {
-    if (sessionId && isDfPublisherSession(sessionId)) {
+    if (sessionId && isDfOpsVcsManagerSession(sessionId)) {
       const effectiveCwd = decision.cwd ?? cwd ?? findToolWorkdir(toolInput);
       if (effectiveCwd) {
         const pbDecision = protectedBranchWriteDecision(
@@ -105,15 +105,15 @@ export function shouldBlockOpenCodeTool(
   toolInput: ToolInput,
   isSubagent: boolean,
   cwd?: string,
-  isDfPublisher = false,
+  isDfOpsVcsManager = false,
 ): BlockDecision | undefined {
   const ocCommand = findCommand(toolInput);
   if (ocCommand && containsBlockedGitGh(ocCommand)) {
-    if (isDfPublisher) {
+    if (isDfOpsVcsManager) {
       if (cwd) {
         const pbDecision = protectedBranchWriteDecision(
           cwd,
-          "df-publisher 在保护分支上执行 git/gh 操作",
+          "df-ops-vcs-manager 在保护分支上执行 git/gh 操作",
         );
         if (pbDecision) return pbDecision;
       }
@@ -121,14 +121,14 @@ export function shouldBlockOpenCodeTool(
     }
     return createBlockDecision(
       "unknown",
-      "git push/commit/gh issue/gh pr 操作已被禁止；请委托 df-publisher Codex worker session 完成",
+      "git push/commit/gh issue/gh pr 操作已被禁止；请委托 df-ops-vcs-manager Codex worker session 完成",
     );
   }
   const decision = decisionForTool(toolName, toolInput, cwd);
   if (!decision) return undefined;
   if (decision.escalation) return decision;
   if (isGlobalGitPushDecision(decision)) {
-    if (isDfPublisher) {
+    if (isDfOpsVcsManager) {
       const effectiveCwd = decision.cwd ?? cwd;
       if (effectiveCwd) {
         const pbDecision = protectedBranchWriteDecision(

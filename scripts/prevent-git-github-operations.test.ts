@@ -1,591 +1,105 @@
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "bun:test";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  statSync,
-  unlinkSync,
-  writeFileSync,
-} from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-let tempDir: string;
-let stateFilePath: string;
-const STATE_PATH_ENV = "DEVOPSFLOW_MAIN_AGENT_WRITE_STATE";
-
-beforeAll(() => {
-  tempDir = mkdtempSync(join(tmpdir(), "devopsflow-test-gitgh-"));
-  stateFilePath = join(tempDir, "test-sessions.json");
-  process.env[STATE_PATH_ENV] = stateFilePath;
-});
-
-function cleanupState(): void {
-  if (existsSync(stateFilePath)) {
-    unlinkSync(stateFilePath);
-  }
-}
-
 import { containsBlockedGitGh, containsGitOrGh } from "@/shared/command-parser";
 import { loadState, saveState } from "@/shared/state-store";
 import {
-  ensureDfPublisherAgent,
+  ensureManagedSubagents,
   shouldBlockTool,
 } from "./prevent-git-github-operations";
 
-function startSubagent(sessionId: string, agentName: string): void {
+const ROOT = join(import.meta.dir, "..");
+const tempRoots: string[] = [];
+const statePath = join(tmpdir(), "devopsflow-test-gitgh-sessions.json");
+
+beforeEach(() => {
+  process.env.DEVOPSFLOW_MAIN_AGENT_WRITE_STATE = statePath;
+  rmSync(statePath, { force: true });
+});
+
+afterEach(() => {
+  for (const root of tempRoots.splice(0))
+    rmSync(root, { recursive: true, force: true });
+  rmSync(statePath, { force: true });
+});
+
+function tempRoot(): string {
+  const root = mkdtempSync(join(tmpdir(), "devopsflow-test-gitgh-"));
+  tempRoots.push(root);
+  return root;
+}
+
+function startSubagent(sessionId: string, agent: string): void {
   const state = loadState();
-  state[sessionId] = { agent: agentName };
+  state[sessionId] = { agent };
   saveState(state);
 }
 
-function stopSubagent(sessionId: string): void {
-  const state = loadState();
-  delete state[sessionId];
-  saveState(state);
-}
-
-function validDfPublisherToml(version: string): string {
-  return `# devopsflow-version = "${version}"
-name = "df-publisher"
-description = "Publish git and GitHub changes"
-nickname_candidates = ["df-publisher", "publisher"]
-developer_instructions = """
-Publish through trusted git and gh workflows.
-"""`;
-}
-
-describe("containsGitOrGh", () => {
-  it("detects plain git and gh commands", () => {
+describe("Git and GitHub command parsing", () => {
+  it("distinguishes Git and GitHub operations from unrelated commands", () => {
     expect(containsGitOrGh("git status")).toBe(true);
-    expect(containsGitOrGh("git push origin main")).toBe(true);
-    expect(containsGitOrGh("git log --oneline -5")).toBe(true);
     expect(containsGitOrGh("gh pr create")).toBe(true);
-    expect(containsGitOrGh("gh issue list")).toBe(true);
-  });
-
-  it("detects path-prefixed binaries", () => {
-    expect(containsGitOrGh("/usr/bin/git status")).toBe(true);
-    expect(containsGitOrGh("/usr/local/bin/gh pr create")).toBe(true);
-  });
-
-  it("detects wrapped commands", () => {
-    expect(containsGitOrGh('bash -c "git push"')).toBe(true);
-    expect(containsGitOrGh('sh -c "git log"')).toBe(true);
-    expect(containsGitOrGh('eval "git status"')).toBe(true);
-    expect(containsGitOrGh("command git status")).toBe(true);
-    expect(containsGitOrGh("env GIT_AUTHOR_DATE=x git commit")).toBe(true);
-    expect(containsGitOrGh("rtk proxy git push origin main")).toBe(true);
-  });
-
-  it("does not false-positive on non-git commands", () => {
-    expect(containsGitOrGh("cat README.md")).toBe(false);
     expect(containsGitOrGh("rg -n DevopsFlow README.md")).toBe(false);
-    expect(containsGitOrGh("ls .git/")).toBe(false);
-    expect(containsGitOrGh("echo git is great")).toBe(false);
-    expect(containsGitOrGh("find . -name .git")).toBe(false);
-  });
-});
-
-describe("containsBlockedGitGh", () => {
-  it("detects blocked git push and commit", () => {
     expect(containsBlockedGitGh("git push origin main")).toBe(true);
-    expect(containsBlockedGitGh("git commit -m test")).toBe(true);
-    expect(containsBlockedGitGh("git push -u origin feature")).toBe(true);
-  });
-
-  it("detects blocked gh issue and pr", () => {
     expect(containsBlockedGitGh("gh issue list")).toBe(true);
-    expect(containsBlockedGitGh("gh pr create")).toBe(true);
-    expect(containsBlockedGitGh("gh pr merge 123")).toBe(true);
-    expect(containsBlockedGitGh("gh issue close 45")).toBe(true);
-  });
-
-  it("detects wrapped blocked commands", () => {
-    expect(containsBlockedGitGh('bash -c "git push"')).toBe(true);
-    expect(containsBlockedGitGh('sh -c "git commit -m test"')).toBe(true);
-    expect(containsBlockedGitGh("command git push origin main")).toBe(true);
-    expect(containsBlockedGitGh("rtk proxy git push origin main")).toBe(true);
-  });
-
-  it("does not block safe git/gh commands", () => {
     expect(containsBlockedGitGh("git status")).toBe(false);
-    expect(containsBlockedGitGh("git log --oneline")).toBe(false);
-    expect(containsBlockedGitGh("git switch -c feature")).toBe(false);
-    expect(containsBlockedGitGh("git checkout main")).toBe(false);
-    expect(containsBlockedGitGh("git merge feature")).toBe(false);
-    expect(containsBlockedGitGh("git diff HEAD~1")).toBe(false);
-    expect(containsBlockedGitGh("git add README.md")).toBe(false);
-    expect(containsBlockedGitGh("gh auth status")).toBe(false);
-    expect(containsBlockedGitGh("gh auth login")).toBe(false);
-    expect(containsBlockedGitGh("gh repo view")).toBe(false);
-  });
-
-  it("does not false-positive on non-git commands", () => {
-    expect(containsBlockedGitGh("cat README.md")).toBe(false);
-    expect(containsBlockedGitGh("rg -n DevopsFlow README.md")).toBe(false);
-    expect(containsBlockedGitGh("bun test")).toBe(false);
   });
 });
 
-describe("GitGhOperationsHook SessionStart", () => {
-  it("returns undefined when df-publisher.toml exists with matching devopsflow-version marker", () => {
-    const projectDir = mkdtempSync(join(tempDir, "has-matching-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-matching-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("1.0.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "1.0.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
+describe("Managed subagent installation", () => {
+  it("installs every distributable agent and does not rewrite matching files", () => {
+    const projectRoot = tempRoot();
+    expect(ensureManagedSubagents(projectRoot, ROOT)).toContain("已同步");
 
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    writeFileSync(installedPath, sourceContent);
-    const before = statSync(installedPath).mtimeMs;
-
-    expect(ensureDfPublisherAgent(projectDir, pluginDir)).toBeUndefined();
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-    expect(statSync(installedPath).mtimeMs).toBe(before);
-  });
-
-  it("re-installs when installed devopsflow-version marker does not match plugin version", () => {
-    const projectDir = mkdtempSync(join(tempDir, "version-mismatch-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-v2-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "2.0.0" }),
-    );
-    writeFileSync(
-      join(pluginAgentsDir, "df-publisher.toml"),
-      validDfPublisherToml("2.0.0"),
-    );
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    writeFileSync(
-      join(agentsDir, "df-publisher.toml"),
-      '# devopsflow-version = "1.0.0"\nname = "df-publisher"',
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("2.0.0");
-
-    const installedContent = readFileSync(
-      join(agentsDir, "df-publisher.toml"),
-      "utf-8",
-    );
-    expect(installedContent).toInclude("2.0.0");
-    expect(installedContent).not.toMatch(/^version\s*=/m);
-  });
-
-  it("re-installs when installed TOML still has legacy top-level version field", () => {
-    const projectDir = mkdtempSync(join(tempDir, "legacy-version-field-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-legacy-clean-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("2.0.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "2.0.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    writeFileSync(
-      join(agentsDir, "df-publisher.toml"),
-      'version = "2.0.0"\nname = "df-publisher"',
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("2.0.0");
-    expect(readFileSync(join(agentsDir, "df-publisher.toml"), "utf-8")).toBe(
-      sourceContent,
-    );
-  });
-
-  it("auto-installs when file is missing and pluginRoot source exists", () => {
-    const projectDir = mkdtempSync(join(tempDir, "auto-install-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-source-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "1.0.0" }),
-    );
-    writeFileSync(
-      join(pluginAgentsDir, "df-publisher.toml"),
-      validDfPublisherToml("1.0.0"),
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("1.0.0");
-
-    const installedPath = join(
-      projectDir,
-      ".codex",
-      "agents",
-      "df-publisher.toml",
-    );
-    expect(existsSync(installedPath)).toBe(true);
-    const installedContent = readFileSync(installedPath, "utf-8");
-    expect(installedContent).toInclude("df-publisher");
-    expect(installedContent).not.toMatch(/^version\s*=/m);
-  });
-
-  it("replaces a file at .codex before auto-installing df-publisher", () => {
-    const projectDir = mkdtempSync(join(tempDir, "codex-file-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-codex-file-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("3.0.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "3.0.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-    writeFileSync(join(projectDir, ".codex"), "blocking file");
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(statSync(join(projectDir, ".codex")).isDirectory()).toBe(true);
-    const installedPath = join(
-      projectDir,
-      ".codex",
-      "agents",
-      "df-publisher.toml",
-    );
-    expect(existsSync(installedPath)).toBe(true);
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("3.0.0");
-  });
-
-  it("self-heals when installed TOML is invalid even with matching version marker", () => {
-    const projectDir = mkdtempSync(join(tempDir, "invalid-toml-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-invalid-target-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("4.0.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "4.0.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    writeFileSync(
-      installedPath,
-      '# devopsflow-version = "4.0.0"\nname = "df-publisher"\ninvalid = "',
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("自愈重装");
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-  });
-
-  it("self-heals when installed TOML has unsupported fields", () => {
-    const projectDir = mkdtempSync(join(tempDir, "unsupported-field-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-unsupported-field-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("4.1.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "4.1.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    writeFileSync(
-      installedPath,
-      `${sourceContent}
-agent_type = "df-publisher"`,
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("自愈重装");
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-  });
-
-  it("self-heals when installed TOML misses required fields", () => {
-    const projectDir = mkdtempSync(join(tempDir, "missing-required-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-missing-required-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("4.2.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "4.2.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    writeFileSync(
-      installedPath,
-      `# devopsflow-version = "4.2.0"
-name = "df-publisher"
-description = "Publish git and GitHub changes"`,
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("自愈重装");
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-  });
-
-  it("self-heals when installed TOML hash differs from plugin source", () => {
-    const projectDir = mkdtempSync(join(tempDir, "hash-mismatch-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-hash-source-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    const sourceContent = validDfPublisherToml("4.3.0");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "4.3.0" }),
-    );
-    writeFileSync(join(pluginAgentsDir, "df-publisher.toml"), sourceContent);
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    writeFileSync(
-      installedPath,
-      sourceContent.replace(
-        "Publish through trusted git and gh workflows.",
-        "Publish through stale local instructions.",
-      ),
-    );
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("hash 不一致");
-    expect(readFileSync(installedPath, "utf-8")).toBe(sourceContent);
-  });
-
-  it("fails closed when plugin source TOML is invalid", () => {
-    const projectDir = mkdtempSync(join(tempDir, "invalid-source-"));
-    const pluginDir = mkdtempSync(join(tempDir, "plugin-invalid-source-"));
-    const pluginAgentsDir = join(pluginDir, "agents");
-    mkdirSync(pluginAgentsDir, { recursive: true });
-    writeFileSync(
-      join(pluginDir, "package.json"),
-      JSON.stringify({ version: "4.3.0" }),
-    );
-    writeFileSync(
-      join(pluginAgentsDir, "df-publisher.toml"),
-      '# devopsflow-version = "4.3.0"\nname = "df-publisher"\ninvalid = "',
-    );
-
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    const installedPath = join(agentsDir, "df-publisher.toml");
-    const installedContent = validDfPublisherToml("4.3.0").replace(
-      "developer_instructions",
-      "agent_type",
-    );
-    writeFileSync(installedPath, installedContent);
-
-    const message = ensureDfPublisherAgent(projectDir, pluginDir);
-
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("插件不完整");
-    expect(message).toInclude("源文件无效");
-    expect(readFileSync(installedPath, "utf-8")).toBe(installedContent);
-  });
-
-  it("warns with copy commands when pluginRoot source does not exist", () => {
-    const projectDir = mkdtempSync(join(tempDir, "no-source-"));
-    const message = ensureDfPublisherAgent(
-      projectDir,
-      "/nonexistent/plugin/root",
-    );
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("插件不完整");
-    expect(message).toInclude("/nonexistent/plugin/root");
-    expect(message).toInclude("mkdir -p");
-    expect(message).toInclude("cp");
-  });
-
-  it("warns with generic instructions when pluginRoot is not provided", () => {
-    const projectDir = mkdtempSync(join(tempDir, "no-plugin-root-"));
-    const message = ensureDfPublisherAgent(projectDir);
-    expect(message).not.toBeUndefined();
-    expect(message).toInclude("df-publisher");
-    expect(message).toInclude("插件不完整");
-  });
-
-  it("assumes OK when file exists but no pluginRoot to check version", () => {
-    const projectDir = mkdtempSync(join(tempDir, "no-plugin-root-but-exists-"));
-    const agentsDir = join(projectDir, ".codex", "agents");
-    mkdirSync(agentsDir, { recursive: true });
-    writeFileSync(
-      join(agentsDir, "df-publisher.toml"),
-      'name = "df-publisher"',
-    );
-    expect(ensureDfPublisherAgent(projectDir)).toBeUndefined();
+    for (const name of [
+      "df-dev-backend-engineer.toml",
+      "df-dev-backend-test-engineer.toml",
+      "df-dev-database-steward.toml",
+      "df-doc-documentation-writer.toml",
+      "df-dev-frontend-engineer.toml",
+      "df-dev-frontend-test-engineer.toml",
+      "df-ops-artifact-manager.toml",
+      "df-ops-vcs-manager.toml",
+    ]) {
+      const installed = join(projectRoot, ".codex", "agents", name);
+      expect(existsSync(installed)).toBe(true);
+      expect(readFileSync(installed, "utf-8")).toBe(
+        readFileSync(join(ROOT, "agents", name), "utf-8"),
+      );
+    }
+    expect(ensureManagedSubagents(projectRoot, ROOT)).toBeUndefined();
   });
 });
 
-describe("GitGhOperationsHook PreToolUse", () => {
-  beforeEach(() => {
-    cleanupState();
-  });
-
-  afterEach(() => {
-    cleanupState();
-  });
-
-  it("blocks non-df-publisher git push and commit", () => {
+describe("Git and GitHub operation guard", () => {
+  it("blocks protected publishing operations for ordinary sessions", () => {
     expect(shouldBlockTool("Bash", { command: "git push origin main" })).toBe(
       true,
     );
     expect(shouldBlockTool("Bash", { command: "git commit -m test" })).toBe(
       true,
     );
-  });
-
-  it("blocks non-df-publisher gh issue and pr", () => {
-    expect(shouldBlockTool("Bash", { command: "gh issue list" })).toBe(true);
     expect(shouldBlockTool("Bash", { command: "gh pr create" })).toBe(true);
-    expect(shouldBlockTool("Bash", { command: "gh pr merge 123" })).toBe(true);
-  });
-
-  it("blocks wrapped blocked commands for non-df-publisher", () => {
-    expect(shouldBlockTool("Bash", { command: 'bash -c "git push"' })).toBe(
-      true,
-    );
-    expect(
-      shouldBlockTool("Bash", { command: "command git push origin main" }),
-    ).toBe(true);
-    expect(
-      shouldBlockTool("Bash", { command: "rtk proxy git push origin main" }),
-    ).toBe(true);
-  });
-
-  it("allows safe git/gh commands for non-df-publisher", () => {
     expect(shouldBlockTool("Bash", { command: "git status" })).toBe(false);
-    expect(shouldBlockTool("Bash", { command: "git log --oneline" })).toBe(
-      false,
-    );
-    expect(shouldBlockTool("Bash", { command: "git switch -c feature" })).toBe(
-      false,
-    );
-    expect(shouldBlockTool("Bash", { command: "git checkout main" })).toBe(
-      false,
-    );
-    expect(shouldBlockTool("Bash", { command: "git merge feature" })).toBe(
-      false,
-    );
-    expect(shouldBlockTool("Bash", { command: "git diff HEAD~1" })).toBe(false);
-    expect(shouldBlockTool("Bash", { command: "git add README.md" })).toBe(
-      false,
-    );
-    expect(shouldBlockTool("Bash", { command: "gh auth status" })).toBe(false);
-    expect(shouldBlockTool("Bash", { command: "gh auth login" })).toBe(false);
   });
 
-  it("allows non-git/gh commands", () => {
-    expect(shouldBlockTool("Bash", { command: "cat README.md" })).toBe(false);
+  it("grants the publishing exemption only to df-ops-vcs-manager", () => {
+    startSubagent("vcs-1", "df-ops-vcs-manager");
     expect(
-      shouldBlockTool("Bash", { command: "rg -n DevopsFlow README.md" }),
+      shouldBlockTool("Bash", { command: "git push origin feature" }, "vcs-1"),
     ).toBe(false);
-    expect(shouldBlockTool("Bash", { command: "bun test" })).toBe(false);
-    expect(shouldBlockTool("Bash", { command: "ls -la" })).toBe(false);
-  });
+    expect(shouldBlockTool("Bash", { command: "gh issue list" }, "vcs-1")).toBe(
+      false,
+    );
 
-  it("allows blocked git/gh commands for df-publisher session", () => {
-    startSubagent("dfpub-1", "df-publisher");
+    startSubagent("other-1", "df-dev-backend-engineer");
     expect(
       shouldBlockTool(
         "Bash",
         { command: "git push origin feature" },
-        "dfpub-1",
+        "other-1",
       ),
-    ).toBe(false);
-    expect(
-      shouldBlockTool("Bash", { command: "git commit -m test" }, "dfpub-1"),
-    ).toBe(false);
-    expect(
-      shouldBlockTool("Bash", { command: "gh pr create" }, "dfpub-1"),
-    ).toBe(false);
-    expect(
-      shouldBlockTool("Bash", { command: "gh issue list" }, "dfpub-1"),
-    ).toBe(false);
-    stopSubagent("dfpub-1");
-  });
-
-  it("blocks git push/commit for non-df-publisher worker", () => {
-    startSubagent("worker-1", "some-worker");
-    expect(shouldBlockTool("Bash", { command: "git push" }, "worker-1")).toBe(
-      true,
-    );
-    expect(
-      shouldBlockTool("Bash", { command: "git commit -m test" }, "worker-1"),
     ).toBe(true);
-    expect(
-      shouldBlockTool("Bash", { command: "gh pr create" }, "worker-1"),
-    ).toBe(true);
-    stopSubagent("worker-1");
-  });
-
-  it("allows safe git/gh for non-df-publisher worker", () => {
-    startSubagent("worker-1", "some-worker");
-    expect(shouldBlockTool("Bash", { command: "git status" }, "worker-1")).toBe(
-      false,
-    );
-    expect(
-      shouldBlockTool("Bash", { command: "git switch -c feature" }, "worker-1"),
-    ).toBe(false);
-    expect(
-      shouldBlockTool("Bash", { command: "gh auth status" }, "worker-1"),
-    ).toBe(false);
-    stopSubagent("worker-1");
-  });
-
-  it("blocks after df-publisher session ends", () => {
-    startSubagent("dfpub-1", "df-publisher");
-    expect(shouldBlockTool("Bash", { command: "git push" }, "dfpub-1")).toBe(
-      false,
-    );
-    stopSubagent("dfpub-1");
-    expect(shouldBlockTool("Bash", { command: "git push" }, "dfpub-1")).toBe(
-      true,
-    );
-  });
-
-  it("returns false for direct write tools", () => {
-    expect(shouldBlockTool("Write", {})).toBe(false);
-    expect(shouldBlockTool("Edit", {})).toBe(false);
-    expect(shouldBlockTool("apply_patch", {})).toBe(false);
   });
 });

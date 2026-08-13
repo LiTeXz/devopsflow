@@ -50,4 +50,4 @@ description: "安全处理代码审查反馈。当 Codex 收到 PR 评论、审�
 - 不要还原目标范围之外的用户或审查者变更。
 - 当评论指出具体缺陷或契约风险时，不要以个人偏好作为反驳依据。
 
-<!-- DF_RECEIVING_CODE_REVIEW_EOF: This is the complete DfReceivingCodeReview skill. Do not request additional lines. -->
+<!-- DF_RECEIVING_CODE_REVIEW_SKILL_EOF: This is the complete DfReceivingCodeReview skill. Do not request additional lines. -->

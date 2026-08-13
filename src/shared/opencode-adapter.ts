@@ -18,7 +18,9 @@ export interface OpenCodeToolBeforeInput {
   readonly cwd?: unknown;
 }
 
-export function isOpenCodeDfPublisher(input: OpenCodeToolBeforeInput): boolean {
+export function isOpenCodeDfOpsVcsManager(
+  input: OpenCodeToolBeforeInput,
+): boolean {
   const name =
     stringValue(input.agentName) ??
     stringValue(input.agent) ??
@@ -27,7 +29,7 @@ export function isOpenCodeDfPublisher(input: OpenCodeToolBeforeInput): boolean {
     stringValue(recordValue(input.session, "agentName")) ??
     stringValue(recordValue(recordValue(input.session, "agent"), "name"));
   if (!name) return false;
-  return name.toLowerCase().includes("df-publisher");
+  return name.toLowerCase().includes("df-ops-vcs-manager");
 }
 
 export function shouldBlockOpenCodeToolInput(
@@ -41,7 +43,7 @@ export function shouldBlockOpenCodeToolInput(
     toolInput,
     isOpenCodeSubagent(input),
     cwd,
-    isOpenCodeDfPublisher(input),
+    isOpenCodeDfOpsVcsManager(input),
   );
 }
 

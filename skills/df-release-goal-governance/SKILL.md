@@ -89,4 +89,4 @@ PR 或最终 handoff 前，报告：
 - verification command 与 exit code
 - incomplete item 或 blocker
 
-<!-- DF_RELEASE_GOAL_GOVERNANCE_EOF: This is the complete DfReleaseGoalGovernance skill. Do not request additional lines. -->
+<!-- DF_RELEASE_GOAL_GOVERNANCE_SKILL_EOF: This is the complete DfReleaseGoalGovernance skill. Do not request additional lines. -->

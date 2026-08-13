@@ -198,9 +198,9 @@ describe("prompt language", () => {
     }
   });
 
-  it("uses Chinese for publisher instructions", () => {
+  it("uses Chinese for VCS manager instructions", () => {
     expect(
-      englishProseLines(join(ROOT, "agents", "df-publisher.toml")),
+      englishProseLines(join(ROOT, "agents", "df-ops-vcs-manager.toml")),
     ).toEqual([]);
   });
 });

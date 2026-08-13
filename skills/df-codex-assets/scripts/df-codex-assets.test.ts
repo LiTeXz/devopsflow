@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
+  AGENT_TOML_PATHS,
   checkManagedAssetHash,
   computeManagedAssetHash,
   DEFAULT_REPOSITORY,
@@ -97,12 +98,10 @@ describe("df-codex-assets", () => {
     for (const command of commands ?? []) expect(command).not.toMatch(/^\w+=/);
   });
 
-  it("injects df-publisher into the SessionStart project after hydration", async () => {
+  it("injects every managed subagent into the SessionStart project after hydration", async () => {
     const pluginRoot = tempRoot();
     const projectRoot = tempRoot();
-    writeManagedAssets(pluginRoot, {
-      "agents/df-publisher.toml": 'name = "df-publisher"\n',
-    });
+    writeManagedAssets(pluginRoot);
     writeStoredHash(pluginRoot, computeManagedAssetHash(pluginRoot));
     process.env.PLUGIN_ROOT = pluginRoot;
 
@@ -112,12 +111,11 @@ describe("df-codex-assets", () => {
     });
 
     expect(exitCode).toBe(0);
-    expect(
-      readFileSync(
-        join(projectRoot, ".codex", "agents", "df-publisher.toml"),
-        "utf-8",
-      ),
-    ).toBe('name = "df-publisher"\n');
+    for (const path of AGENT_TOML_PATHS) {
+      expect(readFileSync(join(projectRoot, ".codex", path), "utf-8")).toBe(
+        `${path}\n`,
+      );
+    }
   });
 
   it("creates the managed project gitignore from the plugin template", async () => {
@@ -301,8 +299,20 @@ describe("df-codex-assets", () => {
     expect(mismatch?.storedHash).toBe("old-hash");
     expect(mismatch?.correctHash).toMatch(/^[a-f0-9]{64}$/);
     expect(mismatch?.updateCommand).toBe(
-      "bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > skills/df-codex-assets/assets/hash.txt",
+      "bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > skills/df-codex-assets/assets/all.lock",
     );
+  });
+
+  it("keeps the staged managed asset lock under Husky control", () => {
+    const preCommit = readFileSync(
+      join(import.meta.dir, "..", "..", "..", ".husky", "pre-commit"),
+      "utf-8",
+    );
+
+    expect(preCommit).toContain(
+      "bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged",
+    );
+    expect(preCommit).not.toContain("all.lock");
   });
 
   it("prints check mismatch details from the CLI", async () => {
@@ -383,7 +393,7 @@ describe("df-codex-assets", () => {
           new Response("missing", { status: 404 })) as FetchLike,
         tagExists: async () => true,
       }),
-    ).rejects.toThrow("Failed to download agents/df-publisher.toml");
+    ).rejects.toThrow(`Failed to download ${AGENT_TOML_PATHS[0]}`);
   });
 
   it("fails closed when hydrated assets do not match the stored hash", async () => {

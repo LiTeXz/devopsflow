@@ -28,7 +28,7 @@ import {
   SHELL_TOOL_NAMES,
 } from "@/shared/payload";
 import { runLoggedScript } from "@/shared/script-logger";
-import { isDfPublisherSession } from "@/shared/state-store";
+import { isDfOpsVcsManagerSession } from "@/shared/state-store";
 import type { Payload, ToolInput } from "@/shared/types";
 import { type BlockDecision, createBlockDecision } from "@/shared/types";
 
@@ -216,7 +216,9 @@ function main(payload: Payload | null = readPayload()): number {
   const cwd = findWorkdir(payload, toolInput);
   const hookEvent = findHookEvent(payload);
   const sessionId = findSessionId(payload);
-  const isDfPublisher = sessionId ? isDfPublisherSession(sessionId) : false;
+  const isDfOpsVcsManager = sessionId
+    ? isDfOpsVcsManagerSession(sessionId)
+    : false;
 
   if (SESSION_HOOK_NAMES.has(hookEvent)) {
     const decision = shouldBlockSessionStart(cwd);
@@ -236,7 +238,7 @@ function main(payload: Payload | null = readPayload()): number {
     return 0;
   }
 
-  const decision = shouldBlockTool(toolName, toolInput, cwd, isDfPublisher);
+  const decision = shouldBlockTool(toolName, toolInput, cwd, isDfOpsVcsManager);
   if (decision) {
     writeBlockMessage(decision);
     return 2;
