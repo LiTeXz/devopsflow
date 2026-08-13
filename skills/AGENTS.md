@@ -1,4 +1,4 @@
-<!-- BEGIN skills/AGENTS.md -->
+<!-- BEGIN:skills/AGENTS.md -->
 
 # skills/AGENTS.md
 
@@ -24,4 +24,4 @@
 ```bash
 bun run check:skill-metadata
 ```
-<!-- END skills/AGENTS.md -->
+<!-- END:skills/AGENTS.md -->
