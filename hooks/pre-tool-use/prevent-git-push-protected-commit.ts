@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
 
-import { currentBranch, PROTECTED_BRANCHES } from '@/shared/branch'
+import { currentBranch } from '@/shared/branch'
 import { binaryName, commandSegments, extractWrappedScript, gitEffectiveCwd, gitSubcommand, normalizeCommandPrefix } from '@/shared/command-parser'
 import { findCommand, findToolInput, findToolName, findWorkdir, PRE_TOOL_USE_EVENTS, readPayload, SHELL_TOOL_NAMES } from '@/shared/payload'
 import { runLoggedScript } from '@/shared/script-logger'
 import type { Payload } from '@/shared/types'
 
 export interface GitMutationDecision {
-  readonly kind: 'push' | 'commit'
+  readonly kind: 'push' | 'commit' | 'hook-bypass'
   readonly branch: string
 }
 
 export function shouldBlockGitMutation(command: string, cwd: string): GitMutationDecision | undefined {
+  if (disablesLocalGitHooks(command)) return { kind: 'hook-bypass', branch: '*' }
+
   for (const segment of commandSegments(command)) {
     const tokens = normalizeCommandPrefix(segment)
     if (!tokens.length) continue
@@ -21,26 +23,55 @@ export function shouldBlockGitMutation(command: string, cwd: string): GitMutatio
       if (wrappedDecision) return wrappedDecision
     }
     if (binaryName(tokens[0]) !== 'git') continue
+
     const subcommand = gitSubcommand(tokens.slice(1))
     if (subcommand === 'push') return { kind: 'push', branch: '*' }
-    if (subcommand !== 'commit') continue
-
-    const branchCwd = gitEffectiveCwd(tokens, cwd)
-    const branch = currentBranch(branchCwd)
-    if (branch && PROTECTED_BRANCHES.has(branch)) {
-      return { kind: 'commit', branch }
-    }
+    if (subcommand === 'commit') return { kind: 'commit', branch: currentBranch(gitEffectiveCwd(tokens, cwd)) ?? '*' }
   }
   return undefined
 }
 
+function disablesLocalGitHooks(command: string): boolean {
+  if (/(?:^|\s)\$env:HUSKY(?:_SKIP_HOOKS)?\s*=\s*['"]?(?:0|1)['"]?/i.test(command)) return true
+  if (/(?:^|\s)\$env:LEFTHOOK\s*=\s*['"]?0['"]?/i.test(command)) return true
+
+  const tokens = commandSegments(command).flat()
+  if (
+    tokens.some(
+      (token) =>
+        token === 'HUSKY=0' ||
+        token === 'HUSKY_SKIP_HOOKS=1' ||
+        token === 'LEFTHOOK=0' ||
+        token.startsWith('LEFTHOOK_EXCLUDE=') ||
+        token.startsWith('LEFTHOOK_ONLY='),
+    )
+  ) {
+    return true
+  }
+
+  return commandSegments(command).some((segment) => {
+    const normalized = normalizeCommandPrefix(segment)
+    if (binaryName(normalized[0] ?? '') !== 'git' || gitSubcommand(normalized.slice(1)) !== 'commit') return false
+    return normalized.some(
+      (token, index) =>
+        token === '--no-verify' ||
+        token === '-n' ||
+        (token === '-c' && normalized[index + 1]?.startsWith('core.hooksPath=')) ||
+        token.startsWith('-ccore.hooksPath=') ||
+        token.startsWith('--config=core.hooksPath='),
+    )
+  })
+}
+
 function writeBlockMessage(decision: GitMutationDecision): void {
   if (decision.kind === 'push') {
-    console.error('DevopsFlow 已阻止 Agent 执行 push；任何分支都必须由用户人工推送。')
+    console.error('DevopsFlow 已阻止 Agent 执行 git push；任何分支都必须由用户手动推送。')
+  } else if (decision.kind === 'hook-bypass') {
+    console.error('DevopsFlow 已阻止跳过本地 Git hooks 的命令。Husky 和 Lefthook 检查是必要流程，不能使用 --no-verify、-n 或关闭 hook 的环境变量绕过。')
   } else {
-    console.error(`DevopsFlow 已阻止 Agent 在受保护分支 ${decision.branch} 上执行 commit。`)
+    console.error('DevopsFlow 已阻止 Agent 执行 git commit；本地 hooks 检查完成后，请由用户手动提交。')
   }
-  console.error('请提醒用户先审查当前代码，再由用户逐个手动提交；不要把 commit 或 push 委托给 Agent。')
+  console.error('请提醒用户先审查当前代码并完成必要的本地 hooks 检查，再由用户手动 commit 和 push；Agent 不能跳过这些检查。')
 }
 
 function main(payload: Payload | null = readPayload()): number {

@@ -39,14 +39,32 @@ describe('PreToolUse Git mutation guard', () => {
     })
   }
 
-  it('allows commit on a feature branch and read-only Git commands', () => {
+  it('blocks commits on a feature branch and allows read-only Git commands', () => {
     const cwd = repo('feature/demo')
-    expect(shouldBlockGitMutation('git commit -m test', cwd)).toBeUndefined()
+    expect(shouldBlockGitMutation('git commit -m test', cwd)).toMatchObject({ branch: 'feature/demo', kind: 'commit' })
     expect(shouldBlockGitMutation('git status --short', cwd)).toBeUndefined()
     expect(shouldBlockGitMutation('gh pr create', cwd)).toBeUndefined()
   })
 
-  it('uses git -C when determining the commit target branch', () => {
+  it('blocks Husky and Lefthook bypasses before the Git command runs', () => {
+    const cwd = repo('feature/demo')
+
+    for (const command of [
+      'git commit --no-verify -m test',
+      'git commit -n -m test',
+      'HUSKY=0 git commit -m test',
+      'LEFTHOOK=0 git commit -m test',
+      'LEFTHOOK_EXCLUDE=pre-commit git commit -m test',
+      'git -c core.hooksPath=/dev/null commit -m test',
+      'bash -c "HUSKY=0 git status --short"',
+      '$env:HUSKY = "0"; git commit -m test',
+      '$env:LEFTHOOK = "0"; git commit -m test',
+    ]) {
+      expect(shouldBlockGitMutation(command, cwd)).toMatchObject({ kind: 'hook-bypass' })
+    }
+  })
+
+  it('uses git -C when determining the blocked commit branch', () => {
     const root = repo('feature/root')
     const protectedRepo = join(root, 'protected')
     mkdirSync(protectedRepo)
@@ -54,7 +72,7 @@ describe('PreToolUse Git mutation guard', () => {
     expect(shouldBlockGitMutation(`git -C "${protectedRepo}" commit -m test`, root)).toMatchObject({ branch: 'master', kind: 'commit' })
   })
 
-  it('returns exit code 2 and tells the user to review and commit manually', () => {
+  it('returns exit code 2 and tells the user to run local hooks before committing manually', () => {
     const cwd = repo('main')
     const payload = JSON.stringify({
       cwd,
@@ -72,7 +90,7 @@ describe('PreToolUse Git mutation guard', () => {
       stderr: 'pipe',
     })
     expect(result.exitCode).toBe(2)
-    expect(result.stderr.toString()).toContain('审查当前代码')
-    expect(result.stderr.toString()).toContain('逐个手动提交')
+    expect(result.stderr.toString()).toContain('本地 hooks 检查')
+    expect(result.stderr.toString()).toContain('手动 commit 和 push')
   })
 })
