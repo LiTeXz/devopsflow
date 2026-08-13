@@ -1,4 +1,4 @@
 interface:
   display_name: "Systematic Debugging"
-  short_description: "面向测试失败、生产缺陷、回归、flaky 行为或根因不清问题的证据驱动调试工作流。当 Codex 必须复现问题、定位最早错误点、添加观察或最小测试、识别根因证据、每次修复一个原因，并在完成前添加回归覆盖时使用。"
-  default_prompt: "使用 $df-systematic-debugging 复现失败、收集证据、查明根因，并通过回归覆盖完成修复。"
+  short_description: "面向 tests 失败, 生产缺陷, 回归, flaky 行为 or 根因不清问题的证据 driven debugging workflow. 当 Codex 必须复现问题, 定位最早错误点, 添加观察 or 最小 tests, 识别根因证据, 每次 fix 1 个原因, 并在完成前添加回归覆盖时使用."
+  default_prompt: "使用 $df-systematic-debugging 复现失败, 收集证据, 查明根因, 并 passed 回归覆盖完成 fix."

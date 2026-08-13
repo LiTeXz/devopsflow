@@ -1,4 +1,4 @@
 interface:
   display_name: "Parallel Agent Orchestration"
-  short_description: "为工程任务规划安全的并行 agent 工作。当独立模块、计划审查、实现、验证或代码审查可在文件所有权互不重叠的上下文中运行，或需要全新审查上下文以避免复杂工作中的自我确认时使用。"
-  default_prompt: "使用 $df-parallel-agent-orchestration 将独立工程工作拆分为互不重叠的 agent 任务。"
+  short_description: "为工程 task 规划安全的并行 agent work. 当独立 module, 计划审查, implementation, 验证 or code 审查可在 file 所有权互不重叠的 context 中 run, or 需要全新审查 context 以避免复杂 work 中的自我确认时使用."
+  default_prompt: "使用 $df-parallel-agent-orchestration 将独立工程 work 拆分为互不重叠的 agent task."

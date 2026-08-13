@@ -88,7 +88,7 @@ describe("TDD Workflow Instructions", () => {
     expect(skill).toContain("as const satisfies TddWorkflowState");
     expect(skill).toContain("update_plan");
     expect(skill).toContain("todolist");
-    expect(skill).toContain("只有一个 `in_progress`");
+    expect(skill).toContain("只有 1 个 `in_progress`");
   });
 
   it("formats every TypeScript definition as a documented standalone block", () => {

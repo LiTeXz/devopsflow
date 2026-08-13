@@ -55,6 +55,9 @@ function promptFiles(directory: string): string[] {
 function englishProseLines(path: string): string[] {
   const violations: string[] = [];
   let ignoredFence = false;
+  const isVocabularyDictionary = path.endsWith(
+    join("df-ai-agentinstruction-authoring", "dictionary", "vocabulary.yaml"),
+  );
 
   for (const [index, rawLine] of readFileSync(path, "utf-8")
     .split(/\r?\n/)
@@ -79,9 +82,11 @@ function englishProseLines(path: string): string[] {
       /^---$/.test(line) ||
       /^<!--.*-->$/.test(line) ||
       /^name:\s/.test(line) ||
+      (isVocabularyDictionary && /^\s*to:\s/.test(rawLine)) ||
       /^\s*run:\s/.test(rawLine) ||
       /^\s*display_name:\s/.test(rawLine) ||
       /^\s*[a-z_]+:\s*"[A-Za-z0-9_.-]+"\s*$/.test(rawLine) ||
+      /^\s*[a-z_]+:\s*\[(?:"[A-Za-z0-9_. -]+"(?:,\s*)?)+\]\s*$/.test(rawLine) ||
       /^\s*[A-Za-z][A-Za-z0-9 /+.-]*:\s*$/.test(rawLine) ||
       /^(?:https?:\/\/|[A-Za-z]:\\)/.test(line)
     ) {

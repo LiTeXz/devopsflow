@@ -1,4 +1,4 @@
 interface:
   display_name: "Glue Coding"
-  short_description: "面向 AI 实现的 Glue Coding 工作流，应复用本地项目材料，同时避免盲目复制旧结构。在领域歧义已解决或被声明为很薄后、实施规划或编码前使用，适用于与现有 CRUD 页面、列表/表单/详情界面、导入/导出、端点、adapter、command handler、projection、测试、配置、重构、迁移、现代化或其他可重复项目 pattern 相似的任务。此 skill 会发现本地 style pack、参考代码、示例、文档、AGENTS.md 规则和附近的生产实现，将其归类为 target pattern、legacy pattern、anti-pattern 或 behavior evidence，保留正确约定，并将新代码限制在预期差异内。"
-  default_prompt: "在领域结论清晰后使用 $df-glue-coding，查找本地代码 pattern，保留项目约定，并只实现必要差异。"
+  short_description: "面向 AI implementation 的 Glue Coding workflow, 应复用 local project 材料, 同时避免盲目复制旧结构. 在 domain 歧义已解决 or 被声明为很薄后, 实施规划 or code 前使用, 适用于 and 现有 CRUD 页面, 列表/表单/详情界面, import/导出, 端点, adapter, command handler, projection, tests, 配置, refactor, 迁移, 现代化 or other 可重复 project pattern 相似的 task. 此 skill 会发现 local style pack, 参考 code, example, 文档, AGENTS.md rule and 附近的生产 implementation, 将其归类为 target pattern, legacy pattern, anti-pattern or behavior evidence, 保留正确约定, 并将新 code 限制在预期差异内."
+  default_prompt: "在 domain 结论清晰后使用 $df-glue-coding, 查找 local code pattern, 保留 project 约定, 并只 implementation 必要差异."

@@ -1,4 +1,4 @@
 interface:
   display_name: "Release Goal Governance"
-  short_description: "创建、更新、执行或关闭 GitHub milestone、release plan、release checklist、tagged release、goal/roadmap issue set、deployment-proof workflow、failure review 或 process feedback loop 时使用；这些工作必须保持 issue scope、milestone description、Mermaid diagram、draw.io diagram、template 和 workflow skill 一致。"
-  default_prompt: "使用 $df-release-goal-governance 管理 release、milestone 或 goal governance。"
+  short_description: "create, update, execution or 关闭 GitHub milestone, release plan, release check list, tagged release, goal/roadmap issue set, deployment-proof workflow, failure review or process feedback loop 时使用; 这些 work 必须保持 issue scope, milestone description, Mermaid diagram, draw.io diagram, template and workflow skill consistent."
+  default_prompt: "使用 $df-release-goal-governance 管理 release, milestone or goal governance."

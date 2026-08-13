@@ -1,47 +1,47 @@
 ---
 name: df-parallel-agent-orchestration
-description: "为工程任务规划安全的并行 agent 工作。当独立模块、计划审查、实现、验证或代码审查可在文件所有权互不重叠的上下文中运行，或需要全新审查上下文以避免复杂工作中的自我确认时使用。"
+description: "为工程 task 规划安全的并行 agent work. 当独立 module, 计划审查, implementation, 验证 or code 审查可在 file 所有权互不重叠的 context 中 run, or 需要全新审查 context 以避免复杂 work 中的自我确认时使用."
 ---
 
 # Parallel Agent Orchestration
 
-仅当并行处理可以降低风险或缩短周期时，才使用此 skill 拆分工作。
+仅当并行处理可以降低风险 or 缩短周期时, 才使用此 skill 拆分 work.
 
 ## Use Parallel Agents For
 
-- 文件互不重叠的独立模块
-- 相互独立的只读代码库问题
-- 实现准备继续进行时开展计划审查
-- 实现完成后使用全新上下文进行代码审查
-- 可与另一项独立任务同时运行的验证
+- file 互不重叠的独立 module
+- 相互独立的只读 code 库问题
+- implementation ready 继续进行时开展计划审查
+- implementation 完成后使用全新 context 进行 code 审查
+- 可 and other item 独立 task 同时 run 的验证
 
 ## Do Not Split When
 
-- 下一个本地步骤受该结果阻塞
-- 文件所有权大量重叠
-- 任务要求一次连贯的编辑
-- 子任务需要提示词中没有的隐藏上下文
-- 简短的本地检查会更快
+- 后续 local 步骤受该 result 阻塞
+- file 所有权大量重叠
+- task 要求 once 连贯的 edit
+- 子 task 需要 prompt 中没有的隐藏 context
+- 简短的 local check 会更快
 
 ## Delegation Contract
 
-每项委派任务必须包含：
+每项委派 task 必须 include:
 
-- 目标
-- agent 所有的文件或模块
-- 禁止触碰的文件或模块
-- 预期输出
-- 验证命令或证据
-- 不得还原他人编辑的指令
-- 报告变更文件路径的指令
+- target
+- agent 所有的 file or module
+- 禁止触碰的 file or module
+- 预期 output
+- 验证命令 or 证据
+- 不得还原他人 edit 的指令
+- 报告 change file 路径的指令
 
 ## Coordination Rules
 
-- 当 worker 拥有某个范围时，规划者不在该范围内进行大范围实现。
-- Worker 执行有边界的任务，并适应现有变更。
-- Reviewer 使用全新上下文，聚焦缺陷、回归和测试缺口。
-- 并行实现任务的写入集合必须互不相交。
-- 集成负责人解决冲突并运行最终验证。
+- 当 worker 拥有某个范围时, 规划者不在该范围内进行大范围 implementation.
+- Worker execution 有边界的 task, 并适应现有 change.
+- Reviewer 使用全新 context, 聚焦缺陷, 回归 and tests 缺口.
+- 并行 implementation task 的 write 集合必须互不相交.
+- integration 负责人解决冲突并 run 最终验证.
 
 ## Output Format
 

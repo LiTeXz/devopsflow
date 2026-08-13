@@ -1,9 +1,13 @@
 #!/usr/bin/env bun
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join, relative } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { basename, relative } from "node:path";
+import { findGovernedFiles, normalizedPath } from "./instruction-files";
+import {
+  findNormalizationIssues,
+  normalizeInstructionText,
+} from "./normalize-agent-instructions";
 
-const AGENT_INSTRUCTION_EXTENSION = /\.(?:json|md|toml|ya?ml)$/i;
 const HEADING_PATTERN = /^(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/;
 const HAN_PATTERN = /\p{Script=Han}/u;
 
@@ -21,10 +25,6 @@ interface Heading {
   line: number;
   level: number;
   title: string;
-}
-
-function normalizedPath(path: string): string {
-  return path.replaceAll("\\", "/");
 }
 
 function hasHanCharacters(content: string): boolean {
@@ -106,19 +106,6 @@ function validateAgentWrappers(
   return violations;
 }
 
-function isGovernedFile(relativePath: string): boolean {
-  if (basename(relativePath) === "AGENTS.md") return true;
-  if (
-    relativePath.startsWith("agents/") &&
-    AGENT_INSTRUCTION_EXTENSION.test(relativePath)
-  ) {
-    return true;
-  }
-  if (!relativePath.startsWith("skills/")) return false;
-  if (relativePath.endsWith("/SKILL.md")) return true;
-  return /\/agents\/.+\.(?:json|md|toml|ya?ml)$/i.test(relativePath);
-}
-
 function validatePortableContext(
   path: string,
   relativePath: string,
@@ -154,31 +141,24 @@ function validatePortableContext(
   return violations;
 }
 
-export function findGovernedFiles(projectRoot: string): string[] {
-  if (!existsSync(projectRoot) || !statSync(projectRoot).isDirectory())
-    return [];
-  const governedFiles: string[] = [];
-  const ignoredDirectories = new Set([".git", "node_modules"]);
-
-  function visit(directory: string): void {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      if (entry.isDirectory()) {
-        if (!ignoredDirectories.has(entry.name))
-          visit(join(directory, entry.name));
-        continue;
-      }
-      if (!entry.isFile()) continue;
-      const path = join(directory, entry.name);
-      const relativePath = normalizedPath(relative(projectRoot, path));
-      if (isGovernedFile(relativePath)) governedFiles.push(path);
-    }
+function validateNormalizedProse(
+  path: string,
+  content: string,
+): AuthoringViolation[] {
+  const violations = findNormalizationIssues(content).map((issue) => ({
+    path,
+    message: issue.message,
+  }));
+  if (normalizeInstructionText(content) !== content) {
+    violations.push({
+      path,
+      message: "instruction prose requires dictionary normalization",
+    });
   }
-
-  visit(projectRoot);
-  return governedFiles.sort((firstPath, secondPath) =>
-    firstPath.localeCompare(secondPath),
-  );
+  return violations;
 }
+
+export { findGovernedFiles } from "./instruction-files";
 
 export function validateProjectAuthoring(
   projectRoot: string,
@@ -191,6 +171,7 @@ export function validateProjectAuthoring(
   for (const path of findGovernedFiles(projectRoot)) {
     const content = readFileSync(path, "utf-8");
     violations.push(...validateHeadings(path, content));
+    violations.push(...validateNormalizedProse(path, content));
     const relativePath = normalizedPath(relative(projectRoot, path));
     violations.push(...validatePortableContext(path, relativePath, content));
     if (basename(relativePath) === "AGENTS.md") {
@@ -212,6 +193,7 @@ export function validateGlobalAgentsFile(
   const content = readFileSync(globalAgentsPath, "utf-8");
   const displayName = basename(globalAgentsPath);
   const violations = validateHeadings(globalAgentsPath, content);
+  violations.push(...validateNormalizedProse(globalAgentsPath, content));
   const expectedStart = "<!-- BEGINE_GLOBAL:~/.codex/ -->";
   const expectedEnd = "<!-- END_GLOBAL:~/.codex/ -->";
   const expectedH1 = "~/.codex/AGENTS.md: Global Codex Constitution";

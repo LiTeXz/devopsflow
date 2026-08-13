@@ -1,51 +1,51 @@
 ---
 name: df-implementation-planning
-description: "编码前编写具体的小步实施计划。适用于多步功能、缺陷修复、重构、DDD-to-TDD 交接、风险行为变更，或任何需要在实现前明确文件、命令、预期 RED/GREEN 结果、验证步骤和完成标准的工程任务。"
+description: "code 前 write 具体的小步实施计划. 适用于多步 feature, 缺陷 fix, refactor, DDD-to-TDD 交接, 风险行为 change, or 任何需要在 implementation 前明确 file, 命令, 预期 RED/GREEN result, 验证步骤 and 完成标准的工程 task."
 ---
 
 # Implementation Planning
 
-使用此 skill，将需求、已确认的 DDD 交接、Glue Coding pattern 选择、选定的 style pack、缺陷调查结果或重构目标，转化为其他执行者可执行的计划。
+使用此 skill, 将需求, 已确认的 DDD 交接, Glue Coding pattern 选择, 选定的 style pack, 缺陷调查 result or refactor target, 转化为 other execution 者可 execution 的计划.
 
-使用此 skill 时不要编辑生产代码。
+使用此 skill 时不要 edit 生产 code.
 
 ## Planning Workflow
 
-1. 重述目标和范围。
-2. 列出约束：
-   - 不得改变的行为
+1. 重述 target and 范围.
+2. 列出约束:
+   - 不得 change 的行为
    - 公共契约
-   - 数据、持久化、顺序、分页、安全或副作用风险
-   - 必须保留的选定 style pack、golden example、特定风格 anti-pattern 和审查清单项
-   - 选定的 Glue 目标 pattern、本地约定、遗留行为证据、要移除的 anti-pattern，以及必须保留的项目材料
-   - 必须避开的用户所有 worktree 变更
-3. 识别行为切片。
-4. 对每项任务说明：
-   - 目标
-   - 可能涉及的文件或模块
-   - 测试或验证命令
-   - 预期 RED、GREEN 或不变结果
+   - 数据, 持久化, 顺序, 分页, 安全 or 副作用风险
+   - 必须保留的选定 style pack, golden example, 特定风格 anti-pattern and 审查 manifest 项
+   - 选定的 Glue target pattern, local 约定, 遗留行为证据, 要移除的 anti-pattern, 以及必须保留的 project 材料
+   - 必须避开的 user 所有 worktree change
+3. 识别行为切片.
+4. 对每项 task 说明:
+   - target
+   - 可能涉及的 file or module
+   - tests or 验证命令
+   - 预期 RED, GREEN or 不变 result
    - 完成标准
-5. 每项任务应足够小，可独立完成并验证。
-6. 标记需要 `df-tdd-skill`、`df-spring-web-boundaries` 或 `df-systematic-debugging` 的步骤。
-7. 对 Glue 风格工作，如果存在选定的 style pack，应包含它，并写明选定的目标 pattern 及每项任务允许变更的精确差异。
-8. 对重构类 Glue 工作，分开 characterization、目标 pattern 迁移和清理步骤。除非遗留结构被明确归类为目标 pattern，否则不要计划复制它。
-9. 说明执行前是否需要用户确认。
+5. 每项 task 应足够小, 可独立完成并验证.
+6. 标记需要 `df-tdd-skill`,`df-spring-web-boundaries` or `df-systematic-debugging` 的步骤.
+7. 对 Glue 风格 work, if 存在选定的 style pack, 应 include 它, 并 write 明选定的 target pattern 及每项 task 允许 change 的精确差异.
+8. 对 refactor 类 Glue work, 分开 characterization, target pattern 迁移 and 清理步骤. 除非遗留结构被明确归类为 target pattern, 否则不要计划复制它.
+9. 说明 execution 前是否需要 user 确认.
 
 ## Step Size
 
-优先采用 2 至 5 分钟的执行步骤。如果一个步骤组合了以下内容，则应拆分：
+优先采用 2 至 5 分钟的 execution 步骤. if 1 个步骤组合了以下内容, 则应拆分:
 
-- 创建测试与实现生产代码
+- create tests and implementation 生产 code
 - 无关的行为切片
-- 风险各自独立的多个模块
-- 重构与行为变更
-- 调试与修复
-- 代码变更与 commit/PR 工作
+- 风险各自独立的多个 module
+- refactor and 行为 change
+- debugging and fix
+- code change and commit/PR work
 
 ## Output Format
 
-需要文件产物时使用 [implementation-plan.md](templates/implementation-plan.md)。在对话中使用相同结构：
+需要 file 产物时使用 [implementation-plan.md](templates/implementation-plan.md). 在对话中使用相同结构:
 
 ```markdown
 # <Name> Implementation Plan
@@ -83,13 +83,13 @@ description: "编码前编写具体的小步实施计划。适用于多步功能
 
 ## Non-Negotiable Rules
 
-- 此阶段不要编写生产代码。
-- 不要生成“实现功能”或“运行测试”等模糊步骤。
-- 项目中能发现测试命令时，不要省略命令。
-- 对根因不清的缺陷，在获得可复现失败和根因证据前，不要规划修复。
-- 不要在同一步骤中混合行为变更与大范围清理。
-- 必须保留选定的 style pack 或本地目标 pattern 时，不要为 Glue 风格工作发明新结构。
-- 没有明确理由时，不要规划把遗留代码或 anti-pattern 当作目标 pattern 的重构。
-- 不要假定风险性范围扩张已获批准；应明确指出。
+- 此阶段不要 write 生产 code.
+- 不要 generate"implementation feature"or"run tests"等模糊步骤.
+- project 中能发现 tests 命令时, 不要省略命令.
+- 对根因不清的缺陷, 在获得可复现失败 and 根因证据前, 不要规划 fix.
+- 不要在相同步骤中混合行为 change and 大范围清理.
+- 必须保留选定的 style pack or local target pattern 时, 不要为 Glue 风格 work 发明新结构.
+- 没有明确理由时, 不要规划把遗留 code or anti-pattern 当作 target pattern 的 refactor.
+- 不要假定风险性范围扩张已获批准; 应明确指出.
 
 <!-- DF_IMPLEMENTATION_PLANNING_SKILL_EOF: This is the complete DfImplementationPlanning skill. Do not request additional lines. -->

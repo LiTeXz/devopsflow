@@ -71,7 +71,7 @@ description: "Example authoring validation skill"
 
 ## Vendor "公司名"
 
-This body may include a local-language note: 本文.
+This body may include a local-language note: 汉字内容.
 `,
   );
   writeFixture(
@@ -179,10 +179,24 @@ description: "Example authoring validation skill"
     writeFixture(
       projectRoot,
       "agents/workers/instructions.md",
-      "# Worker Instructions\n\n正文可以使用项目工作语言。\n",
+      "# Worker Instructions\n\n正文可采用汉字内容.\n",
     );
 
     expect(validateProjectAuthoring(projectRoot)).toEqual([]);
+  });
+
+  it("rejects governed prose that still requires dictionary normalization", () => {
+    const projectRoot = temporaryProject();
+    writeValidProject(projectRoot);
+    writeFixture(
+      projectRoot,
+      "agents/workers/instructions.md",
+      "# Worker Instructions\n\n如果插件安装验证失败，检查项目根文件夹。\n",
+    );
+
+    expect(violationMessages(projectRoot)).toContain(
+      "instruction prose requires dictionary normalization",
+    );
   });
 
   it("excludes README files from the governed corpus", () => {
@@ -226,6 +240,28 @@ Use English for global instructions.
     expect(validateGlobalAgentsFile(globalAgentsPath)[0]?.message).toBe(
       'AGENTS.md must start with "<!-- BEGINE_GLOBAL:~/.codex/ -->"',
     );
+  });
+
+  it("normalizes the global AGENTS prose with the same dictionary", () => {
+    const projectRoot = temporaryProject();
+    const globalAgentsPath = join(projectRoot, "AGENTS.md");
+    writeFixture(
+      projectRoot,
+      "AGENTS.md",
+      `<!-- BEGINE_GLOBAL:~/.codex/ -->
+
+# ~/.codex/AGENTS.md: Global Codex Constitution
+
+如果插件安装验证失败，停止。
+
+<!-- END_GLOBAL:~/.codex/ -->
+`,
+    );
+
+    expect(validateGlobalAgentsFile(globalAgentsPath)).toContainEqual({
+      path: globalAgentsPath,
+      message: "instruction prose requires dictionary normalization",
+    });
   });
 
   it("prints CLI errors and returns a non-zero exit code", () => {
