@@ -75,7 +75,7 @@ description: "通过明确的 checkpoint、resume file 和交接说明保护长�
 选择内部工作流前使用此 skill，之后让它作为 checkpointing layer 保持 active：
 
 ```text
-df-engineering-workflow-router
+df-dev-engineering-workflow-route
   -> df-resumable-workflow-guard
   -> df-implementation-planning
   -> df-executing-implementation-plan
