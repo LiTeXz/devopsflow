@@ -22,7 +22,7 @@ this file 补充根 [AGENTS.md](../AGENTS.md), 适用于 `skills/` 子树.
 
 - skill directory 名必须以 `df-dev-`, `df-ops-`, `df-ai-` or `df-doc-` 开头.
 - `SKILL.md` front matter 必须 include `name` and `description`, 且 `name` 必须 and directory 名 exactly match.
-- Agent Skills specification 将 `agents/openai.yaml` 视为 optional; 本 repository 额外要求每个 skill include 该文件.
+- Agent Skills specification 将 `agents/openai.yaml` 视为 optional; 本 repository 额外要求每个 skill include 该 file.
 - `interface.display_name` 必须等于 directory 名移除 `df-` 后按单词首字母大 write 得到的 name.
 - `interface.short_description` 必须 and `SKILL.md` front matter 的 `description` exactly match.
 - 元数据判定以 `bun run check:skill-metadata` 的 result 为准.
@@ -63,7 +63,7 @@ interface SkillFrontMatter {
 }
 ```
 
-在 Agent Skills specification 中，`agents/openai.yaml` 及其 fields 均为 optional；本 repository 额外要求每个 skill 提供该文件，并要求 `interface.display_name` 和 `interface.short_description`：
+在 Agent Skills specification 中,`agents/openai.yaml` 及其 fields 均为 optional; 本 repository 额外要求每个 skill 提供该 file, 并要求 `interface.display_name` and `interface.short_description`:
 
 ```typescript
 interface OpenAiAgentMetadata {

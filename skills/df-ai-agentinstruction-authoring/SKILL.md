@@ -1,10 +1,10 @@
 ---
 name: df-ai-agentinstruction-authoring
 description: "改进 AGENTS, SKILL and agent 指令的结构, 格式 and execution 效果."
-version: "0.2.29"
+version: "0.2.30"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.29"
+  version: "0.2.30"
 ---
 
 # AI Agentinstruction Authoring

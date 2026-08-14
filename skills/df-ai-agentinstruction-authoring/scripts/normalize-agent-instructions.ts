@@ -49,6 +49,7 @@ const URL_PATTERN = /https?:\/\/[^\s)]+/g
 const INLINE_CODE_PATTERN = /`[^`\r\n]*`/g
 const LINK_DESTINATION_PATTERN = /(?<=\]\()[^)\r\n]+(?=\))/g
 const MARKDOWN_LINK_PATTERN = /\[([^\]\r\n]+)\]\(([^)\r\n]+)\)/g
+const ASSET_PATH_PATTERN = /(?:\.\.?\/)?assets\/[A-Za-z0-9._/-]+/g
 
 export function loadVocabulary(path = DEFAULT_DICTIONARY_PATH): Vocabulary {
   const parsed = Bun.YAML.parse(readFileSync(path, 'utf-8')) as Vocabulary
@@ -114,7 +115,7 @@ function normalizeSpacing(content: string, vocabulary: Vocabulary): string {
     normalized = normalized.replace(new RegExp(`(${HAN})(${escaped})`, 'gu'), '$1 $2').replace(new RegExp(`(${escaped})(${HAN})`, 'gu'), '$1 $2')
   }
   const tokenPattern = tokens.map(escapeRegExp).join('|')
-  const joinedTokens = new RegExp(`(${tokenPattern})(${tokenPattern})`, 'gu')
+  const joinedTokens = new RegExp(`(?<![A-Za-z0-9])(${tokenPattern})(${tokenPattern})(?![A-Za-z0-9])`, 'gu')
   const tokenSet = new Set(tokens)
   let previous: string
   do {
@@ -155,7 +156,7 @@ interface Span {
 
 function protectedSpans(line: string): Span[] {
   const spans: Span[] = []
-  for (const pattern of [URL_PATTERN, INLINE_CODE_PATTERN, LINK_DESTINATION_PATTERN]) {
+  for (const pattern of [URL_PATTERN, INLINE_CODE_PATTERN, LINK_DESTINATION_PATTERN, ASSET_PATH_PATTERN]) {
     pattern.lastIndex = 0
     for (let match = pattern.exec(line); match; match = pattern.exec(line)) {
       spans.push({ start: match.index, end: match.index + match[0].length })

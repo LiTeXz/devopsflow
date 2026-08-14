@@ -177,6 +177,12 @@ allowedNonAsciiSymbols: []
 `)
   })
 
+  it('preserves standalone words and asset paths while normalizing prose', () => {
+    expect(normalizeInstructionText('specification ./assets/openai-logo.svg ./assets/jimmer-logo.png')).toBe(
+      'specification ./assets/openai-logo.svg ./assets/jimmer-logo.png',
+    )
+  })
+
   it('replaces forbidden Chinese digits in every file region', () => {
     const source = `一二三四五六七八九
 

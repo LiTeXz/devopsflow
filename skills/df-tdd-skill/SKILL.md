@@ -1,10 +1,10 @@
 ---
 name: df-tdd-skill
 description: "适用于全新 feature development, 缺陷 fix, 行为保持型 refactor, 特征 tests 以及先刻画后 fix work 的纯 TDD workflow. 当 Codex 需要以 tests 优先的纪律从零构建新行为, or 在不引起行为漂移的前提下修改现有 code 时使用. 适用于各种 language and 架构. 不要用于技术栈专用分层 rule, 仅文档 edit, 简单格式调整, or 不期望产生可 execution 行为的纯探索性原型."
-version: "0.2.29"
+version: "0.2.30"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.29"
+  version: "0.2.30"
 ---
 
 # TDD Skill

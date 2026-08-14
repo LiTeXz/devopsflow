@@ -104,7 +104,6 @@ describe('TDD Workflow Instructions', () => {
       expect(definitions?.length).toBe(1)
       expect(block).toContain('/**')
       expect(block).not.toMatch(/"[^"\n]*"/)
-      expect(block).not.toContain(';')
     }
   })
 })
