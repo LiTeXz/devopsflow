@@ -44,12 +44,21 @@ export function spotlessTaskForPath(path: string): string | undefined {
   return undefined
 }
 
-export function findGradleWrapper(start: string, platform: NodeJS.Platform = process.platform): { root: string; wrapper: string } | undefined {
+export function findGradleWrapper(
+  editedPath: string,
+  cwd: string,
+  platform: NodeJS.Platform = process.platform,
+): { root: string; wrapper: string } | undefined {
   const wrapperName = platform === 'win32' ? 'gradlew.bat' : 'gradlew'
-  let current = resolve(start)
+  const boundary = resolve(cwd)
+  const editedAbsolutePath = resolve(editedPath)
+  let current = dirname(editedAbsolutePath)
   while (true) {
     const wrapper = resolve(current, wrapperName)
     if (existsSync(wrapper)) return { root: current, wrapper }
+    if (current === boundary) return undefined
+    const distance = relative(boundary, current)
+    if (distance === '' || distance === '..' || distance.startsWith(`..${sep}`) || isAbsolute(distance)) return undefined
     const parent = dirname(current)
     if (parent === current) return undefined
     current = parent
@@ -92,16 +101,23 @@ export function formatEditedFiles(payload: Payload, formatter: Formatter = runBi
   }
 
   if (spotlessPaths.length) {
-    const wrapper = findGradleWrapper(cwd)
-    if (!wrapper) warnings.push(`devopsflow: skipped Spotless formatting for ${spotlessPaths.join(', ')} because no Gradle wrapper was found`)
-    else {
-      const tasks = [...new Set(spotlessPaths.map((path) => spotlessTaskForPath(path)).filter((task): task is string => task !== undefined))]
-      for (const task of tasks) {
-        const result = runGradle(wrapper.wrapper, wrapper.root, task)
-        const taskPaths = spotlessPaths.filter((path) => spotlessTaskForPath(path) === task)
-        if (result.exitCode === 0) formatted.push(...taskPaths)
-        else warnings.push(formatterWarning(taskPaths, result.stderr))
+    const groups = new Map<string, { wrapper: { root: string; wrapper: string }; task: string; paths: string[] }>()
+    for (const path of spotlessPaths) {
+      const wrapper = findGradleWrapper(resolve(cwd, path), cwd)
+      const task = spotlessTaskForPath(path)
+      if (!wrapper || !task) {
+        warnings.push(`devopsflow: skipped Spotless formatting for ${path} because no Gradle wrapper was found`)
+        continue
       }
+      const key = `${wrapper.root}\0${task}`
+      const group = groups.get(key) ?? { wrapper, task, paths: [] }
+      group.paths.push(path)
+      groups.set(key, group)
+    }
+    for (const group of groups.values()) {
+      const result = runGradle(group.wrapper.wrapper, group.wrapper.root, group.task)
+      if (result.exitCode === 0) formatted.push(...group.paths)
+      else warnings.push(formatterWarning(group.paths, result.stderr))
     }
   }
 

@@ -25,8 +25,21 @@ describe('PostToolUse edited-file formatter', () => {
     mkdirSync(nested, { recursive: true })
     writeFileSync(join(root, 'gradlew'), '#!/bin/sh\n')
 
-    expect(findGradleWrapper(nested, 'linux')).toEqual({ root, wrapper: join(root, 'gradlew') })
+    expect(findGradleWrapper(join(nested, 'Main.java'), root, 'linux')).toEqual({ root, wrapper: join(root, 'gradlew') })
     expect(gradleCommand(join(root, 'gradlew'), 'spotlessJavaApply')).toEqual([join(root, 'gradlew'), '--no-daemon', 'spotlessJavaApply'])
+  })
+
+  it('searches from the edited file up to cwd without crossing above cwd', () => {
+    const root = mkdtempSync(join(tmpdir(), 'devopsflow-gradle-file-boundary-'))
+    const cwd = join(root, 'workspace')
+    const editedDir = join(cwd, 'module', 'src')
+    mkdirSync(editedDir, { recursive: true })
+    writeFileSync(join(root, 'gradlew'), '')
+    writeFileSync(join(cwd, 'gradlew'), '')
+
+    expect(findGradleWrapper(join(editedDir, 'Main.java'), cwd, 'linux')).toEqual({ root: cwd, wrapper: join(cwd, 'gradlew') })
+    rmSync(join(cwd, 'gradlew'))
+    expect(findGradleWrapper(join(editedDir, 'Main.java'), cwd, 'linux')).toBeUndefined()
   })
 
   it('prefers gradlew.bat on Windows and reports no wrapper when absent', () => {
@@ -35,8 +48,9 @@ describe('PostToolUse edited-file formatter', () => {
     mkdirSync(nested, { recursive: true })
     writeFileSync(join(root, 'gradlew.bat'), '@echo off\r\n')
 
-    expect(findGradleWrapper(nested, 'win32')).toEqual({ root, wrapper: join(root, 'gradlew.bat') })
-    expect(findGradleWrapper(mkdtempSync(join(tmpdir(), 'devopsflow-no-wrapper-')), 'linux')).toBeUndefined()
+    expect(findGradleWrapper(join(nested, 'Main.java'), root, 'win32')).toEqual({ root, wrapper: join(root, 'gradlew.bat') })
+    const noWrapper = mkdtempSync(join(tmpdir(), 'devopsflow-no-wrapper-'))
+    expect(findGradleWrapper(join(noWrapper, 'Main.java'), noWrapper, 'linux')).toBeUndefined()
   })
 
   it('runs the matching Spotless task with the Gradle wrapper for JVM files', () => {
