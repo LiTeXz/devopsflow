@@ -23,6 +23,8 @@ export interface Payload {
   event?: string
   tool_input?: ToolInput
   toolInput?: ToolInput
+  tool_response?: unknown
+  toolResponse?: unknown
   cwd?: string
   session_id?: string
   sessionId?: string

@@ -34,6 +34,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"${PLUGIN_ROOT}/hooks/post-tool-use/format-edited-files.ts\"",
+            "timeout": 30,
+            "statusMessage": "devopsflow: formatting edited files"
+          }
+        ]
+      }
     ]
   }
 }
