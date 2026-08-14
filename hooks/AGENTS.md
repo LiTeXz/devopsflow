@@ -58,7 +58,7 @@ this directory 保存 DevopsFlow plugin 随附的 Codex lifecycle hooks. this fi
 
 ## Current Configuration
 
-`hooks.codex.json` 当前注册 `SessionStart`、`PreToolUse` and `PostToolUse` matcher group. `SessionStart` 按顺序声明三个 `type: "command"` handler:
+`hooks.codex.json` 当前注册 `SessionStart`,`PreToolUse` and `PostToolUse` matcher group. `SessionStart` 按顺序声明3个 `type: "command"` handler:
 
 - use `${PLUGIN_ROOT}` 定位 installed plugin directory, run `df-codex-assets.ts hydrate`, 确保受管 subagent 配置集合存在.
 - run `df-codex-assets.ts sync-project-gitignore`, 确保 project `.gitignore` rule 存在.
@@ -66,7 +66,7 @@ this directory 保存 DevopsFlow plugin 随附的 Codex lifecycle hooks. this fi
 
 `PreToolUse` 对 shell tool run `prevent-git-push-protected-commit.ts`: 禁止任何 Agent push, 并禁止在 protected branch commit.
 
-`PostToolUse` 对 canonical `apply_patch` run `format-edited-files.ts`; matcher 兼容官方 `Edit`/`Write` alias. script 从成功编辑的 patch 提取新增或更新文件：Biome 文件走本地 Biome，`.java`/`.kt`/`.gradle`/`.gradle.kts` 从各自文件目录向上查找 `gradlew`/`gradlew.bat`，最多到 hook `cwd`，再运行对应 Spotless task 和 `--no-daemon`，并在 formatter 失败时保持 fail-open.
+`PostToolUse` 对 canonical `apply_patch` run `format-edited-files.ts`; matcher 兼容官方 `Edit`/`Write` alias. script 从成功 edit 的 patch 提取新增 or update file: Biome file 走 local Biome,`.java`/`.kt`/`.gradle`/`.gradle.kts` 从各自 file directory 向上查找 `gradlew`/`gradlew.bat`, 最多到 hook `cwd`, 再 run 对应 Spotless task and `--no-daemon`, 并在 formatter 失败时保持 fail-open.
 
 新增 or 修改 Hook 时必须同步 check plugin manifest, script 路径, Windows 行为, 信任提示 and 相关 tests; 不要把 this directory 的当前配置误 write 成 Codex 的全部 default event.
 
