@@ -11,9 +11,9 @@
 
 ## Resume Cursor
 
-- 当前阶段：本地 release gate 已通过，待提交
-- 下一步操作：提交门禁修复，随后创建 `dev -> main` PR。
-- 从此处继续：从当前工作区的修复 diff 和完整 gate 证据继续，不要重复版本同步。
+- 当前阶段：发布完成，main/dev 同步待执行
+- 下一步操作：合并 closeout 记录后创建 `main -> dev` 同步 PR。
+- 从此处继续：使用已发布的 `94fb094d384fe9028ed1beec95a3b1f048eb7bd4` 作为同步源，不要重复创建 tag 或 Release。
 - 不要重做：版本号已由提交 `33a5d90` 同步到 `0.2.30`；不要重复修改版本文件。
 
 ## Workflow Chain
@@ -38,9 +38,9 @@ df-dev-engineering-workflow-route
 - [x] R2 - 运行本地 release gate。
 - [x] R2a - 修复 normalizer 对合法 asset path/ASCII 单词的破坏并加入回归测试。
 - [x] R2b - 修复 TDD protocol 文档 TypeScript 示例的分号契约。
-- [ ] R3 - 创建并合并 `dev -> main` 发布 PR。
-- [ ] R4 - 推送 `v0.2.30` 并等待 tag-specific Version Check。
-- [ ] R5 - 创建 GitHub Release 并验证精确 tag 安装。
+- [x] R3 - 创建并合并 `dev -> main` 发布 PR（PR #82，merge `94fb094d384fe9028ed1beec95a3b1f048eb7bd4`）。
+- [x] R4 - 推送 `v0.2.30` 并等待 tag-specific Version Check（run `31761107160`）。
+- [x] R5 - 创建 GitHub Release 并验证精确 tag 安装（Release `v0.2.30`，local plugin `0.2.30`）。
 - [ ] R6 - 同步 `main` 到 `dev` 并完成最终验证。
 
 ## Touched Files
@@ -80,7 +80,7 @@ df-dev-engineering-workflow-route
 ## Risks And Blockers
 
 - 风险：发布包含 `v0.2.28..origin/dev` 的累计提交，需要以完整本地 gate 和 PR checks 证明可发布。
-- Blocker：无；远端 PR checks、tag-specific Version Check 和 Release 尚未执行。
+- Blocker：无；仅剩 `main -> dev` 同步 PR。
 
 ## Progress Log
 
@@ -89,9 +89,9 @@ df-dev-engineering-workflow-route
 任务：发布前现状核对。
 变更：仅创建 checkpoint。
 验证：工作区、远端分支、版本源、tag/Release、开放 PR 已核对。
-状态：active。
-证据：origin/dev=33a5d90，origin/main=64ff015，package/plugin/agents=0.2.30。
-下一步：提交当前修复并创建 `dev -> main` 发布 PR。
+状态：发布已完成，等待同步。
+证据：PR #82 merged，main=`94fb094d384fe9028ed1beec95a3b1f048eb7bd4`，tag=`v0.2.30`，Version Check run `31761107160` success，Release 已创建，local plugin=`0.2.30`。
+下一步：创建 `main -> dev` 同步 PR。
 ```
 
 ## Handoff
