@@ -7,9 +7,9 @@
 示例：
 
 ```bash
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage before_edit --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
-bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage finish --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage before_edit --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage state --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
+bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage finish --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 ```
 
 将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` blocks 追加到 protocol file，然后对该文件运行脚本。该 `.jsonl` 文件是任务的永久审计记录，必须永久保留；不得在任务完成后删除、清空、截断或迁移到临时目录。
@@ -57,15 +57,15 @@ interface TddStateTransition {
  */
 declare const allowedTddTransitions: readonly [
   /** Moves from declared scope to an executable focused test. */
-  TddStateTransition & { from: 'scope_defined', to: 'test_written' },
+  TddStateTransition & { from: 'scope_defined'; to: 'test_written' },
   /** Accepts failure only after proving it is caused by the target risk. */
-  TddStateTransition & { from: 'test_written', to: 'red_observed' },
+  TddStateTransition & { from: 'test_written'; to: 'red_observed' },
   /** Accepts passing evidence only after the smallest production correction. */
-  TddStateTransition & { from: 'red_observed', to: 'green_reached' },
+  TddStateTransition & { from: 'red_observed'; to: 'green_reached' },
   /** Either enters protected cleanup or proceeds directly to final verification. */
-  TddStateTransition & { from: 'green_reached', to: 'refactor_done' | 'final_verified' },
+  TddStateTransition & { from: 'green_reached'; to: 'refactor_done' | 'final_verified' },
   /** Completes verification after optional cleanup remains behavior-preserving. */
-  TddStateTransition & { from: 'refactor_done', to: 'final_verified' },
+  TddStateTransition & { from: 'refactor_done'; to: 'final_verified' },
 ]
 ```
 

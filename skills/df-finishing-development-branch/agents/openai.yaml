@@ -1,4 +1,4 @@
 interface:
   display_name: "Finishing Development Branch"
-  short_description: "完成开发分支，为 commit、push、PR 或交接做准备。在实现和验证后使用，用于检查 git 状态、分离用户所有的变更与 Codex 变更、确认测试和计划完成情况，并起草 PR 或交接说明。"
-  default_prompt: "使用 $df-finishing-development-branch 检查状态、确认验证证据并准备分支交接。"
+  short_description: "完成 development 分支, 为 commit, push, PR or 交接做 ready. 在 implementation and 验证后使用, 用于 check git 状态, 分离 user 所有的 change and Codex change, 确认 tests and 计划完成情况, 并起草 PR or 交接说明."
+  default_prompt: "使用 $df-finishing-development-branch check 状态, 确认验证证据并 ready 分支交接."

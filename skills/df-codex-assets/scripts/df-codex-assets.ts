@@ -1,691 +1,622 @@
 #!/usr/bin/env bun
 
-import { createHash } from "node:crypto";
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { readScriptPayload, runLoggedScriptAsync } from "./script-logger";
+import { createHash } from 'node:crypto'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { readScriptPayload, runLoggedScriptAsync } from './script-logger'
 
 export const AGENT_TOML_PATHS = [
-  "agents/df-dev-backend-engineer.toml",
-  "agents/df-dev-backend-test-engineer.toml",
-  "agents/df-dev-database-steward.toml",
-  "agents/df-doc-documentation-writer.toml",
-  "agents/df-dev-frontend-engineer.toml",
-  "agents/df-dev-frontend-test-engineer.toml",
-  "agents/df-ops-artifact-manager.toml",
-  "agents/df-ops-vcs-manager.toml",
-] as const;
+  'agents/df-dev-backend-engineer.toml',
+  'agents/df-dev-backend-test-engineer.toml',
+  'agents/df-dev-database-steward.toml',
+  'agents/df-doc-documentation-writer.toml',
+  'agents/df-dev-frontend-engineer.toml',
+  'agents/df-dev-frontend-test-engineer.toml',
+  'agents/df-ops-artifact-manager.toml',
+  'agents/df-ops-vcs-manager.toml',
+] as const
 
 export const MANAGED_ASSET_PATHS = [
   ...AGENT_TOML_PATHS,
-  "skills/df-codex-assets/assets/.gitignore",
-  "scripts/prevent-git-github-operations.ts",
-  "scripts/prevent-main-agent-write.ts",
-  "scripts/prevent-protected-branch-push.ts",
-  "src/shared/branch.ts",
-  "src/shared/command-parser.ts",
-  "src/shared/opencode-adapter.ts",
-  "src/shared/payload.ts",
-  "src/shared/script-logger.ts",
-  "src/shared/state-store.ts",
-  "src/shared/types.ts",
-  "package.json",
-  "tsconfig.json",
-] as const;
+  'skills/df-codex-assets/assets/.gitignore',
+  'hooks/pre-tool-use/prevent-git-github-operations.ts',
+  'hooks/pre-tool-use/prevent-git-push-protected-commit.ts',
+  'hooks/subagent/prevent-main-agent-write.ts',
+  'hooks/session-start/prevent-protected-branch-push.ts',
+  'hooks/session-start/update-protected-branches.ts',
+  'src/shared/branch.ts',
+  'src/shared/command-parser.ts',
+  'src/shared/opencode-adapter.ts',
+  'src/shared/payload.ts',
+  'src/shared/script-logger.ts',
+  'src/shared/state-store.ts',
+  'src/shared/types.ts',
+  'package.json',
+  'tsconfig.json',
+] as const
 
-export const HASH_FILE_PATH = "skills/df-codex-assets/assets/all.lock";
-export const SUBAGENT_HASH_FILE_PATH =
-  "skills/df-codex-assets/assets/subagent.lock";
-export const PROJECT_GITIGNORE_TEMPLATE_PATH =
-  "skills/df-codex-assets/assets/.gitignore";
-export const PROJECT_GITIGNORE_START = "# BEGIN DEVOPSFLOW MANAGED";
-export const PROJECT_GITIGNORE_END = "# END DEVOPSFLOW MANAGED";
-export const DEFAULT_REPOSITORY = "LiTeXz/devopsflow";
+export const HASH_FILE_PATH = 'skills/df-codex-assets/assets/all.lock'
+export const SUBAGENT_HASH_FILE_PATH = 'skills/df-codex-assets/assets/subagent.lock'
+export const PROJECT_GITIGNORE_TEMPLATE_PATH = 'skills/df-codex-assets/assets/.gitignore'
+export const PROJECT_GITIGNORE_START = '# BEGIN DEVOPSFLOW MANAGED'
+export const PROJECT_GITIGNORE_END = '# END DEVOPSFLOW MANAGED'
+export const DEFAULT_REPOSITORY = 'LiTeXz/devopsflow'
 
-export type FetchLike = (
-  input: string | URL | Request,
-  init?: RequestInit,
-) => Promise<Response>;
+export type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 
 export interface HydrateOptions {
-  fetchImpl?: FetchLike;
-  tagExists?: (repository: string, tag: string) => Promise<boolean>;
-  log?: (message: string) => void;
-  error?: (message: string) => void;
+  fetchImpl?: FetchLike
+  tagExists?: (repository: string, tag: string) => Promise<boolean>
+  log?: (message: string) => void
+  error?: (message: string) => void
 }
 
 export interface HydrateResult {
-  status: "already-current" | "hydrated";
-  hash: string;
-  tag?: string;
+  status: 'already-current' | 'hydrated'
+  hash: string
+  tag?: string
 }
 
 export interface HashMismatch {
-  storedHash: string;
-  correctHash: string;
-  updateCommand: string;
+  storedHash: string
+  correctHash: string
+  updateCommand: string
 }
 
 export interface HookPayload {
-  readonly cwd?: unknown;
-  readonly hook_event_name?: unknown;
+  readonly cwd?: unknown
+  readonly hook_event_name?: unknown
 }
 
 export interface SyncStagedHashResult {
-  readonly hash: string;
-  readonly subagentHash: string;
-  readonly staged: boolean;
+  readonly hash: string
+  readonly subagentHash: string
+  readonly staged: boolean
 }
 
 export interface SyncProjectGitignoreResult {
-  readonly status: "created" | "updated" | "already-current" | "skipped";
-  readonly warning?: string;
+  readonly status: 'created' | 'updated' | 'already-current' | 'skipped'
+  readonly warning?: string
 }
 
 export interface VersionAlignment {
-  readonly version: string;
+  readonly version: string
+}
+
+export interface SyncStagedVersionsResult {
+  readonly version: string
+  readonly paths: readonly string[]
 }
 
 function normalizeLineEndings(buffer: Buffer): Buffer {
-  return Buffer.from(buffer.toString("utf-8").replace(/\r\n?/g, "\n"), "utf-8");
+  return Buffer.from(buffer.toString('utf-8').replace(/\r\n?/g, '\n'), 'utf-8')
 }
 
 export function hashContent(buffer: Buffer): string {
-  return createHash("sha256")
-    .update(normalizeLineEndings(buffer))
-    .digest("hex");
+  return createHash('sha256').update(normalizeLineEndings(buffer)).digest('hex')
 }
 
-export function manifestForFiles(
-  pluginRoot: string,
-  paths: readonly string[] = MANAGED_ASSET_PATHS,
-): string {
+export function manifestForFiles(pluginRoot: string, paths: readonly string[] = MANAGED_ASSET_PATHS): string {
   return [...paths]
     .sort((a, b) => a.localeCompare(b))
     .map((relativePath) => {
-      const absolutePath = join(pluginRoot, relativePath);
+      const absolutePath = join(pluginRoot, relativePath)
       if (!existsSync(absolutePath)) {
-        throw new Error(`Missing managed asset: ${relativePath}`);
+        throw new Error(`Missing managed asset: ${relativePath}`)
       }
-      return `${relativePath}\0${hashContent(readFileSync(absolutePath))}\n`;
+      return `${relativePath}\0${hashContent(readFileSync(absolutePath))}\n`
     })
-    .join("");
+    .join('')
 }
 
-export function computeManagedAssetHash(
-  pluginRoot: string,
-  paths: readonly string[] = MANAGED_ASSET_PATHS,
-): string {
-  return createHash("sha256")
-    .update(manifestForFiles(pluginRoot, paths))
-    .digest("hex");
+export function computeManagedAssetHash(pluginRoot: string, paths: readonly string[] = MANAGED_ASSET_PATHS): string {
+  return createHash('sha256').update(manifestForFiles(pluginRoot, paths)).digest('hex')
 }
 
 export function computeSubagentHash(pluginRoot: string): string {
-  return computeManagedAssetHash(pluginRoot, AGENT_TOML_PATHS);
+  return computeManagedAssetHash(pluginRoot, AGENT_TOML_PATHS)
 }
 
-export function readStoredHash(
-  pluginRoot: string,
-  hashFilePath = HASH_FILE_PATH,
-): string {
-  const hashPath = join(pluginRoot, hashFilePath);
+export function readStoredHash(pluginRoot: string, hashFilePath = HASH_FILE_PATH): string {
+  const hashPath = join(pluginRoot, hashFilePath)
   if (!existsSync(hashPath)) {
-    throw new Error(`Missing stored asset hash: ${hashFilePath}`);
+    throw new Error(`Missing stored asset hash: ${hashFilePath}`)
   }
-  return readFileSync(hashPath, "utf-8").trim();
+  return readFileSync(hashPath, 'utf-8').trim()
 }
 
-export function writeStoredHash(
-  pluginRoot: string,
-  hash: string,
-  hashFilePath = HASH_FILE_PATH,
-): void {
-  const hashPath = join(pluginRoot, hashFilePath);
-  mkdirSync(dirname(hashPath), { recursive: true });
-  writeFileSync(hashPath, `${hash}\n`);
+export function writeStoredHash(pluginRoot: string, hash: string, hashFilePath = HASH_FILE_PATH): void {
+  const hashPath = join(pluginRoot, hashFilePath)
+  mkdirSync(dirname(hashPath), { recursive: true })
+  writeFileSync(hashPath, `${hash}\n`)
 }
 
 export function computeStagedManagedAssetHash(pluginRoot: string): string {
-  return computeStagedHash(pluginRoot, MANAGED_ASSET_PATHS);
+  return computeStagedHash(pluginRoot, MANAGED_ASSET_PATHS)
 }
 
 export function computeStagedSubagentHash(pluginRoot: string): string {
-  return computeStagedHash(pluginRoot, AGENT_TOML_PATHS);
+  return computeStagedHash(pluginRoot, AGENT_TOML_PATHS)
 }
 
-function computeStagedHash(
-  pluginRoot: string,
-  paths: readonly string[],
-): string {
+function computeStagedHash(pluginRoot: string, paths: readonly string[]): string {
   const manifest = [...paths]
     .sort((left, right) => left.localeCompare(right))
     .map((relativePath) => {
-      return `${relativePath}\0${hashContent(readStagedFile(pluginRoot, relativePath))}\n`;
+      return `${relativePath}\0${hashContent(readStagedFile(pluginRoot, relativePath))}\n`
     })
-    .join("");
-  return createHash("sha256").update(manifest).digest("hex");
+    .join('')
+  return createHash('sha256').update(manifest).digest('hex')
 }
 
-export function checkStagedVersionAlignment(
-  pluginRoot: string,
-): VersionAlignment {
-  const packageVersion = jsonVersion(
-    "package.json",
-    readStagedFile(pluginRoot, "package.json"),
-  );
-  const pluginVersion = jsonVersion(
-    ".codex-plugin/plugin.json",
-    readStagedFile(pluginRoot, ".codex-plugin/plugin.json"),
-  );
+export function checkStagedVersionAlignment(pluginRoot: string): VersionAlignment {
+  const packageVersion = jsonVersion('package.json', readStagedFile(pluginRoot, 'package.json'))
+  const pluginVersion = jsonVersion('.codex-plugin/plugin.json', readStagedFile(pluginRoot, '.codex-plugin/plugin.json'))
   const agentVersions = AGENT_TOML_PATHS.map((path) => {
-    const agentContent = readStagedFile(pluginRoot, path).toString("utf-8");
+    const agentContent = readStagedFile(pluginRoot, path).toString('utf-8')
     if (/^version\s*=/m.test(agentContent)) {
-      throw new Error(
-        `${path} must use # devopsflow-version = "..." instead of a top-level version field`,
-      );
+      throw new Error(`${path} must use # devopsflow-version = "..." instead of a top-level version field`)
     }
-    const version = agentContent.match(
-      /^#\s*devopsflow-version\s*=\s*"([^"]+)"/m,
-    )?.[1];
+    const version = agentContent.match(/^#\s*devopsflow-version\s*=\s*"([^"]+)"/m)?.[1]
     if (!version) {
-      throw new Error(`${path} is missing its devopsflow-version marker`);
+      throw new Error(`${path} is missing its devopsflow-version marker`)
     }
-    return { path, version };
-  });
-  const mismatchedAgents = agentVersions.filter(
-    ({ version }) => version !== packageVersion,
-  );
+    return { path, version }
+  })
+  const mismatchedAgents = agentVersions.filter(({ version }) => version !== packageVersion)
   if (packageVersion !== pluginVersion || mismatchedAgents.length > 0) {
     throw new Error(
-      `Version mismatch: package.json=${packageVersion}, plugin.json=${pluginVersion}, ${agentVersions.map(({ path, version }) => `${path}=${version}`).join(", ")}`,
-    );
+      `Version mismatch: package.json=${packageVersion}, plugin.json=${pluginVersion}, ${agentVersions.map(({ path, version }) => `${path}=${version}`).join(', ')}`,
+    )
   }
-  return { version: packageVersion };
+  return { version: packageVersion }
+}
+
+export function syncStagedVersionAlignment(pluginRoot: string): SyncStagedVersionsResult {
+  const version = jsonVersion('package.json', readStagedFile(pluginRoot, 'package.json'))
+  const paths: string[] = []
+  const pluginPath = '.codex-plugin/plugin.json'
+  const stagedPlugin = readStagedFile(pluginRoot, pluginPath)
+  const pluginContent = stagedPlugin.toString('utf-8')
+  const pluginJson = JSON.parse(pluginContent) as Record<string, unknown>
+  if (pluginJson.version !== version) {
+    const updatedPlugin = pluginContent.replace(/("version"\s*:\s*)"[^"]+"/, `$1"${version}"`)
+    syncFileToIndex(pluginRoot, pluginPath, stagedPlugin, Buffer.from(updatedPlugin))
+    paths.push(pluginPath)
+  }
+
+  for (const path of AGENT_TOML_PATHS) {
+    const stagedAgent = readStagedFile(pluginRoot, path)
+    const content = stagedAgent.toString('utf-8')
+    if (/^version\s*=/m.test(content)) {
+      throw new Error(`${path} must use # devopsflow-version = "..." instead of a top-level version field`)
+    }
+    if (!/^#\s*devopsflow-version\s*=\s*"[^"]+"/m.test(content)) {
+      throw new Error(`${path} is missing its devopsflow-version marker`)
+    }
+    const updated = content.replace(/^(#\s*devopsflow-version\s*=\s*)"[^"]+"/m, `$1"${version}"`)
+    if (updated !== content) {
+      syncFileToIndex(pluginRoot, path, stagedAgent, Buffer.from(updated))
+      paths.push(path)
+    }
+  }
+
+  checkStagedVersionAlignment(pluginRoot)
+  return { version, paths }
 }
 
 function jsonVersion(path: string, content: Buffer): string {
-  let parsed: unknown;
+  let parsed: unknown
   try {
-    parsed = JSON.parse(content.toString("utf-8"));
+    parsed = JSON.parse(content.toString('utf-8'))
   } catch (error) {
-    throw new Error(`${path} is invalid JSON: ${errorMessage(error)}`);
+    throw new Error(`${path} is invalid JSON: ${errorMessage(error)}`)
   }
-  const version = isRecord(parsed) ? parsed.version : undefined;
+  const version = isRecord(parsed) ? parsed.version : undefined
   if (!isNonEmptyString(version)) {
-    throw new Error(`${path} is missing a non-empty version`);
+    throw new Error(`${path} is missing a non-empty version`)
   }
-  return version;
+  return version
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === 'string' && value.trim().length > 0
 }
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  return error instanceof Error ? error.message : String(error)
 }
 
 function readStagedFile(pluginRoot: string, relativePath: string): Buffer {
-  const result = git(pluginRoot, ["show", `:${relativePath}`]);
+  const result = git(pluginRoot, ['show', `:${relativePath}`])
   if (result.exitCode !== 0) {
-    throw new Error(
-      `Unable to read staged file ${relativePath}: ${result.stderr.toString().trim()}`,
-    );
+    throw new Error(`Unable to read staged file ${relativePath}: ${result.stderr.toString().trim()}`)
   }
-  return result.stdout;
+  return result.stdout
 }
 
-export function syncStagedManagedAssetHash(
-  pluginRoot: string,
-): SyncStagedHashResult {
-  const hash = computeStagedManagedAssetHash(pluginRoot);
-  const subagentHash = computeStagedSubagentHash(pluginRoot);
-  writeStoredHash(pluginRoot, hash);
-  writeStoredHash(pluginRoot, subagentHash, SUBAGENT_HASH_FILE_PATH);
-  const addResult = git(pluginRoot, ["add", "--", HASH_FILE_PATH]);
+function syncFileToIndex(pluginRoot: string, relativePath: string, stagedContent: Buffer, updatedContent: Buffer): void {
+  const absolutePath = join(pluginRoot, relativePath)
+  if (existsSync(absolutePath) && readFileSync(absolutePath).equals(stagedContent)) {
+    writeFileSync(absolutePath, updatedContent)
+    const addResult = git(pluginRoot, ['add', '--', relativePath])
+    if (addResult.exitCode !== 0) {
+      throw new Error(`Unable to stage ${relativePath}: ${addResult.stderr.toString().trim()}`)
+    }
+    return
+  }
+
+  const modeResult = git(pluginRoot, ['ls-files', '-s', '--', relativePath])
+  const mode = modeResult.stdout.toString().match(/^(\d+)\s/)?.[1]
+  if (modeResult.exitCode !== 0 || !mode) {
+    throw new Error(`Unable to inspect staged file ${relativePath}: ${modeResult.stderr.toString().trim()}`)
+  }
+  const hashResult = Bun.spawnSync({
+    cmd: ['git', 'hash-object', '-w', '--stdin'],
+    cwd: pluginRoot,
+    stdin: updatedContent,
+    stderr: 'pipe',
+    stdout: 'pipe',
+  })
+  const objectId = hashResult.stdout.toString().trim()
+  if (hashResult.exitCode !== 0 || !objectId) {
+    throw new Error(`Unable to create staged object for ${relativePath}: ${hashResult.stderr.toString().trim()}`)
+  }
+  const updateResult = git(pluginRoot, ['update-index', '--cacheinfo', mode, objectId, relativePath])
+  if (updateResult.exitCode !== 0) {
+    throw new Error(`Unable to update staged file ${relativePath}: ${updateResult.stderr.toString().trim()}`)
+  }
+}
+
+export function syncStagedManagedAssetHash(pluginRoot: string): SyncStagedHashResult {
+  const hash = computeStagedManagedAssetHash(pluginRoot)
+  const subagentHash = computeStagedSubagentHash(pluginRoot)
+  writeStoredHash(pluginRoot, hash)
+  writeStoredHash(pluginRoot, subagentHash, SUBAGENT_HASH_FILE_PATH)
+  const addResult = git(pluginRoot, ['add', '--', HASH_FILE_PATH])
   if (addResult.exitCode !== 0) {
-    throw new Error(
-      `Unable to stage ${HASH_FILE_PATH}: ${addResult.stderr.toString().trim()}`,
-    );
+    throw new Error(`Unable to stage ${HASH_FILE_PATH}: ${addResult.stderr.toString().trim()}`)
   }
-  const addSubagentResult = git(pluginRoot, [
-    "add",
-    "--",
-    SUBAGENT_HASH_FILE_PATH,
-  ]);
+  const addSubagentResult = git(pluginRoot, ['add', '--', SUBAGENT_HASH_FILE_PATH])
   if (addSubagentResult.exitCode !== 0) {
-    throw new Error(
-      `Unable to stage ${SUBAGENT_HASH_FILE_PATH}: ${addSubagentResult.stderr.toString().trim()}`,
-    );
+    throw new Error(`Unable to stage ${SUBAGENT_HASH_FILE_PATH}: ${addSubagentResult.stderr.toString().trim()}`)
   }
-  const diffResult = git(pluginRoot, [
-    "diff",
-    "--cached",
-    "--quiet",
-    "--",
-    HASH_FILE_PATH,
-  ]);
+  const diffResult = git(pluginRoot, ['diff', '--cached', '--quiet', '--', HASH_FILE_PATH])
   if (diffResult.exitCode !== 0 && diffResult.exitCode !== 1) {
-    throw new Error(
-      `Unable to inspect staged ${HASH_FILE_PATH}: ${diffResult.stderr.toString().trim()}`,
-    );
+    throw new Error(`Unable to inspect staged ${HASH_FILE_PATH}: ${diffResult.stderr.toString().trim()}`)
   }
-  return { hash, subagentHash, staged: diffResult.exitCode === 1 };
+  return { hash, subagentHash, staged: diffResult.exitCode === 1 }
 }
 
 function git(pluginRoot: string, args: string[]): Bun.ReadableSyncSubprocess {
   return Bun.spawnSync({
-    cmd: ["git", ...args],
+    cmd: ['git', ...args],
     cwd: pluginRoot,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+    stderr: 'pipe',
+    stdout: 'pipe',
+  })
 }
 
 export function assetHashUpdateCommand(): string {
-  return `bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > ${HASH_FILE_PATH}`;
+  return `bun skills/df-codex-assets/scripts/df-codex-assets.ts compute > ${HASH_FILE_PATH}`
 }
 
-export function checkManagedAssetHash(
-  pluginRoot: string,
-): HashMismatch | undefined {
-  const storedHash = readStoredHash(pluginRoot);
-  const correctHash = computeManagedAssetHash(pluginRoot);
-  if (storedHash === correctHash) return undefined;
+export function checkManagedAssetHash(pluginRoot: string): HashMismatch | undefined {
+  const storedHash = readStoredHash(pluginRoot)
+  const correctHash = computeManagedAssetHash(pluginRoot)
+  if (storedHash === correctHash) return undefined
   return {
     storedHash,
     correctHash,
     updateCommand: assetHashUpdateCommand(),
-  };
+  }
 }
 
-export function checkSubagentHash(
-  pluginRoot: string,
-): HashMismatch | undefined {
-  const storedHash = readStoredHash(pluginRoot, SUBAGENT_HASH_FILE_PATH);
-  const correctHash = computeSubagentHash(pluginRoot);
-  if (storedHash === correctHash) return undefined;
+export function checkSubagentHash(pluginRoot: string): HashMismatch | undefined {
+  const storedHash = readStoredHash(pluginRoot, SUBAGENT_HASH_FILE_PATH)
+  const correctHash = computeSubagentHash(pluginRoot)
+  if (storedHash === correctHash) return undefined
   return {
     storedHash,
     correctHash,
     updateCommand: `bun skills/df-codex-assets/scripts/df-codex-assets.ts compute-subagents > ${SUBAGENT_HASH_FILE_PATH}`,
-  };
+  }
 }
 
-export function readJsonFile(
-  path: string,
-): Record<string, unknown> | undefined {
+export function readJsonFile(path: string): Record<string, unknown> | undefined {
   try {
-    const parsed = JSON.parse(readFileSync(path, "utf-8"));
-    if (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      !Array.isArray(parsed)
-    ) {
-      return parsed as Record<string, unknown>;
+    const parsed = JSON.parse(readFileSync(path, 'utf-8'))
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>
     }
   } catch {
-    return undefined;
+    return undefined
   }
-  return undefined;
+  return undefined
 }
 
 export function readPluginVersion(pluginRoot: string): string {
-  const pluginJson = readJsonFile(
-    join(pluginRoot, ".codex-plugin", "plugin.json"),
-  );
-  const packageJson = readJsonFile(join(pluginRoot, "package.json"));
-  const version =
-    typeof pluginJson?.version === "string"
-      ? pluginJson.version
-      : typeof packageJson?.version === "string"
-        ? packageJson.version
-        : undefined;
+  const pluginJson = readJsonFile(join(pluginRoot, '.codex-plugin', 'plugin.json'))
+  const packageJson = readJsonFile(join(pluginRoot, 'package.json'))
+  const version = typeof pluginJson?.version === 'string' ? pluginJson.version : typeof packageJson?.version === 'string' ? packageJson.version : undefined
   if (!version) {
-    throw new Error(
-      "Unable to determine plugin version from .codex-plugin/plugin.json or package.json",
-    );
+    throw new Error('Unable to determine plugin version from .codex-plugin/plugin.json or package.json')
   }
-  return version;
+  return version
 }
 
 export function readPluginRepository(pluginRoot: string): string {
-  const pluginJson = readJsonFile(
-    join(pluginRoot, ".codex-plugin", "plugin.json"),
-  );
-  const repository =
-    typeof pluginJson?.repository === "string"
-      ? repositoryFromUrl(pluginJson.repository)
-      : undefined;
-  return repository ?? DEFAULT_REPOSITORY;
+  const pluginJson = readJsonFile(join(pluginRoot, '.codex-plugin', 'plugin.json'))
+  const repository = typeof pluginJson?.repository === 'string' ? repositoryFromUrl(pluginJson.repository) : undefined
+  return repository ?? DEFAULT_REPOSITORY
 }
 
 export function repositoryFromUrl(repositoryUrl: string): string | undefined {
-  const trimmed = repositoryUrl.trim();
-  const githubMatch = trimmed.match(
-    /^https?:\/\/github\.com\/([^/\s]+)\/([^/\s#?]+?)(?:\.git)?(?:[/?#].*)?$/i,
-  );
-  if (githubMatch) return `${githubMatch[1]}/${githubMatch[2]}`;
-  const shorthandMatch = trimmed.match(/^([^/\s]+)\/([^/\s]+)$/);
-  if (shorthandMatch) return trimmed;
-  return undefined;
+  const trimmed = repositoryUrl.trim()
+  const githubMatch = trimmed.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/\s#?]+?)(?:\.git)?(?:[/?#].*)?$/i)
+  if (githubMatch) return `${githubMatch[1]}/${githubMatch[2]}`
+  const shorthandMatch = trimmed.match(/^([^/\s]+)\/([^/\s]+)$/)
+  if (shorthandMatch) return trimmed
+  return undefined
 }
 
-export function rawAssetUrl(
-  repository: string,
-  tag: string,
-  path: string,
-): string {
-  return `https://raw.githubusercontent.com/${repository}/${tag}/${path}`;
+export function rawAssetUrl(repository: string, tag: string, path: string): string {
+  return `https://raw.githubusercontent.com/${repository}/${tag}/${path}`
 }
 
-export async function downloadAsset(
-  repository: string,
-  tag: string,
-  path: string,
-  fetchImpl: FetchLike = fetch,
-): Promise<Buffer> {
-  const response = await fetchImpl(rawAssetUrl(repository, tag, path));
+export async function downloadAsset(repository: string, tag: string, path: string, fetchImpl: FetchLike = fetch): Promise<Buffer> {
+  const response = await fetchImpl(rawAssetUrl(repository, tag, path))
   if (!response.ok) {
-    throw new Error(
-      `Failed to download ${path} from ${tag}: HTTP ${response.status}`,
-    );
+    throw new Error(`Failed to download ${path} from ${tag}: HTTP ${response.status}`)
   }
-  return Buffer.from(await response.arrayBuffer());
+  return Buffer.from(await response.arrayBuffer())
 }
 
-async function defaultTagExists(
-  repository: string,
-  tag: string,
-  fetchImpl: FetchLike,
-): Promise<boolean> {
-  const tagUrl = `https://github.com/${repository}/releases/tag/${tag}`;
+async function defaultTagExists(repository: string, tag: string, fetchImpl: FetchLike): Promise<boolean> {
+  const tagUrl = `https://github.com/${repository}/releases/tag/${tag}`
   try {
-    const response = await fetchImpl(tagUrl, { method: "HEAD" });
-    if (response.ok) return true;
-    if (response.status !== 405) return false;
-    const getResponse = await fetchImpl(tagUrl, { method: "GET" });
-    return getResponse.ok;
+    const response = await fetchImpl(tagUrl, { method: 'HEAD' })
+    if (response.ok) return true
+    if (response.status !== 405) return false
+    const getResponse = await fetchImpl(tagUrl, { method: 'GET' })
+    return getResponse.ok
   } catch {
-    return false;
+    return false
   }
 }
 
-export async function hydrateManagedAssets(
-  pluginRoot = process.env.PLUGIN_ROOT || process.cwd(),
-  options: HydrateOptions = {},
-): Promise<HydrateResult> {
-  const storedHash = readStoredHash(pluginRoot);
+export async function hydrateManagedAssets(pluginRoot = process.env.PLUGIN_ROOT || process.cwd(), options: HydrateOptions = {}): Promise<HydrateResult> {
+  const storedHash = readStoredHash(pluginRoot)
   try {
-    const currentHash = computeManagedAssetHash(pluginRoot);
+    const currentHash = computeManagedAssetHash(pluginRoot)
     if (currentHash === storedHash) {
-      return { status: "already-current", hash: currentHash };
+      return { status: 'already-current', hash: currentHash }
     }
   } catch {
     // Missing or incomplete installed plugin assets are hydrated below.
   }
 
-  const version = readPluginVersion(pluginRoot);
-  const tag = `v${version}`;
-  const repository = readPluginRepository(pluginRoot);
-  const fetchImpl = options.fetchImpl ?? fetch;
-  const tagExists =
-    options.tagExists ??
-    ((repo, releaseTag) => defaultTagExists(repo, releaseTag, fetchImpl));
+  const version = readPluginVersion(pluginRoot)
+  const tag = `v${version}`
+  const repository = readPluginRepository(pluginRoot)
+  const fetchImpl = options.fetchImpl ?? fetch
+  const tagExists = options.tagExists ?? ((repo, releaseTag) => defaultTagExists(repo, releaseTag, fetchImpl))
 
   if (!(await tagExists(repository, tag))) {
-    throw new Error(
-      `Required release tag ${tag} was not found in ${repository}`,
-    );
+    throw new Error(`Required release tag ${tag} was not found in ${repository}`)
   }
 
   for (const path of MANAGED_ASSET_PATHS) {
-    const content = await downloadAsset(repository, tag, path, fetchImpl);
-    const targetPath = join(pluginRoot, path);
-    mkdirSync(dirname(targetPath), { recursive: true });
-    writeFileSync(targetPath, normalizeLineEndings(content));
+    const content = await downloadAsset(repository, tag, path, fetchImpl)
+    const targetPath = join(pluginRoot, path)
+    mkdirSync(dirname(targetPath), { recursive: true })
+    writeFileSync(targetPath, normalizeLineEndings(content))
   }
 
-  const hydratedHash = computeManagedAssetHash(pluginRoot);
+  const hydratedHash = computeManagedAssetHash(pluginRoot)
   if (hydratedHash !== storedHash) {
-    throw new Error(
-      `Hydrated asset hash mismatch: stored ${storedHash}, hydrated ${hydratedHash}`,
-    );
+    throw new Error(`Hydrated asset hash mismatch: stored ${storedHash}, hydrated ${hydratedHash}`)
   }
-  return { status: "hydrated", hash: hydratedHash, tag };
+  return { status: 'hydrated', hash: hydratedHash, tag }
 }
 
-export function installProjectAgent(
-  pluginRoot: string,
-  projectRoot: string,
-): boolean {
-  let changed = false;
+export function installProjectAgent(pluginRoot: string, projectRoot: string): boolean {
+  let changed = false
   for (const relativePath of AGENT_TOML_PATHS) {
-    const sourcePath = join(pluginRoot, relativePath);
-    const targetPath = join(projectRoot, ".codex", relativePath);
+    const sourcePath = join(pluginRoot, relativePath)
+    const targetPath = join(projectRoot, '.codex', relativePath)
     if (!existsSync(sourcePath)) {
-      throw new Error(`Missing managed asset: ${relativePath}`);
+      throw new Error(`Missing managed asset: ${relativePath}`)
     }
-    if (
-      existsSync(targetPath) &&
-      hashContent(readFileSync(targetPath)) ===
-        hashContent(readFileSync(sourcePath))
-    ) {
-      continue;
+    if (existsSync(targetPath) && hashContent(readFileSync(targetPath)) === hashContent(readFileSync(sourcePath))) {
+      continue
     }
-    mkdirSync(dirname(targetPath), { recursive: true });
-    copyFileSync(sourcePath, targetPath);
-    changed = true;
+    mkdirSync(dirname(targetPath), { recursive: true })
+    copyFileSync(sourcePath, targetPath)
+    changed = true
   }
-  return changed;
+  return changed
 }
 
 function countMarkerLines(content: string, marker: string): number {
   return content
-    .replace(/\r\n?/g, "\n")
-    .split("\n")
-    .filter((line) => line === marker).length;
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .filter((line) => line === marker).length
 }
 
 function markerLineIndex(content: string, marker: string): number {
-  const matcher = new RegExp(
-    `(?:^|\\r?\\n)${marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=\\r?\\n|$)`,
-  );
-  const match = matcher.exec(content);
-  if (!match) return -1;
-  return (
-    match.index +
-    (match[0].startsWith("\r\n") ? 2 : match[0].startsWith("\n") ? 1 : 0)
-  );
+  const matcher = new RegExp(`(?:^|\\r?\\n)${marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\r?\\n|$)`)
+  const match = matcher.exec(content)
+  if (!match) return -1
+  return match.index + (match[0].startsWith('\r\n') ? 2 : match[0].startsWith('\n') ? 1 : 0)
 }
 
-function newlineFor(content: string): "\r\n" | "\n" {
-  return content.includes("\r\n") ? "\r\n" : "\n";
+function newlineFor(content: string): '\r\n' | '\n' {
+  return content.includes('\r\n') ? '\r\n' : '\n'
 }
 
-function normalizeTemplate(content: string, newline: "\r\n" | "\n"): string {
-  return `${content.replace(/\r\n?/g, "\n").trimEnd().replaceAll("\n", newline)}${newline}`;
+function normalizeTemplate(content: string, newline: '\r\n' | '\n'): string {
+  return `${content.replace(/\r\n?/g, '\n').trimEnd().replaceAll('\n', newline)}${newline}`
 }
 
-export function syncProjectGitignore(
-  pluginRoot: string,
-  projectRoot: string,
-): SyncProjectGitignoreResult {
-  const sourcePath = join(pluginRoot, PROJECT_GITIGNORE_TEMPLATE_PATH);
+export function syncProjectGitignore(pluginRoot: string, projectRoot: string): SyncProjectGitignoreResult {
+  const sourcePath = join(pluginRoot, PROJECT_GITIGNORE_TEMPLATE_PATH)
   if (!existsSync(sourcePath)) {
     return {
-      status: "skipped",
+      status: 'skipped',
       warning: `Missing managed asset: ${PROJECT_GITIGNORE_TEMPLATE_PATH}; project .gitignore was not modified`,
-    };
+    }
   }
 
-  const sourceContent = readFileSync(sourcePath, "utf-8");
+  const sourceContent = readFileSync(sourcePath, 'utf-8')
   if (
     countMarkerLines(sourceContent, PROJECT_GITIGNORE_START) !== 1 ||
     countMarkerLines(sourceContent, PROJECT_GITIGNORE_END) !== 1 ||
-    markerLineIndex(sourceContent, PROJECT_GITIGNORE_START) >=
-      markerLineIndex(sourceContent, PROJECT_GITIGNORE_END)
+    markerLineIndex(sourceContent, PROJECT_GITIGNORE_START) >= markerLineIndex(sourceContent, PROJECT_GITIGNORE_END)
   ) {
     return {
-      status: "skipped",
+      status: 'skipped',
       warning: `Managed template markers are invalid; project .gitignore was not modified`,
-    };
+    }
   }
 
-  const targetPath = join(projectRoot, ".devopsflow", ".gitignore");
+  const targetPath = join(projectRoot, '.devopsflow', '.gitignore')
   if (!existsSync(targetPath)) {
-    mkdirSync(dirname(targetPath), { recursive: true });
-    writeFileSync(targetPath, normalizeTemplate(sourceContent, "\n"));
-    return { status: "created" };
+    mkdirSync(dirname(targetPath), { recursive: true })
+    writeFileSync(targetPath, normalizeTemplate(sourceContent, '\n'))
+    return { status: 'created' }
   }
 
-  const currentContent = readFileSync(targetPath, "utf-8");
-  const newline = newlineFor(currentContent);
-  const managedBlock = normalizeTemplate(sourceContent, newline);
-  const startCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_START);
-  const endCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_END);
-  let updatedContent: string;
+  const currentContent = readFileSync(targetPath, 'utf-8')
+  const newline = newlineFor(currentContent)
+  const managedBlock = normalizeTemplate(sourceContent, newline)
+  const startCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_START)
+  const endCount = countMarkerLines(currentContent, PROJECT_GITIGNORE_END)
+  let updatedContent: string
 
   if (startCount === 0 && endCount === 0) {
-    const prefix = currentContent.trimEnd();
-    updatedContent = prefix
-      ? `${prefix}${newline}${newline}${managedBlock}`
-      : managedBlock;
+    const prefix = currentContent.trimEnd()
+    updatedContent = prefix ? `${prefix}${newline}${newline}${managedBlock}` : managedBlock
   } else if (startCount === 1 && endCount === 1) {
-    const startIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_START);
-    const endIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_END);
+    const startIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_START)
+    const endIndex = markerLineIndex(currentContent, PROJECT_GITIGNORE_END)
     if (startIndex < 0 || endIndex < startIndex) {
       return {
-        status: "skipped",
+        status: 'skipped',
         warning: `Managed project .gitignore markers are malformed; file was not modified`,
-      };
+      }
     }
-    const blockEnd = endIndex + PROJECT_GITIGNORE_END.length;
-    const trailingNewlineLength = currentContent.startsWith("\r\n", blockEnd)
-      ? 2
-      : currentContent.startsWith("\n", blockEnd)
-        ? 1
-        : 0;
-    updatedContent = `${currentContent.slice(0, startIndex)}${managedBlock}${currentContent.slice(blockEnd + trailingNewlineLength)}`;
+    const blockEnd = endIndex + PROJECT_GITIGNORE_END.length
+    const trailingNewlineLength = currentContent.startsWith('\r\n', blockEnd) ? 2 : currentContent.startsWith('\n', blockEnd) ? 1 : 0
+    updatedContent = `${currentContent.slice(0, startIndex)}${managedBlock}${currentContent.slice(blockEnd + trailingNewlineLength)}`
   } else {
     return {
-      status: "skipped",
+      status: 'skipped',
       warning: `Managed project .gitignore markers are malformed; file was not modified`,
-    };
+    }
   }
 
-  if (updatedContent === currentContent) return { status: "already-current" };
-  writeFileSync(targetPath, updatedContent);
-  return { status: "updated" };
+  if (updatedContent === currentContent) return { status: 'already-current' }
+  writeFileSync(targetPath, updatedContent)
+  return { status: 'updated' }
 }
 
-function projectRootFromPayload(
-  payload: HookPayload | null,
-): string | undefined {
-  return typeof payload?.cwd === "string" && payload.cwd.trim()
-    ? payload.cwd
-    : undefined;
+function projectRootFromPayload(payload: HookPayload | null): string | undefined {
+  return typeof payload?.cwd === 'string' && payload.cwd.trim() ? payload.cwd : undefined
 }
 
 function defaultPluginRoot(): string {
-  return resolve(import.meta.dir, "../../..");
+  return resolve(import.meta.dir, '../../..')
 }
 
-function printCheckMismatch(
-  mismatch: HashMismatch,
-  error: (message: string) => void,
-): void {
-  error("DevopsFlow Codex asset hash mismatch.");
-  error(`stored hash:  ${mismatch.storedHash}`);
-  error(`correct hash: ${mismatch.correctHash}`);
-  error(`update with:   ${mismatch.updateCommand}`);
+function printCheckMismatch(mismatch: HashMismatch, error: (message: string) => void): void {
+  error('DevopsFlow Codex asset hash mismatch.')
+  error(`stored hash:  ${mismatch.storedHash}`)
+  error(`correct hash: ${mismatch.correctHash}`)
+  error(`update with:   ${mismatch.updateCommand}`)
 }
 
-export async function runCli(
-  args: string[] = process.argv.slice(2),
-  payload: HookPayload | null = null,
-): Promise<number> {
-  const command = args[0] ?? "check";
-  const pluginRoot = process.env.PLUGIN_ROOT || defaultPluginRoot();
+export async function runCli(args: string[] = process.argv.slice(2), payload: HookPayload | null = null): Promise<number> {
+  const command = args[0] ?? 'check'
+  const pluginRoot = process.env.PLUGIN_ROOT || defaultPluginRoot()
 
   try {
-    if (command === "compute") {
-      console.log(computeManagedAssetHash(pluginRoot));
-      return 0;
+    if (command === 'compute') {
+      console.log(computeManagedAssetHash(pluginRoot))
+      return 0
     }
-    if (command === "compute-subagents") {
-      console.log(computeSubagentHash(pluginRoot));
-      return 0;
+    if (command === 'compute-subagents') {
+      console.log(computeSubagentHash(pluginRoot))
+      return 0
     }
-    if (command === "check") {
-      const mismatch = checkManagedAssetHash(pluginRoot);
+    if (command === 'check') {
+      const mismatch = checkManagedAssetHash(pluginRoot)
       if (mismatch) {
-        printCheckMismatch(mismatch, console.error);
-        return 1;
+        printCheckMismatch(mismatch, console.error)
+        return 1
       }
-      const subagentMismatch = checkSubagentHash(pluginRoot);
+      const subagentMismatch = checkSubagentHash(pluginRoot)
       if (subagentMismatch) {
-        printCheckMismatch(subagentMismatch, console.error);
-        return 1;
+        printCheckMismatch(subagentMismatch, console.error)
+        return 1
       }
-      return 0;
+      return 0
     }
-    if (command === "hydrate") {
-      await hydrateManagedAssets(pluginRoot);
-      const projectRoot = projectRootFromPayload(payload);
-      if (projectRoot) installProjectAgent(pluginRoot, projectRoot);
-      return 0;
+    if (command === 'hydrate') {
+      await hydrateManagedAssets(pluginRoot)
+      const projectRoot = projectRootFromPayload(payload)
+      if (projectRoot) installProjectAgent(pluginRoot, projectRoot)
+      return 0
     }
-    if (command === "sync-project-gitignore") {
-      const projectRoot = projectRootFromPayload(payload);
-      if (!projectRoot) return 0;
-      const result = syncProjectGitignore(pluginRoot, projectRoot);
-      if (result.warning) console.warn(result.warning);
-      return 0;
+    if (command === 'sync-project-gitignore') {
+      const projectRoot = projectRootFromPayload(payload)
+      if (!projectRoot) return 0
+      const result = syncProjectGitignore(pluginRoot, projectRoot)
+      if (result.warning) console.warn(result.warning)
+      return 0
     }
-    if (command === "sync-staged") {
-      const result = syncStagedManagedAssetHash(pluginRoot);
-      console.log(`Managed Codex asset hash: ${result.hash}`);
-      console.log(`Managed subagent hash: ${result.subagentHash}`);
-      return 0;
+    if (command === 'sync-staged') {
+      const result = syncStagedManagedAssetHash(pluginRoot)
+      console.log(`Managed Codex asset hash: ${result.hash}`)
+      console.log(`Managed subagent hash: ${result.subagentHash}`)
+      return 0
     }
-    if (command === "check-versions-staged") {
-      const result = checkStagedVersionAlignment(pluginRoot);
-      console.log(`All staged versions aligned: ${result.version}`);
-      return 0;
+    if (command === 'check-versions-staged') {
+      const result = checkStagedVersionAlignment(pluginRoot)
+      console.log(`All staged versions aligned: ${result.version}`)
+      return 0
     }
-    console.error(`Unknown command: ${command}`);
+    if (command === 'sync-versions-staged') {
+      const result = syncStagedVersionAlignment(pluginRoot)
+      console.log(`Staged release versions synchronized: ${result.version}`)
+      return 0
+    }
+    console.error(`Unknown command: ${command}`)
     console.error(
-      "Usage: df-codex-assets.ts <check-versions-staged|compute|compute-subagents|check|hydrate|sync-project-gitignore|sync-staged>",
-    );
-    return 2;
+      'Usage: df-codex-assets.ts <check-versions-staged|compute|compute-subagents|check|hydrate|sync-project-gitignore|sync-staged|sync-versions-staged>',
+    )
+    return 2
   } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
-    return 1;
+    console.error(error instanceof Error ? error.message : String(error))
+    return 1
   }
 }
 
 if (import.meta.main) {
-  const payload = process.stdin.isTTY ? null : readScriptPayload();
+  const payload = process.stdin.isTTY ? null : readScriptPayload()
   process.exit(
     await runLoggedScriptAsync(
       {
-        details: { command: process.argv[2] ?? "check" },
+        details: { command: process.argv[2] ?? 'check' },
         payload,
-        scriptName: "df-codex-assets",
+        scriptName: 'df-codex-assets',
       },
       () => runCli(undefined, payload),
     ),
-  );
+  )
 }

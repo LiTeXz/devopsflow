@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Engineering Workflow Route"
+  short_description: "强制 development 工程 workflow route. 在 software development, refactor, 缺陷 fix, domain 建模, Glue Coding, API or 授权设计, code 审查, 验证, 分支收尾 or commit ready 开始时, 对 task category 并选择必需的 skills."
+  default_prompt: "使用 $df-dev-engineering-workflow-route 对此工程 task category, 并在开始 work 前选择强制 skills."

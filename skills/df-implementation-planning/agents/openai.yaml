@@ -1,4 +1,4 @@
 interface:
   display_name: "Implementation Planning"
-  short_description: "编码前编写具体的小步实施计划。适用于多步功能、缺陷修复、重构、DDD-to-TDD 交接、风险行为变更，或任何需要在实现前明确文件、命令、预期 RED/GREEN 结果、验证步骤和完成标准的工程任务。"
-  default_prompt: "使用 $df-implementation-planning 生成包含文件、命令和预期结果的分步实施计划。"
+  short_description: "code 前 write 具体的小步实施计划. 适用于多步 feature, 缺陷 fix, refactor, DDD-to-TDD 交接, 风险行为 change, or 任何需要在 implementation 前明确 file, 命令, 预期 RED/GREEN result, 验证步骤 and 完成标准的工程 task."
+  default_prompt: "使用 $df-implementation-planning generate include file, 命令 and 预期 result 的分步实施计划."

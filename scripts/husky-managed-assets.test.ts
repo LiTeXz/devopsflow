@@ -1,187 +1,225 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import {
-  AGENT_TOML_PATHS,
-  computeManagedAssetHash,
-  HASH_FILE_PATH,
-  MANAGED_ASSET_PATHS,
-} from "../skills/df-codex-assets/scripts/df-codex-assets";
+import { afterEach, describe, expect, it } from 'bun:test'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { AGENT_TOML_PATHS, computeManagedAssetHash, HASH_FILE_PATH, MANAGED_ASSET_PATHS } from '../skills/df-codex-assets/scripts/df-codex-assets'
+import { checkStagedSkillVersions } from './check-staged-skill-versions'
 
-const AGENT_EOF_MARKER = "# DF_AGENT_EOF";
+const AGENT_EOF_MARKER = '# DF_AGENT_EOF'
 
-const ROOT = join(import.meta.dir, "..");
-const tempRoots: string[] = [];
+const ROOT = join(import.meta.dir, '..')
+const tempRoots: string[] = []
 
 afterEach(() => {
   for (const root of tempRoots.splice(0)) {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true })
   }
-});
+})
 
 function createRepository(): string {
-  const root = mkdtempSync(join(tmpdir(), "devopsflow-husky-hash-"));
-  tempRoots.push(root);
+  const root = mkdtempSync(join(tmpdir(), 'devopsflow-husky-hash-'))
+  tempRoots.push(root)
   for (const path of MANAGED_ASSET_PATHS) {
-    const absolutePath = join(root, path);
-    mkdirSync(dirname(absolutePath), { recursive: true });
-    writeFileSync(absolutePath, `baseline:${path}\n`);
+    const absolutePath = join(root, path)
+    mkdirSync(dirname(absolutePath), { recursive: true })
+    writeFileSync(absolutePath, `baseline:${path}\n`)
   }
-  writeFileSync(
-    join(root, "package.json"),
-    JSON.stringify({ version: "1.0.0" }),
-  );
-  const pluginPath = join(root, ".codex-plugin", "plugin.json");
-  mkdirSync(dirname(pluginPath), { recursive: true });
-  writeFileSync(pluginPath, JSON.stringify({ version: "1.0.0" }));
+  writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '1.0.0' }))
+  const pluginPath = join(root, '.codex-plugin', 'plugin.json')
+  mkdirSync(dirname(pluginPath), { recursive: true })
+  writeFileSync(pluginPath, JSON.stringify({ version: '1.0.0' }))
   for (const path of AGENT_TOML_PATHS) {
-    writeFileSync(
-      join(root, path),
-      '# devopsflow-version = "1.0.0"\nname = "test-agent"\n',
-    );
+    writeFileSync(join(root, path), '# devopsflow-version = "1.0.0"\nname = "test-agent"\n')
   }
-  const hashPath = join(root, HASH_FILE_PATH);
-  mkdirSync(dirname(hashPath), { recursive: true });
-  writeFileSync(hashPath, "baseline-hash\n");
-  git(root, "init");
-  git(root, "config", "user.email", "test@example.com");
-  git(root, "config", "user.name", "DevopsFlow Test");
-  git(root, "add", ".");
-  git(root, "commit", "--no-verify", "-m", "test: baseline");
-  return root;
+  const hashPath = join(root, HASH_FILE_PATH)
+  mkdirSync(dirname(hashPath), { recursive: true })
+  writeFileSync(hashPath, 'baseline-hash\n')
+  git(root, 'init')
+  git(root, 'config', 'user.email', 'test@example.com')
+  git(root, 'config', 'user.name', 'DevopsFlow Test')
+  git(root, 'add', '.')
+  git(root, 'commit', '--no-verify', '-m', 'test: baseline')
+  return root
 }
 
 function git(root: string, ...args: string[]): string {
   const result = Bun.spawnSync({
-    cmd: ["git", ...args],
+    cmd: ['git', ...args],
     cwd: root,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+    stderr: 'pipe',
+    stdout: 'pipe',
+  })
   if (result.exitCode !== 0) {
-    throw new Error(result.stderr.toString());
+    throw new Error(result.stderr.toString())
   }
-  return result.stdout.toString().trim();
+  return result.stdout.toString().trim()
 }
 
-describe("Husky managed asset hash", () => {
-  it("manages every distributable subagent TOML", () => {
+function writeSkill(root: string, skill: string, version: string, body = 'baseline'): string {
+  const path = join(root, 'skills', skill, 'SKILL.md')
+  mkdirSync(dirname(path), { recursive: true })
+  writeFileSync(path, ['---', `name: ${skill}`, `version: "${version}"`, 'metadata:', `  version: "${version}"`, '---', '', body, ''].join('\n'))
+  return path
+}
+
+describe('Husky managed asset hash', () => {
+  it('requires a changed staged skill to increment both version fields once', () => {
+    const root = createRepository()
+    writeSkill(root, 'df-example', '1.2.3')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+    git(root, 'commit', '--no-verify', '-m', 'test: add skill')
+
+    writeSkill(root, 'df-example', '1.2.3', 'changed')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+
+    expect(checkStagedSkillVersions(root)).toEqual(['skills/df-example/SKILL.md'])
+    expect(git(root, 'show', ':skills/df-example/SKILL.md')).toContain('version: "1.2.4"')
+  })
+
+  it('accepts a changed staged skill when both version fields increment once', () => {
+    const root = createRepository()
+    writeSkill(root, 'df-example', '1.2.3')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+    git(root, 'commit', '--no-verify', '-m', 'test: add skill')
+
+    writeSkill(root, 'df-example', '1.2.4', 'changed')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+
+    expect(checkStagedSkillVersions(root)).toEqual(['skills/df-example/SKILL.md'])
+  })
+
+  it('ignores unstaged skill changes', () => {
+    const root = createRepository()
+    writeSkill(root, 'df-example', '1.2.3')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+    git(root, 'commit', '--no-verify', '-m', 'test: add skill')
+
+    writeSkill(root, 'df-example', '1.2.3', 'unstaged change')
+
+    expect(checkStagedSkillVersions(root)).toEqual([])
+  })
+
+  it('manages every distributable subagent TOML', () => {
     expect(AGENT_TOML_PATHS).toEqual([
-      "agents/df-dev-backend-engineer.toml",
-      "agents/df-dev-backend-test-engineer.toml",
-      "agents/df-dev-database-steward.toml",
-      "agents/df-doc-documentation-writer.toml",
-      "agents/df-dev-frontend-engineer.toml",
-      "agents/df-dev-frontend-test-engineer.toml",
-      "agents/df-ops-artifact-manager.toml",
-      "agents/df-ops-vcs-manager.toml",
-    ]);
-  });
+      'agents/df-dev-backend-engineer.toml',
+      'agents/df-dev-backend-test-engineer.toml',
+      'agents/df-dev-database-steward.toml',
+      'agents/df-doc-documentation-writer.toml',
+      'agents/df-dev-frontend-engineer.toml',
+      'agents/df-dev-frontend-test-engineer.toml',
+      'agents/df-ops-artifact-manager.toml',
+      'agents/df-ops-vcs-manager.toml',
+    ])
+  })
 
-  it("requires every distributable subagent TOML to end with its EOF marker", () => {
+  it('requires every distributable subagent TOML to end with its EOF marker', () => {
     for (const path of AGENT_TOML_PATHS) {
-      expect(readFileSync(join(ROOT, path), "utf-8").trimEnd()).toEndWith(
-        AGENT_EOF_MARKER,
-      );
+      expect(readFileSync(join(ROOT, path), 'utf-8').trimEnd()).toEndWith(AGENT_EOF_MARKER)
     }
-  });
+  })
 
-  it("blocks a commit when staged versions are not aligned", () => {
-    const root = createRepository();
-    const pluginPath = join(root, ".codex-plugin", "plugin.json");
-    writeFileSync(pluginPath, JSON.stringify({ version: "2.0.0" }));
-    git(root, "add", ".codex-plugin/plugin.json");
+  it('blocks a commit when staged versions are not aligned', () => {
+    const root = createRepository()
+    const pluginPath = join(root, '.codex-plugin', 'plugin.json')
+    writeFileSync(pluginPath, JSON.stringify({ version: '2.0.0' }))
+    git(root, 'add', '.codex-plugin/plugin.json')
 
-    const result = runAssetCli(root, "check-versions-staged");
+    const result = runAssetCli(root, 'check-versions-staged')
 
-    expect(result.exitCode).toBe(1);
-    expect(result.stderr.toString()).toContain(
-      "Version mismatch: package.json=1.0.0, plugin.json=2.0.0",
-    );
-  });
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr.toString()).toContain('Version mismatch: package.json=1.0.0, plugin.json=2.0.0')
+  })
 
-  it("syncs and stages a hash for the exact Git index contents", () => {
-    const root = createRepository();
-    const managedPath = MANAGED_ASSET_PATHS[0];
-    const absolutePath = join(root, managedPath);
-    writeFileSync(absolutePath, "staged version\n");
-    git(root, "add", managedPath);
-    const expectedHash = computeManagedAssetHash(root);
-    writeFileSync(absolutePath, "unstaged version\n");
+  it('syncs and stages release versions from the staged package version', () => {
+    const root = createRepository()
+    const packagePath = join(root, 'package.json')
+    writeFileSync(packagePath, JSON.stringify({ version: '2.0.0' }))
+    git(root, 'add', 'package.json')
+
+    const result = runAssetCli(root, 'sync-versions-staged')
+
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(result.stdout.toString()).toContain('Staged release versions synchronized: 2.0.0')
+    expect(JSON.parse(git(root, 'show', ':.codex-plugin/plugin.json')).version).toBe('2.0.0')
+    for (const path of AGENT_TOML_PATHS) {
+      expect(git(root, 'show', `:${path}`)).toContain('# devopsflow-version = "2.0.0"')
+    }
+    expect(runAssetCli(root, 'check-versions-staged').exitCode).toBe(0)
+  })
+
+  it('preserves unstaged release metadata while synchronizing the Git index', () => {
+    const root = createRepository()
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '2.0.0' }))
+    git(root, 'add', 'package.json')
+    const pluginPath = join(root, '.codex-plugin', 'plugin.json')
+    writeFileSync(pluginPath, JSON.stringify({ version: '1.0.0', note: 'keep unstaged' }))
+    const agentPath = AGENT_TOML_PATHS[0]
+    writeFileSync(join(root, agentPath), '# devopsflow-version = "1.0.0"\nname = "unstaged-agent"\n')
+
+    const result = runAssetCli(root, 'sync-versions-staged')
+
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(JSON.parse(readFileSync(pluginPath, 'utf-8'))).toEqual({ version: '1.0.0', note: 'keep unstaged' })
+    expect(JSON.parse(git(root, 'show', ':.codex-plugin/plugin.json'))).toEqual({ version: '2.0.0' })
+    expect(readFileSync(join(root, agentPath), 'utf-8')).toContain('name = "unstaged-agent"')
+    expect(git(root, 'show', `:${agentPath}`)).toBe('# devopsflow-version = "2.0.0"\nname = "test-agent"')
+  })
+
+  it('syncs and stages a hash for the exact Git index contents', () => {
+    const root = createRepository()
+    const managedPath = MANAGED_ASSET_PATHS[0]
+    const absolutePath = join(root, managedPath)
+    writeFileSync(absolutePath, 'staged version\n')
+    git(root, 'add', managedPath)
+    const expectedHash = computeManagedAssetHash(root)
+    writeFileSync(absolutePath, 'unstaged version\n')
 
     const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        join(
-          ROOT,
-          "skills",
-          "df-codex-assets",
-          "scripts",
-          "df-codex-assets.ts",
-        ),
-        "sync-staged",
-      ],
+      cmd: [process.execPath, join(ROOT, 'skills', 'df-codex-assets', 'scripts', 'df-codex-assets.ts'), 'sync-staged'],
       cwd: root,
       env: { ...process.env, PLUGIN_ROOT: root },
-      stderr: "pipe",
-      stdout: "pipe",
-    });
+      stderr: 'pipe',
+      stdout: 'pipe',
+    })
 
-    expect(result.exitCode, result.stderr.toString()).toBe(0);
-    expect(result.stdout.toString()).toContain(expectedHash);
-    expect(readFileSync(absolutePath, "utf-8")).toBe("unstaged version\n");
-    expect(git(root, "show", `:${managedPath}`)).toBe("staged version");
-    expect(git(root, "show", `:${HASH_FILE_PATH}`)).toBe(expectedHash);
-    expect(git(root, "diff", "--cached", "--name-only")).toContain(
-      HASH_FILE_PATH,
-    );
-  });
+    expect(result.exitCode, result.stderr.toString()).toBe(0)
+    expect(result.stdout.toString()).toContain(expectedHash)
+    expect(readFileSync(absolutePath, 'utf-8')).toBe('unstaged version\n')
+    expect(git(root, 'show', `:${managedPath}`)).toBe('staged version')
+    expect(git(root, 'show', `:${HASH_FILE_PATH}`)).toBe(expectedHash)
+    expect(git(root, 'diff', '--cached', '--name-only')).toContain(HASH_FILE_PATH)
+  })
 
-  it("configures Husky quality and managed asset gates before commit", () => {
-    const packageJson = JSON.parse(
-      readFileSync(join(ROOT, "package.json"), "utf-8"),
-    ) as {
-      devDependencies?: Record<string, string>;
-      scripts?: Record<string, string>;
-    };
-    const hookPath = join(ROOT, ".husky", "pre-commit");
+  it('configures Husky quality and managed asset gates before commit', () => {
+    const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8')) as {
+      devDependencies?: Record<string, string>
+      scripts?: Record<string, string>
+    }
+    const hookPath = join(ROOT, '.husky', 'pre-commit')
 
-    expect(packageJson.scripts?.prepare).toBe("husky");
-    expect(packageJson.devDependencies?.husky).toBeDefined();
-    expect(existsSync(hookPath)).toBe(true);
-    expect(readFileSync(hookPath, "utf-8").trim()).toBe(
+    expect(packageJson.scripts?.prepare).toBe('husky')
+    expect(packageJson.devDependencies?.husky).toBeDefined()
+    expect(existsSync(hookPath)).toBe(true)
+    expect(readFileSync(hookPath, 'utf-8').trim()).toBe(
       [
-        "bun scripts/ensure-skill-eof.ts",
-        "bun run format:check",
-        "bun run lint",
-        "bun skills/df-codex-assets/scripts/df-codex-assets.ts check-versions-staged",
-        "bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged",
-      ].join("\n"),
-    );
-  });
-});
+        'bun run check:skill-eof',
+        'bun run format:markdown:staged',
+        'bun run format:check',
+        'bun run lint',
+        'bun run check:skill-versions',
+        'bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-versions-staged',
+        'bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged',
+      ].join('\n'),
+    )
+  })
+})
 
-function runAssetCli(
-  root: string,
-  command: string,
-): Bun.ReadableSyncSubprocess {
+function runAssetCli(root: string, command: string): Bun.ReadableSyncSubprocess {
   return Bun.spawnSync({
-    cmd: [
-      process.execPath,
-      join(ROOT, "skills", "df-codex-assets", "scripts", "df-codex-assets.ts"),
-      command,
-    ],
+    cmd: [process.execPath, join(ROOT, 'skills', 'df-codex-assets', 'scripts', 'df-codex-assets.ts'), command],
     cwd: root,
     env: { ...process.env, PLUGIN_ROOT: root },
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+    stderr: 'pipe',
+    stdout: 'pipe',
+  })
 }

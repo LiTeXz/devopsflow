@@ -1,6 +1,6 @@
 {
   "name": "devopsflow",
-  "version": "0.2.28",
+  "version": "0.2.30",
   "description": "DevopsFlow engineering workflow and agent harness for Codex, combining skills, hooks, MCP integration, specialized agents, execution constraints, and feedback loops.",
   "author": {
     "name": "LiTeXz",
@@ -9,16 +9,7 @@
   "homepage": "https://github.com/LiTeXz/devopsflow",
   "repository": "https://github.com/LiTeXz/devopsflow",
   "license": "GPL-3.0-only",
-  "keywords": [
-    "codex",
-    "skills",
-    "hooks",
-    "mcp",
-    "agents",
-    "workflow",
-    "ddd",
-    "tdd"
-  ],
+  "keywords": ["codex", "skills", "hooks", "mcp", "agents", "workflow", "ddd", "tdd"],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.codex.json",
   "interface": {
@@ -32,7 +23,7 @@
     "capabilities": ["Interactive", "Read", "Write"],
     "websiteURL": "https://github.com/LiTeXz/devopsflow",
     "defaultPrompt": [
-      "使用 df-engineering-workflow-router 对此任务分类",
+      "使用 df-dev-engineering-workflow-route 对此任务分类",
       "git 和代码托管任务使用 df-ops-vcs-manager Codex worker session。",
       "创建 DDD 到 TDD 的实施计划",
       "完成前验证此分支"

@@ -32,6 +32,15 @@ codex plugin add devopsflow@devopsflow
 
 安装完成后，重新打开 Codex 任务。
 
+更新 marketplace 快照并刷新插件：
+
+```bash
+codex plugin marketplace upgrade devopsflow
+codex plugin add devopsflow@devopsflow
+```
+
+当前 Codex CLI 没有 `codex plugin update` 子命令；`plugin add` 是已配置 marketplace 中插件的安装/刷新入口。
+
 ### OpenCode
 
 下载本仓库后，在项目的 `opencode.json` 中添加：

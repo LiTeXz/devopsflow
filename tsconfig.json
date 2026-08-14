@@ -13,11 +13,6 @@
     },
     "types": ["bun"]
   },
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "skills/**/*.ts",
-    ".opencode/**/*.ts"
-  ],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "skills/**/*.ts", ".opencode/**/*.ts", "hooks/**/*.ts"],
   "exclude": ["node_modules"]
 }

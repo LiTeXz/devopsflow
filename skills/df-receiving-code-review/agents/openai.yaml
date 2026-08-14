@@ -1,4 +1,4 @@
 interface:
   display_name: "Receiving Code Review"
-  short_description: "安全处理代码审查反馈。当 Codex 收到 PR 评论、审查线程、变更请求、行内代码审查反馈或维护者建议，需要对评论分类、决定修复或讨论、应用聚焦变更、验证每项修复并避免无关重构时使用。"
-  default_prompt: "使用 $df-receiving-code-review 对审查评论分类，应用聚焦修复，并验证每个已解决的问题。"
+  short_description: "安全处理 code 审查反馈. 当 Codex 收到 PR 评论, 审查线程, change 请求, 行内 code 审查反馈 or 维护者建议, 需要对评论 category, 决定 fix or 讨论, 应用聚焦 change, 验证每项 fix 并避免无关 refactor 时使用."
+  default_prompt: "使用 $df-receiving-code-review 对审查评论 category, 应用聚焦 fix, 并验证每个已解决的问题."

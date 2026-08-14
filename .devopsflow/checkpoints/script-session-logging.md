@@ -19,7 +19,7 @@
 ## Workflow Chain
 
 ```text
-df-engineering-workflow-router
+df-dev-engineering-workflow-route
   -> df-resumable-workflow-guard
   -> df-glue-coding
   -> df-implementation-planning
@@ -32,7 +32,7 @@ df-engineering-workflow-router
 
 - In scope: `hooks/hooks.codex.json` 当前入口及仓库 9 个非测试 TypeScript 脚本的生命周期、输出和异常日志
 - Out of scope: `*.test.ts`、业务行为重构、hook 阻断策略调整、日志轮转和上传
-- User-owned changes: `.editorconfig`、`.gitignore`、`scripts/prevent-main-agent-write.test.ts`、`skills/df-codex-assets/assets/hash.txt`、`skills/df-ddd-event-storming-design/SKILL.md`、`skills/df-tdd-skill/**`、`src/shared/command-parser.ts`、`scripts/runtime-migration.test.ts`
+- User-owned changes: `.editorconfig`、`.gitignore`、`hooks/subagent/prevent-main-agent-write.test.ts`、`skills/df-codex-assets/assets/hash.txt`、`skills/df-ddd-event-storming-design/SKILL.md`、`skills/df-tdd-skill/**`、`src/shared/command-parser.ts`、`scripts/runtime-migration.test.ts`
 
 ## Checklist
 

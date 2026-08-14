@@ -10,4 +10,7 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.jar binary
+*.sqlite binary
+*.sqlite3 binary
+*.db binary
 * text=auto eol=lf

@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Assets"
-  short_description: "在其他 hook 运行前，将 DevopsFlow Codex hook 运行时资产引导至已安装的插件镜像。"
-  default_prompt: "使用 $df-codex-assets。"
+  short_description: "在 other hook run 前, 将 DevopsFlow Codex hook runtime 资产引导至已 install 的 plugin 镜像."
+  default_prompt: "使用 $df-codex-assets."

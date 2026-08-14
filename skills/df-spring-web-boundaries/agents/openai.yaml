@@ -1,4 +1,4 @@
 interface:
   display_name: "Spring Web Boundaries"
-  short_description: "用于 Java/Spring Boot 重构的 Spring Web boundary guardrail。当 Codex 修改 Spring 应用中的 controller、REST endpoint、request/response mapping、validation、security、文件上传/下载、export 或 service/controller 分层时使用。这是 TDD skill 的可选架构与技术栈配套 skill；不要将其用作通用 TDD methodology skill。"
-  default_prompt: "修改 Spring controller、endpoint 或 service/controller boundary 时，使用 $df-spring-web-boundaries。"
+  short_description: "用于 Java/Spring Boot refactor 的 Spring Web boundary guardrail. 当 Codex 修改 Spring 应用中的 controller, REST endpoint, request/response mapping, validation, security, file 上传/下载, export or service/controller 分层时使用. 这是 TDD skill 的可选架构 and 技术栈配套 skill; 不要将其用作通用 TDD methodology skill."
+  default_prompt: "修改 Spring controller, endpoint or service/controller boundary 时, 使用 $df-spring-web-boundaries."
