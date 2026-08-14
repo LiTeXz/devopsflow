@@ -4,16 +4,16 @@
 
 - 名称：发布 DevopsFlow 0.2.30
 - 目标：将 `origin/dev` 的 0.2.30 内容通过发布门禁合入 `main`，创建并验证 `v0.2.30` tag、GitHub Release、精确 tag 安装，并同步 `dev`。
-- 状态：active
+- 状态：completed
 - Owner：Codex `/root`
 - 创建时间：2026-08-14 Asia/Shanghai
 - 更新时间：2026-08-14 Asia/Shanghai
 
 ## Resume Cursor
 
-- 当前阶段：发布完成，main/dev 同步待执行
-- 下一步操作：合并 closeout 记录后创建 `main -> dev` 同步 PR。
-- 从此处继续：使用已发布的 `94fb094d384fe9028ed1beec95a3b1f048eb7bd4` 作为同步源，不要重复创建 tag 或 Release。
+- 当前阶段：completed
+- 下一步操作：无。
+- 从此处继续：无需继续；`v0.2.30` 发布、exact-tag 安装和 `main/dev` 同步均已完成。
 - 不要重做：版本号已由提交 `33a5d90` 同步到 `0.2.30`；不要重复修改版本文件。
 
 ## Workflow Chain
@@ -41,7 +41,7 @@ df-dev-engineering-workflow-route
 - [x] R3 - 创建并合并 `dev -> main` 发布 PR（PR #82，merge `94fb094d384fe9028ed1beec95a3b1f048eb7bd4`）。
 - [x] R4 - 推送 `v0.2.30` 并等待 tag-specific Version Check（run `31761107160`）。
 - [x] R5 - 创建 GitHub Release 并验证精确 tag 安装（Release `v0.2.30`，local plugin `0.2.30`）。
-- [ ] R6 - 同步 `main` 到 `dev` 并完成最终验证。
+- [x] R6 - 同步 `main` 到 `dev` 并完成最终验证（PR #84，merge `574744955976b6041702747d316c022e71c534d1`）。
 
 ## Touched Files
 
@@ -76,11 +76,13 @@ df-dev-engineering-workflow-route
 | `bun run check:skill-eof` | 0 | skill EOF | 通过 |
 | `bun run check:skill-metadata` | 0 | skill metadata | 通过 |
 | `bun test scripts/version-check-workflow.test.ts` | 0 | tag workflow contract | 通过 |
+| `git merge-base --is-ancestor origin/main origin/dev` | 0 | branch ancestry | `origin/main` 是 `origin/dev` 祖先 |
+| `git show -s --format=%T origin/main` / `origin/dev` | 0 | branch tree | 两者均为 `f707302ac00ce17711a9ba814db4063fa12e4a3e` |
 
 ## Risks And Blockers
 
 - 风险：发布包含 `v0.2.28..origin/dev` 的累计提交，需要以完整本地 gate 和 PR checks 证明可发布。
-- Blocker：无；仅剩 `main -> dev` 同步 PR。
+- Blocker：无。
 
 ## Progress Log
 
@@ -89,9 +91,9 @@ df-dev-engineering-workflow-route
 任务：发布前现状核对。
 变更：仅创建 checkpoint。
 验证：工作区、远端分支、版本源、tag/Release、开放 PR 已核对。
-状态：发布已完成，等待同步。
-证据：PR #82 merged，main=`94fb094d384fe9028ed1beec95a3b1f048eb7bd4`，tag=`v0.2.30`，Version Check run `31761107160` success，Release 已创建，local plugin=`0.2.30`。
-下一步：创建 `main -> dev` 同步 PR。
+状态：completed。
+证据：PR #82/#83/#84 merged，tag=`v0.2.30`，Version Check run `31761107160` success，Release 已创建，local plugin=`0.2.30`，`main/dev` ancestry 与 tree 验证通过。
+下一步：无。
 ```
 
 ## Handoff
