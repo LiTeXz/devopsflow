@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { existsSync, realpathSync } from 'node:fs'
-import { isAbsolute, relative, resolve, sep } from 'node:path'
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { findHookEvent, findToolInput, findToolName, readPayload } from '@/shared/payload'
 import type { Payload } from '@/shared/types'
 
@@ -35,6 +35,31 @@ export function biomeCommand(root: string, paths: string[]): string[] {
   return [process.execPath, resolve(root, 'node_modules', '@biomejs', 'biome', 'bin', 'biome'), 'format', '--write', ...paths]
 }
 
+export function spotlessTaskForPath(path: string): string | undefined {
+  const normalized = path.toLowerCase()
+  if (normalized.endsWith('.gradle.kts')) return 'spotlessGradleApply'
+  if (normalized.endsWith('.gradle')) return 'spotlessGradleApply'
+  if (normalized.endsWith('.java')) return 'spotlessJavaApply'
+  if (normalized.endsWith('.kt')) return 'spotlessKotlinApply'
+  return undefined
+}
+
+export function findGradleWrapper(start: string, platform: NodeJS.Platform = process.platform): { root: string; wrapper: string } | undefined {
+  const wrapperName = platform === 'win32' ? 'gradlew.bat' : 'gradlew'
+  let current = resolve(start)
+  while (true) {
+    const wrapper = resolve(current, wrapperName)
+    if (existsSync(wrapper)) return { root: current, wrapper }
+    const parent = dirname(current)
+    if (parent === current) return undefined
+    current = parent
+  }
+}
+
+export function gradleCommand(wrapper: string, task: string): string[] {
+  return [wrapper, '--no-daemon', task]
+}
+
 export function formatEditedFiles(payload: Payload, formatter: Formatter = runBiome): FormatResult {
   if (
     !POST_TOOL_USE_EVENTS.has(findHookEvent(payload)) ||
@@ -50,21 +75,42 @@ export function formatEditedFiles(payload: Payload, formatter: Formatter = runBi
   const cwd = typeof payload.cwd === 'string' && payload.cwd.trim() ? payload.cwd : process.cwd()
   const root = gitRoot(cwd)
   if (!root) return { formatted: [], warning: 'devopsflow: skipped post-edit formatting because the Git root was unavailable' }
-  if (!hasBiomeConfig(root)) return { formatted: [], warning: undefined }
-
   const paths = extractEditedPaths(command)
     .map((path) => containedRootPath(root, cwd, path))
     .filter((path): path is string => path !== undefined)
   if (!paths.length) return { formatted: [], warning: undefined }
 
-  const result = formatter(paths, root)
-  if (result.exitCode === 0) return { formatted: paths, warning: undefined }
+  const spotlessPaths = paths.filter((path) => spotlessTaskForPath(path))
+  const biomePaths = paths.filter((path) => !spotlessTaskForPath(path))
+  const formatted: string[] = []
+  const warnings: string[] = []
 
-  const detail = result.stderr.trim().replace(/\s+/g, ' ').slice(0, MAX_WARNING_LENGTH)
-  return {
-    formatted: [],
-    warning: `devopsflow: formatter failed for ${paths.join(', ')}${detail ? `: ${detail}` : ''}`,
+  if (biomePaths.length && hasBiomeConfig(root)) {
+    const result = formatter(biomePaths, root)
+    if (result.exitCode === 0) formatted.push(...biomePaths)
+    else warnings.push(formatterWarning(biomePaths, result.stderr))
   }
+
+  if (spotlessPaths.length) {
+    const wrapper = findGradleWrapper(cwd)
+    if (!wrapper) warnings.push(`devopsflow: skipped Spotless formatting for ${spotlessPaths.join(', ')} because no Gradle wrapper was found`)
+    else {
+      const tasks = [...new Set(spotlessPaths.map((path) => spotlessTaskForPath(path)).filter((task): task is string => task !== undefined))]
+      for (const task of tasks) {
+        const result = runGradle(wrapper.wrapper, wrapper.root, task)
+        const taskPaths = spotlessPaths.filter((path) => spotlessTaskForPath(path) === task)
+        if (result.exitCode === 0) formatted.push(...taskPaths)
+        else warnings.push(formatterWarning(taskPaths, result.stderr))
+      }
+    }
+  }
+
+  return { formatted, warning: warnings.length ? warnings.join('; ').slice(0, MAX_WARNING_LENGTH) : undefined }
+}
+
+function formatterWarning(paths: string[], stderr: string): string {
+  const detail = stderr.trim().replace(/\s+/g, ' ').slice(0, MAX_WARNING_LENGTH)
+  return `devopsflow: formatter failed for ${paths.join(', ')}${detail ? `: ${detail}` : ''}`
 }
 
 function toolFailed(response: unknown): boolean {
@@ -101,6 +147,11 @@ function runBiome(paths: string[], cwd: string): FormatterResult {
     cwd,
     stdout: 'ignore',
   })
+  return { exitCode: result.exitCode, stderr: result.stderr.toString() }
+}
+
+function runGradle(wrapper: string, cwd: string, task: string): FormatterResult {
+  const result = Bun.spawnSync({ cmd: gradleCommand(wrapper, task), cwd, stdout: 'ignore' })
   return { exitCode: result.exitCode, stderr: result.stderr.toString() }
 }
 

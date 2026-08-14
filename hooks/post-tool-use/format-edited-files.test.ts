@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { biomeCommand, extractEditedPaths, formatEditedFiles } from './format-edited-files'
+import { biomeCommand, extractEditedPaths, findGradleWrapper, formatEditedFiles, gradleCommand, spotlessTaskForPath } from './format-edited-files'
 
 function initGitRepo(root: string, withBiome = true): void {
   const result = Bun.spawnSync({ cmd: ['git', 'init', '-b', 'codex/test'], cwd: root, stderr: 'ignore', stdout: 'ignore' })
@@ -11,6 +11,56 @@ function initGitRepo(root: string, withBiome = true): void {
 }
 
 describe('PostToolUse edited-file formatter', () => {
+  it('routes JVM and Gradle files to their Spotless tasks', () => {
+    expect(spotlessTaskForPath('src/Main.java')).toBe('spotlessJavaApply')
+    expect(spotlessTaskForPath('src/Main.kt')).toBe('spotlessKotlinApply')
+    expect(spotlessTaskForPath('build.gradle')).toBe('spotlessGradleApply')
+    expect(spotlessTaskForPath('build.gradle.kts')).toBe('spotlessGradleApply')
+    expect(spotlessTaskForPath('src/Main.groovy')).toBeUndefined()
+  })
+
+  it('finds the platform wrapper in an ancestor and builds a no-daemon command', () => {
+    const root = mkdtempSync(join(tmpdir(), 'devopsflow-gradle-wrapper-'))
+    const nested = join(root, 'module', 'src')
+    mkdirSync(nested, { recursive: true })
+    writeFileSync(join(root, 'gradlew'), '#!/bin/sh\n')
+
+    expect(findGradleWrapper(nested, 'linux')).toEqual({ root, wrapper: join(root, 'gradlew') })
+    expect(gradleCommand(join(root, 'gradlew'), 'spotlessJavaApply')).toEqual([join(root, 'gradlew'), '--no-daemon', 'spotlessJavaApply'])
+  })
+
+  it('prefers gradlew.bat on Windows and reports no wrapper when absent', () => {
+    const root = mkdtempSync(join(tmpdir(), 'devopsflow-gradle-wrapper-win-'))
+    const nested = join(root, 'module')
+    mkdirSync(nested, { recursive: true })
+    writeFileSync(join(root, 'gradlew.bat'), '@echo off\r\n')
+
+    expect(findGradleWrapper(nested, 'win32')).toEqual({ root, wrapper: join(root, 'gradlew.bat') })
+    expect(findGradleWrapper(mkdtempSync(join(tmpdir(), 'devopsflow-no-wrapper-')), 'linux')).toBeUndefined()
+  })
+
+  it('runs the matching Spotless task with the Gradle wrapper for JVM files', () => {
+    const root = mkdtempSync(join(tmpdir(), 'devopsflow-spotless-route-'))
+    initGitRepo(root, false)
+    const source = join(root, 'src', 'Main.java')
+    const argsFile = join(root, 'gradle-args.txt')
+    mkdirSync(join(root, 'src'), { recursive: true })
+    writeFileSync(source, 'class Main {}\n')
+    const wrapper = join(root, 'gradlew.bat')
+    writeFileSync(wrapper, `@echo off\necho %* > "${argsFile}"\r\n`)
+
+    const result = formatEditedFiles({
+      cwd: root,
+      hook_event_name: 'PostToolUse',
+      tool_name: 'apply_patch',
+      tool_input: { command: '*** Begin Patch\n*** Update File: src/Main.java\n*** End Patch' },
+      tool_response: {},
+    })
+
+    expect(result).toEqual({ formatted: ['src/Main.java'], warning: undefined })
+    expect(readFileSync(argsFile, 'utf8').trim()).toBe('--no-daemon spotlessJavaApply')
+  })
+
   it('uses only the repository-installed Biome executable', () => {
     const root = process.cwd()
     expect(biomeCommand(root, ['source.ts'])).toEqual([
