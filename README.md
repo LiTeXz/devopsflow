@@ -20,7 +20,7 @@ DevopsFlow 不是单纯的 skills 汇总，而是一组可组合的工程流程�
 
 这些能力共同支持任务路由、长任务检查点、实现与验证，以及受保护分支上的安全协作。
 
-## Installation
+## Installation Plugin or Update Plugin
 
 ### Codex
 
