@@ -1,10 +1,10 @@
 ---
 name: df-dev-tdd
 description: "适用于全新 feature development, 缺陷 fix, 行为保持型 refactor, 特征 tests 以及先刻画后 fix work 的纯 TDD workflow. 当 Codex 需要以 tests 优先的纪律从零构建新行为, or 在不引起行为漂移的前提下修改现有 code 时使用. 适用于各种 language and 架构. 不要用于技术栈专用分层 rule, 仅文档 edit, 简单格式调整, or 不期望产生可 execution 行为的纯探索性原型."
-version: "0.2.31"
+version: "0.2.32"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.31"
+  version: "0.2.32"
 ---
 
 # Dev TDD
@@ -84,7 +84,7 @@ type TddCheckpointEvent =
 
 edit 生产 code 前, 使用 [tdd_start.jsonl](templates/tdd_start.jsonl) output `tdd_start` protocol block, 使流程可 check.
 
-每当观察到重要状态时, 使用 [tdd_state.jsonl](templates/tdd_state.jsonl) 记录新的 `tdd_state` checkpoint event. 它是历史事实, 不是待更新的当前状态快照.
+每当观察到重要状态时, 使用 [tdd_state.jsonl](templates/tdd_state.jsonl) 记录新的 `tdd_state` checkpoint event. 它是 history 事实, 不是待 update 的当前状态快照.
 
 观察到 meaningful RED 后 and edit 生产行为前, 使用 [tdd_boundary_scan.jsonl](templates/tdd_boundary_scan.jsonl) append `tdd_boundary_scan`. 它记录从反例脑暴中发现的边界以及 each candidate 的处置, 不替代 focused tests.
 
@@ -95,8 +95,8 @@ edit 生产 code 前, 使用 [tdd_start.jsonl](templates/tdd_start.jsonl) output
 
 此 skill 无法注册 platform 级自动 hook. 使用时, 必须在固定阶段主动 run install 后 skill 根 directory 中的 `append-tdd-checkpoint.ts` and `validate-tdd-protocol.ts`:
 
-- if target project 已 enable `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`, passed `append-tdd-checkpoint.ts --checkpoint <path>` 将每个 protocol block 作为新行追加. 该 helper 仅以 append mode 打开 file; 不得修改、替换或删除任何已写入的行, 也不得用 apply patch, editor or write/truncate API 重写整个 file.
-- checkpoint file 是 append-only 永久审计日志. 当前 phase 只能由按顺序读取 events 推导, 不得存储 or 更新单一的 current state snapshot. 证据需要纠正时追加同 phase 的新 event 并说明它修正哪条证据, 不得改写旧 event.
+- if target project 已 enable `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl`, passed `append-tdd-checkpoint.ts --checkpoint <path>` 将每个 protocol block 作为新行追加. 该 helper 仅以 append mode 打开 file; 不得修改, 替换 or 删除任何已 write 的行, 也不得用 apply patch, editor or write/truncate API 重 write 整个 file.
+- checkpoint file 是 append-only 永久审计日志. 当前 phase 只能由按顺序读取 events 推导, 不得存储 or update single current state snapshot. 证据需要纠正时追加同 phase 的新 event 并说明它修正哪条证据, 不得 rewrite 旧 event.
 - directory 不存在时不要擅自 create DevopsFlow 专属结构, 先记录替代审计位置 or 请求确认.
 - edit 生产 code 前: output `tdd_start`, 然后 run `--stage before_edit`.`validation failed` 时, 先补全声明再 edit 生产 code.
 - 观察到 RED 后: output `tdd_state`, append `tdd_boundary_scan`, 然后 run `--stage state`. scan 必须位于 `red_observed` after and `green_reached` before.
@@ -126,7 +126,7 @@ edit 生产 code 前, 使用 [tdd_start.jsonl](templates/tdd_start.jsonl) output
    - if tests 因 tests 本身有问题而报错, fix tests, 直至它因 target 风险而失败.
    - if tests 立即 passed, 停止操作; 在 edit 生产 code 前, 先证明它能够因 target 风险而失败.
 6. run Boundary Discovery Burst, append `tdd_boundary_scan`, 并确定最多 1 个 `current_slice` candidate.
-7. 仅实现当前 focused RED and selected `current_slice` 达到 `green_reached` 所需的最小生产 change.
+7. 仅 implementation 当前 focused RED and selected `current_slice` 达到 `green_reached` 所需的最小生产 change.
 8. 在 `green_reached` 后 refactor; 处于 `red_observed` 时不要进行结构清理.
 9. 每个有意义的步骤后 run 最小相关 tests.
 10. 将 `next_slice` 逐个转为后续 RED, 直至 target 行为 and design change 完成.
@@ -135,7 +135,7 @@ edit 生产 code 前, 使用 [tdd_start.jsonl](templates/tdd_start.jsonl) output
 
 在可信 `red_observed` after and 首次生产行为 edit before, 进行 2 至 5 分钟受约束的反例脑暴. 详细方法见 [boundary-discovery.md](references/boundary-discovery.md).
 
-- 至少考虑 input partition, state sequence, external failure, time/concurrency, invariant and representation 中与 stable boundary 相关的维度.
+- 至少考虑 input partition, state sequence, external failure, time/concurrency, invariant and representation 中 and stable boundary 相关的维度.
 - 每个 candidate 记录 `dimension`,`counterexample`,`risk`,`test_layer`,`rationale` and disposition.
 - `current_slice` 最多只能有 1 个; 它可以收紧当前 RED, 但不得把多个独立行为塞入本次 GREEN.
 - `next_slice` 加入 todo list, 在当前 GREEN 后逐个成为新的 RED.
@@ -175,8 +175,8 @@ edit 生产 code 前, 使用 [tdd_start.jsonl](templates/tdd_start.jsonl) output
 - 仅在 GREEN 后 refactor. refactor 后, 同组相关 tests 仍应 passed.
 - 不要把架构 or 技术栈 rule 伪装成 TDD 本身. framework 边界相关时, 使用对应的技术栈 skill.
 - 将 `tdd_start`,`tdd_state`,`tdd_boundary_scan` and `tdd_finish` 视为 unique 稳定的验证接口. 半自动 script 不应推断 project directory or framework type.
-- meaningful RED and first GREEN 之间必须 append boundary scan; 广泛发现 candidate 后仍只允许最多 1 个 `current_slice` 驱动当前 implementation.
-- 将已 enable 的 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl` 作为 append-only event log 永久保留; 不得改写历史行, 也不得把 task 完成视为删除审计记录的授权.
+- meaningful RED and first GREEN 之间必须 append boundary scan; 广泛发现 candidate 后仍只允许最多 1 个 `current_slice` driven 当前 implementation.
+- 将已 enable 的 `.devopsflow/.tdd_checkpoints/<task-slug>.jsonl` 作为 append-only event log 永久保留; 不得 rewrite history 行, 也不得把 task 完成视为删除审计记录的授权.
 - 使用 todo list 工具明确列出并穿插 update TDD work 项, 任何时刻只有 1 个 `in_progress`.
 - 不要使用含糊证据满足 protocol. RED 证据必须表明 target tests 因 target 风险而失败; GREEN 证据必须表明最小生产修改后, 相同风险已受到保护.
 
@@ -252,7 +252,7 @@ if 答案不明确, 在修改生产 code 前继续阅读 code or 添加 tests.
 ## On-Demand References
 
 - [test-slices.md](references/test-slices.md): 按风险选择 tests 层.
-- [boundary-discovery.md](references/boundary-discovery.md): 在 RED after 进行受约束反例脑暴, 分类 candidate and 保持单一 implementation slice.
+- [boundary-discovery.md](references/boundary-discovery.md): 在 RED after 进行受约束反例脑暴, category candidate and 保持 single implementation slice.
 - [hook-protocol.md](references/hook-protocol.md): 半自动 TDD 护栏 script 的字段, 状态 and 阻断 rule.
 - [characterization-tests.md](references/characterization-tests.md): 如何为复杂现有行为 write 特征 tests.
 - [checklists.md](references/checklists.md): pre edit, 完成前, tests 质量 and 边界异味 check.
@@ -260,7 +260,7 @@ if 答案不明确, 在修改生产 code 前继续阅读 code or 添加 tests.
 - [anti-patterns.md](references/anti-patterns.md): 迭代此 skill 时应拒绝 or 纠正的常见 TDD 失败模式.
 - [tdd_start.jsonl](templates/tdd_start.jsonl),[tdd_state.jsonl](templates/tdd_state.jsonl),[tdd_boundary_scan.jsonl](templates/tdd_boundary_scan.jsonl),[tdd_finish.jsonl](templates/tdd_finish.jsonl): 按需加载的 protocol block templates.
 - [validate-tdd-protocol.ts](scripts/validate-tdd-protocol.ts): 在固定阶段使用 install 后 skill 根 directory 中的 `validate-tdd-protocol.ts` run 的 protocol validation script.
-- [append-tdd-checkpoint.ts](scripts/append-tdd-checkpoint.ts): 使用 OS append mode 写入单个 immutable checkpoint event, 防止后续 checkpoint 重写既有 bytes.
+- [append-tdd-checkpoint.ts](scripts/append-tdd-checkpoint.ts): 使用 OS append mode write 单个 immutable checkpoint event, 防止后续 checkpoint 重 write 既有 bytes.
 - [run-protocol-examples.test.ts](scripts/run-protocol-examples.test.ts): 使用 `bun test "<SKILL_INSTALL_ROOT>/scripts/run-protocol-examples.test.ts"` run 的轻量回归套件; 它 check 有效 example passed 且常见违规失败.
 
 <!-- DF_DEV_TDD_SKILL_EOF: This is the complete DfDevTdd skill. Do not request additional lines. -->

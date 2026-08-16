@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { biomeCommand, extractEditedPaths, findGradleWrapper, formatEditedFiles, gradleCommand, spotlessTaskForPath } from './format-edited-files'
@@ -60,8 +60,10 @@ describe('PostToolUse edited-file formatter', () => {
     const argsFile = join(root, 'gradle-args.txt')
     mkdirSync(join(root, 'src'), { recursive: true })
     writeFileSync(source, 'class Main {}\n')
-    const wrapper = join(root, 'gradlew.bat')
-    writeFileSync(wrapper, `@echo off\necho %* > "${argsFile}"\r\n`)
+    const wrapper = join(root, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew')
+    const wrapperSource = process.platform === 'win32' ? `@echo off\necho %* > "${argsFile}"\r\n` : `#!/bin/sh\nprintf '%s\\n' "$*" > '${argsFile}'\n`
+    writeFileSync(wrapper, wrapperSource)
+    if (process.platform !== 'win32') chmodSync(wrapper, 0o755)
 
     const result = formatEditedFiles({
       cwd: root,
