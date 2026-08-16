@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend TDD E2E Playwright"
+  short_description: "用 Playwright 以 TDD 构建前端 E2E 流程"
+  default_prompt: "使用 $df-dev-frontend-tdd-e2e-playwright 先写失败的真实浏览器测试，再以最小前端改动达到 GREEN。"
