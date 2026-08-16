@@ -12,6 +12,7 @@
     "check:skill-eof": "bun scripts/ensure-skill-eof.ts",
     "check:skill-versions": "bun scripts/check-staged-skill-versions.ts",
     "check:skill-metadata": "bun scripts/check-skill-metadata.ts",
+    "sync:versions:staged": "bun scripts/sync-staged-versions.ts",
     "test": "bun test",
     "test:repository-scripts": "bun test scripts/",
     "test:validators": "bun test skills/df-dev-tdd/scripts/ skills/df-ddd-event-storming-design/scripts/ skills/df-iam-access-control-design/scripts/",
