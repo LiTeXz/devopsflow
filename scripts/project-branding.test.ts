@@ -66,6 +66,13 @@ describe(`${currentBrand} project identity`, () => {
     }
   })
 
+  it('keeps both Codex marketplace manifests installable from the repository root', () => {
+    for (const manifestPath of ['.agents/plugins/marketplace.json', '.codex-plugin/marketplace.json']) {
+      const marketplace = JSON.parse(readFileSync(join(ROOT, manifestPath), 'utf-8'))
+      expect(marketplace.plugins[0].source, manifestPath).toEqual({ source: 'local', path: '.' })
+    }
+  })
+
   it('keeps README user-facing and documents plugin update commands', () => {
     const readme = readFileSync(join(ROOT, 'README.md'), 'utf-8')
     const contributing = readFileSync(join(ROOT, 'CONTRIBUTING.md'), 'utf-8')
