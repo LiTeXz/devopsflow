@@ -79,15 +79,6 @@ export interface SyncProjectGitignoreResult {
   readonly warning?: string
 }
 
-export interface VersionAlignment {
-  readonly version: string
-}
-
-export interface SyncStagedVersionsResult {
-  readonly version: string
-  readonly paths: readonly string[]
-}
-
 function normalizeLineEndings(buffer: Buffer): Buffer {
   return Buffer.from(buffer.toString('utf-8').replace(/\r\n?/g, '\n'), 'utf-8')
 }
@@ -149,127 +140,12 @@ function computeStagedHash(pluginRoot: string, paths: readonly string[]): string
   return createHash('sha256').update(manifest).digest('hex')
 }
 
-export function checkStagedVersionAlignment(pluginRoot: string): VersionAlignment {
-  const packageVersion = jsonVersion('package.json', readStagedFile(pluginRoot, 'package.json'))
-  const pluginVersion = jsonVersion('.codex-plugin/plugin.json', readStagedFile(pluginRoot, '.codex-plugin/plugin.json'))
-  const agentVersions = AGENT_TOML_PATHS.map((path) => {
-    const agentContent = readStagedFile(pluginRoot, path).toString('utf-8')
-    if (/^version\s*=/m.test(agentContent)) {
-      throw new Error(`${path} must use # devopsflow-version = "..." instead of a top-level version field`)
-    }
-    const version = agentContent.match(/^#\s*devopsflow-version\s*=\s*"([^"]+)"/m)?.[1]
-    if (!version) {
-      throw new Error(`${path} is missing its devopsflow-version marker`)
-    }
-    return { path, version }
-  })
-  const mismatchedAgents = agentVersions.filter(({ version }) => version !== packageVersion)
-  if (packageVersion !== pluginVersion || mismatchedAgents.length > 0) {
-    throw new Error(
-      `Version mismatch: package.json=${packageVersion}, plugin.json=${pluginVersion}, ${agentVersions.map(({ path, version }) => `${path}=${version}`).join(', ')}`,
-    )
-  }
-  return { version: packageVersion }
-}
-
-export function syncStagedVersionAlignment(pluginRoot: string): SyncStagedVersionsResult {
-  const version = jsonVersion('package.json', readStagedFile(pluginRoot, 'package.json'))
-  const paths: string[] = []
-  const pluginPath = '.codex-plugin/plugin.json'
-  const stagedPlugin = readStagedFile(pluginRoot, pluginPath)
-  const pluginContent = stagedPlugin.toString('utf-8')
-  const pluginJson = JSON.parse(pluginContent) as Record<string, unknown>
-  if (pluginJson.version !== version) {
-    const updatedPlugin = pluginContent.replace(/("version"\s*:\s*)"[^"]+"/, `$1"${version}"`)
-    syncFileToIndex(pluginRoot, pluginPath, stagedPlugin, Buffer.from(updatedPlugin))
-    paths.push(pluginPath)
-  }
-
-  for (const path of AGENT_TOML_PATHS) {
-    const stagedAgent = readStagedFile(pluginRoot, path)
-    const content = stagedAgent.toString('utf-8')
-    if (/^version\s*=/m.test(content)) {
-      throw new Error(`${path} must use # devopsflow-version = "..." instead of a top-level version field`)
-    }
-    if (!/^#\s*devopsflow-version\s*=\s*"[^"]+"/m.test(content)) {
-      throw new Error(`${path} is missing its devopsflow-version marker`)
-    }
-    const updated = content.replace(/^(#\s*devopsflow-version\s*=\s*)"[^"]+"/m, `$1"${version}"`)
-    if (updated !== content) {
-      syncFileToIndex(pluginRoot, path, stagedAgent, Buffer.from(updated))
-      paths.push(path)
-    }
-  }
-
-  checkStagedVersionAlignment(pluginRoot)
-  return { version, paths }
-}
-
-function jsonVersion(path: string, content: Buffer): string {
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(content.toString('utf-8'))
-  } catch (error) {
-    throw new Error(`${path} is invalid JSON: ${errorMessage(error)}`)
-  }
-  const version = isRecord(parsed) ? parsed.version : undefined
-  if (!isNonEmptyString(version)) {
-    throw new Error(`${path} is missing a non-empty version`)
-  }
-  return version
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
 function readStagedFile(pluginRoot: string, relativePath: string): Buffer {
   const result = git(pluginRoot, ['show', `:${relativePath}`])
   if (result.exitCode !== 0) {
     throw new Error(`Unable to read staged file ${relativePath}: ${result.stderr.toString().trim()}`)
   }
   return result.stdout
-}
-
-function syncFileToIndex(pluginRoot: string, relativePath: string, stagedContent: Buffer, updatedContent: Buffer): void {
-  const absolutePath = join(pluginRoot, relativePath)
-  if (existsSync(absolutePath) && readFileSync(absolutePath).equals(stagedContent)) {
-    writeFileSync(absolutePath, updatedContent)
-    const addResult = git(pluginRoot, ['add', '--', relativePath])
-    if (addResult.exitCode !== 0) {
-      throw new Error(`Unable to stage ${relativePath}: ${addResult.stderr.toString().trim()}`)
-    }
-    return
-  }
-
-  const modeResult = git(pluginRoot, ['ls-files', '-s', '--', relativePath])
-  const mode = modeResult.stdout.toString().match(/^(\d+)\s/)?.[1]
-  if (modeResult.exitCode !== 0 || !mode) {
-    throw new Error(`Unable to inspect staged file ${relativePath}: ${modeResult.stderr.toString().trim()}`)
-  }
-  const hashResult = Bun.spawnSync({
-    cmd: ['git', 'hash-object', '-w', '--stdin'],
-    cwd: pluginRoot,
-    stdin: updatedContent,
-    stderr: 'pipe',
-    stdout: 'pipe',
-  })
-  const objectId = hashResult.stdout.toString().trim()
-  if (hashResult.exitCode !== 0 || !objectId) {
-    throw new Error(`Unable to create staged object for ${relativePath}: ${hashResult.stderr.toString().trim()}`)
-  }
-  const updateResult = git(pluginRoot, ['update-index', '--cacheinfo', mode, objectId, relativePath])
-  if (updateResult.exitCode !== 0) {
-    throw new Error(`Unable to update staged file ${relativePath}: ${updateResult.stderr.toString().trim()}`)
-  }
 }
 
 export function syncStagedManagedAssetHash(pluginRoot: string): SyncStagedHashResult {
@@ -586,20 +462,8 @@ export async function runCli(args: string[] = process.argv.slice(2), payload: Ho
       console.log(`Managed subagent hash: ${result.subagentHash}`)
       return 0
     }
-    if (command === 'check-versions-staged') {
-      const result = checkStagedVersionAlignment(pluginRoot)
-      console.log(`All staged versions aligned: ${result.version}`)
-      return 0
-    }
-    if (command === 'sync-versions-staged') {
-      const result = syncStagedVersionAlignment(pluginRoot)
-      console.log(`Staged release versions synchronized: ${result.version}`)
-      return 0
-    }
     console.error(`Unknown command: ${command}`)
-    console.error(
-      'Usage: df-codex-assets.ts <check-versions-staged|compute|compute-subagents|check|hydrate|sync-project-gitignore|sync-staged|sync-versions-staged>',
-    )
+    console.error('Usage: df-codex-assets.ts <compute|compute-subagents|check|hydrate|sync-project-gitignore|sync-staged>')
     return 2
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error))

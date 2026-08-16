@@ -3,5 +3,5 @@ bun run format:markdown:staged
 bun run format:check
 bun run lint
 bun run check:skill-versions
-bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-versions-staged
+bun run sync:versions:staged
 bun skills/df-codex-assets/scripts/df-codex-assets.ts sync-staged

@@ -1,10 +1,10 @@
 ---
 name: df-codex-assets
 description: "在 other hook run 前, 将 DevopsFlow Codex hook runtime 资产引导至已 install 的 plugin 镜像."
-version: "0.2.35"
+version: "0.2.36"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.35"
+  version: "0.2.36"
 ---
 
 # DevopsFlow Codex Asset Bootstrap
