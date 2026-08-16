@@ -4,7 +4,7 @@
 
 - 名称：从 `dev` 发布 DevopsFlow 0.2.31
 - 目标：将 `origin/dev` 的版本源同步到 0.2.31，通过本地发布门禁，使用 `dev -> main` PR 合入，创建并验证 `v0.2.31` tag、tag-specific Version Check、GitHub Release、精确 tag 安装，并同步 `main` 到 `dev`。
-- 状态：in_progress
+- 状态：superseded_by_v0.2.32
 - Owner：Codex `/root`
 - 创建时间：2026-08-16 Asia/Shanghai
 
@@ -27,11 +27,11 @@ df-dev-engineering-workflow-route
 
 - [x] R1 - 核对分支、远端、版本源、现有 tag/Release 与开放 PR。
 - [x] R2 - 将 package/plugin/agent/managed asset 版本同步到 0.2.31。
-- [ ] R3 - 运行完整本地 release gate，提交并推送 `codex/release-v0.2.31`。
-- [ ] R4 - 创建并合并 `dev -> main` 发布 PR。
-- [ ] R5 - 推送 `v0.2.31` 并等待 tag-specific Version Check。
-- [ ] R6 - 创建 GitHub Release 并验证精确 tag 安装。
-- [ ] R7 - 同步 `main` 到 `dev` 并完成最终验证。
+- [x] R3 - 运行完整本地 release gate，提交并推送 `codex/release-v0.2.31`。
+- [x] R4 - 创建并合并 release PR #87 到 `main`。
+- [x] R5 - 推送 `v0.2.31` 并等待 tag-specific Version Check（run `31925121268`）。
+- [x] R6 - 创建 GitHub Release；精确 tag 安装失败，已由 v0.2.32 hotfix 修复。
+- [x] R7 - 后续同步由 v0.2.32 closeout 完成。
 
 ## Verification Evidence
 
@@ -48,6 +48,7 @@ df-dev-engineering-workflow-route
 
 - 版本发布必须分别验证 merge commit、tag workflow 和 GitHub Release，不能以本地 gate 代替远端证明。
 - 当前无已确认 blocker。
+- v0.2.31 的 marketplace install 缺陷已记录在 v0.2.32 failure review，并由 `v0.2.32` supersede。
 
 ## Progress Log
 
