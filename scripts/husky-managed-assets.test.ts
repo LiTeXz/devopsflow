@@ -76,6 +76,20 @@ describe('Husky managed asset hash', () => {
     expect(git(root, 'show', ':skills/df-example/SKILL.md')).toContain('version: "1.2.4"')
   })
 
+  it('increments a renamed staged skill from the version at its old path', () => {
+    const root = createRepository()
+    writeSkill(root, 'df-example', '1.2.3')
+    git(root, 'add', 'skills/df-example/SKILL.md')
+    git(root, 'commit', '--no-verify', '-m', 'test: add skill')
+
+    git(root, 'mv', 'skills/df-example', 'skills/df-renamed')
+    writeSkill(root, 'df-renamed', '1.2.3', 'changed')
+    git(root, 'add', 'skills/df-renamed/SKILL.md')
+
+    expect(checkStagedSkillVersions(root)).toEqual(['skills/df-renamed/SKILL.md'])
+    expect(git(root, 'show', ':skills/df-renamed/SKILL.md')).toContain('version: "1.2.4"')
+  })
+
   it('accepts a changed staged skill when both version fields increment once', () => {
     const root = createRepository()
     writeSkill(root, 'df-example', '1.2.3')
