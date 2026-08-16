@@ -1,10 +1,10 @@
 ---
 name: df-executing-implementation-plan
 description: "安全地 execution 实施计划. 当 Codex 已有书面计划 or 即将遵循规划的工程步骤时使用: 先审查计划是否存在 tests 缺失, 步骤过大, 顺序错误 or 假设过时, 再逐项 execution task 并记录验证证据."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # Executing Implementation Plan
@@ -39,7 +39,7 @@ if 计划不安全, 先 update 计划 or 请求确认, 再继续 execution.
    - 相关 tests name or check 项
    - result 摘要
 5. if tests 意外失败, 切换至 `df-systematic-debugging`.
-6. if 后续步骤是 TDD 行为 work, 使用 `df-tdd-skill`.
+6. if 后续步骤是 TDD 行为 work, 使用 `df-dev-tdd`.
 7. if task 涉及 Spring Web 边界, 使用 `df-spring-web-boundaries`.
 8. if 实际情况使计划失效, 停止并修订计划.
 

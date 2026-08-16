@@ -1,10 +1,10 @@
 ---
 name: df-ddd-to-tdd-handoff
 description: "将已确认的 DDD event 风暴产物 and 需求可追踪关系转换为可 execution, and language 无关的 TDD implementation 切片. 在 df-ddd-event-storming-design 已产出并确认需求, 命令, event, 聚合, 策略, 不变量, 读模型 or 关系, 且 Codex 需要 tests, implementation 计划 or development 顺序时使用."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # DDD To TDD Handoff
@@ -62,7 +62,7 @@ if DDD 设计尚未确认, 不要 create implementation 切片. return `df-ddd-e
    - 受保护的不变量 or 读模型 result
    - 依赖 and 未决事实
 6. 仅在后续 implementation 技术栈已知时, 标记需要技术专用边界 skill 的切片.
-7. 将切片传递给 `df-implementation-planning` or `df-tdd-skill`.
+7. 将切片传递给 `df-implementation-planning` or `df-dev-tdd`.
 
 ## Output Format
 

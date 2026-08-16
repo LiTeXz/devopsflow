@@ -7,12 +7,15 @@
 示例：
 
 ```bash
+bun "<SKILL_INSTALL_ROOT>/scripts/append-tdd-checkpoint.ts" --checkpoint .devopsflow/.tdd_checkpoints/<task-slug>.jsonl --input <event.json>
 bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage before_edit --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage state --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 bun "<SKILL_INSTALL_ROOT>/scripts/validate-tdd-protocol.ts" --stage finish --input .devopsflow/.tdd_checkpoints/<task-slug>.jsonl
 ```
 
-将当前任务的 `tdd_start`、每个 `tdd_state` 以及 `tdd_finish` blocks 追加到 protocol file，然后对该文件运行脚本。该 `.jsonl` 文件是任务的永久审计记录，必须永久保留；不得在任务完成后删除、清空、截断或迁移到临时目录。
+将当前任务的 `tdd_start`, each `tdd_state`, RED-to-GREEN 中间的 `tdd_boundary_scan` and `tdd_finish` blocks passed `append-tdd-checkpoint.ts --checkpoint <path>` 逐条追加到 protocol file, 然后对该 file run validator. 每一行都是 immutable checkpoint event, 不是可更新的 current state snapshot; 当前 phase 只由 validator 按写入顺序推导.
+
+该 `.jsonl` file 是 append-only 永久审计记录, 必须永久保留, 不得在任务完成后删除. 不得修改、替换或删除任何已写入的行, 不得通过 editor, apply patch or truncate/write API 重写 file. 证据需要补充 or 纠正时, 追加新的 `tdd_state` event 并在 `evidence` 中引用被修正的历史观察. `tdd_start` and `tdd_finish` each 只能出现一次, 后写同类 event 不会覆盖 earlier event, validator 会将其视为 protocol violation.
 
 ## State Machine
 
@@ -72,6 +75,8 @@ declare const allowedTddTransitions: readonly [
 `scope_defined` 由 `tdd_start` 表示；`final_verified` 由 `tdd_finish` 表示。`tdd_state.phase` 只使用中间四种状态：`test_written`、`red_observed`、`green_reached` 和 `refactor_done`。
 可以跳过 `refactor_done`，但 `tdd_finish.refactor_performed` 必须为 `false`。除非 `evidence` 说明如何证明一个已经 GREEN 的测试有效，否则在没有 `red_observed` 时，不得进入生产行为修改或最终完成阶段。
 
+`tdd_boundary_scan` 不是 mutable phase. each behavior slice 的 scan 必须 append 在对应 `red_observed` after and `green_reached` before, 用于记录 implementation 前发现的 counterexample candidate and disposition.
+
 每次状态转换都必须同步调用 todo list 工具更新 `todoItemId` 对应项。todo list 必须在 `scope_defined` 后创建，任一时刻仅有一个 `in_progress`；进入 `final_verified` 前必须逐项核对，不得在收尾时批量伪造完成状态。
 
 ## tdd_start
@@ -102,6 +107,20 @@ declare const allowedTddTransitions: readonly [
 - `red_observed.evidence` 必须说明失败原因与目标风险之间的关系。
 - 如果测试立即通过，必须提供补充证明：临时扰动、反转断言、移除生产路径并观察失败，或说明无法复现先前 RED 证据的原因。
 
+## tdd_boundary_scan
+
+meaningful RED after, 使用 [tdd_boundary_scan.jsonl](../templates/tdd_boundary_scan.jsonl) append boundary discovery event.
+
+阻断规则:
+
+- missing scan 时不得进入 `green_reached` or `tdd_finish`.
+- scan 位于 `red_observed` before or `green_reached` after 时阻断.
+- `trigger_test`,`stable_boundary`,`dimensions_considered` and `candidates` required.
+- each candidate 必须 include `dimension`,`counterexample`,`risk`,`disposition`,`test_layer` and `rationale`.
+- disposition 只能是 `current_slice`,`next_slice` or `deferred`; `current_slice` 最多 1 个.
+- candidate dimension 必须在 `dimensions_considered` 中.
+- `candidates` empty 时必须提供具体 `none_found_reason`.
+
 ## tdd_finish
 
 最终响应前，使用 [tdd_finish.jsonl](../templates/tdd_finish.jsonl) 声明 `tdd_finish` protocol block。
@@ -116,6 +135,7 @@ declare const allowedTddTransitions: readonly [
 - 当 `green_reached: true` 时，`tests_run` 必须包含 GREEN 或最终通过证据。
 - `task_type: characterize_then_fix` 且 `wrong_contract_fixed: false` 时，需要说明停止或继续修复工作的原因。
 - `current_contract_wrong: true` 且 `wrong_contract_characterized: false` 时，需要额外的特征测试证据。
+- latest `red_observed` and `tdd_boundary_scan` 没有对应 `green_reached` 时阻断 finish.
 
 ## What This Does Not Check
 

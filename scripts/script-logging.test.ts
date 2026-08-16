@@ -25,8 +25,8 @@ const operationalScriptPaths = [
   'skills/df-codex-assets/scripts/trust-codex-hooks.ts',
   'skills/df-ddd-event-storming-design/scripts/validate-ddd-design.ts',
   'skills/df-iam-access-control-design/scripts/validate-authorization-identifiers.ts',
-  'skills/df-tdd-skill/scripts/check-template-extraction.ts',
-  'skills/df-tdd-skill/scripts/validate-tdd-protocol.ts',
+  'skills/df-dev-tdd/scripts/check-template-extraction.ts',
+  'skills/df-dev-tdd/scripts/validate-tdd-protocol.ts',
 ] as const
 
 function createPluginRoot(): string {

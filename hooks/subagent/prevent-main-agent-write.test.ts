@@ -136,7 +136,7 @@ describe('MainAgentWriteGuard', () => {
       expect(shouldBlockTool('Bash', { command: 'bun run lint' })).toBeUndefined()
       expect(
         shouldBlockTool('Bash', {
-          command: 'bun skills/df-tdd-skill/scripts/validate-tdd-protocol.ts --stage state --input tdd-protocol.md',
+          command: 'bun skills/df-dev-tdd/scripts/validate-tdd-protocol.ts --stage state --input tdd-protocol.md',
         }),
       ).toBeUndefined()
     })

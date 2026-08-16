@@ -1,10 +1,10 @@
 ---
 name: df-glue-coding
 description: "面向 AI implementation 的 Glue Coding workflow, 应复用 local project 材料, 同时避免盲目复制旧结构. 在 domain 歧义已解决 or 被声明为很薄后, 实施规划 or code 前使用, 适用于 and 现有 CRUD 页面, 列表/表单/详情界面, import/导出, 端点, adapter, command handler, projection, tests, 配置, refactor, 迁移, 现代化 or other 可重复 project pattern 相似的 task. 此 skill 会发现 local style pack, 参考 code, example, 文档, AGENTS.md rule and 附近的生产 implementation, 将其归类为 target pattern, legacy pattern, anti-pattern or behavior evidence, 保留正确约定, 并将新 code 限制在预期差异内."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # Glue Coding
@@ -80,7 +80,7 @@ if 请求 include 不清晰的 domain language, 隐藏业务 rule, 状态转换,
 对于 refactor work:
 
 1. 阅读 legacy code, 理解行为, 公共契约, 副作用 and 兼容性风险.
-2. change 行为保持型 code 前, 使用 `df-tdd-skill` characterization test.
+2. change 行为保持型 code 前, 使用 `df-dev-tdd` characterization test.
 3. 在 repository other 位置 or 明确的参考材料中搜索 target pattern.
 4. if target pattern 不存在, 将 target 设计 task 传给 `df-implementation-planning`, 而不是复制 legacy 形态.
 5. 保留 behavior evidence, 而不是偶然结构.
@@ -114,7 +114,7 @@ if 请求 include 不清晰的 domain language, 隐藏业务 rule, 状态转换,
 - 除非 user 明确接受风险, 否则不要在缺少 characterization 覆盖时 refactor 行为保持型 code.
 - 不要把过时 or 无关 example 视为权威; 参考材料 and repository 冲突时, 优先采用当前生产 code.
 - if pattern 违反已确认的 domain rule, 安全, 验证, 持久化 or 公共契约, 不要盲目保留.
-- 不要让 Glue Coding 成为逃避 tests 的方式. 除非 task 只涉及文档 or 被明确规定为不可 execution, 否则行为 change 仍需要 `df-tdd-skill`.
+- 不要让 Glue Coding 成为逃避 tests 的方式. 除非 task 只涉及文档 or 被明确规定为不可 execution, 否则行为 change 仍需要 `df-dev-tdd`.
 - 不要向此 skill 添加 project 特定 example. 将可复用 example 放入 project repository, 并从 `AGENTS.md` or local 文档提及.
 - 不要把 style pack 当作业务事实. 它只在 DDD, API, 安全, 验证 and 持久化约束已得到遵守后保留 implementation 风格.
 

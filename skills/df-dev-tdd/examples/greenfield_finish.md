@@ -11,6 +11,10 @@
 ```
 
 ```jsonl
+{"tdd_boundary_scan":{"trigger_test":"test_calculate_subtotal_multiplies_quantity_by_unit_price","stable_boundary":"核心逻辑函数 calculate_subtotal(quantity, unit_price)","dimensions_considered":["input_partition","invariant","representation"],"candidates":[{"dimension":"input_partition","counterexample":"quantity 为零","risk":"错误产生非零小计","disposition":"current_slice","test_layer":"unit","rationale":"属于相同乘法边界"},{"dimension":"representation","counterexample":"unit_price 包含小数精度","risk":"金额精度丢失","disposition":"next_slice","test_layer":"property","rationale":"需要独立定义金额精度契约"}]}}
+```
+
+```jsonl
 {"tdd_state":{"phase":"green_reached","command":"bun test tests/price-calculator.test.ts -t multiplies-quantity-by-unit-price","exit_code":0,"evidence":"GREEN：添加最小 calculate_subtotal 实现后，新的小计行为通过。"}}
 ```
 

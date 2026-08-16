@@ -14,7 +14,7 @@
     "check:skill-metadata": "bun scripts/check-skill-metadata.ts",
     "test": "bun test",
     "test:repository-scripts": "bun test scripts/",
-    "test:validators": "bun test skills/df-tdd-skill/scripts/ skills/df-ddd-event-storming-design/scripts/ skills/df-iam-access-control-design/scripts/",
+    "test:validators": "bun test skills/df-dev-tdd/scripts/ skills/df-ddd-event-storming-design/scripts/ skills/df-iam-access-control-design/scripts/",
     "typecheck": "bunx tsc --noEmit",
     "format": "bunx biome format --write .",
     "format:check": "bunx biome format .",
