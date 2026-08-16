@@ -1,4 +1,4 @@
 interface:
-  display_name: "Frontend TDD E2E Playwright"
-  short_description: "用 Playwright 以 TDD 构建前端 E2E 流程"
-  default_prompt: "使用 $df-dev-frontend-tdd-e2e-playwright 先写失败的真实浏览器测试，再以最小前端改动达到 GREEN。"
+  display_name: "Dev Frontend Tdd E2e Playwright"
+  short_description: "适用于前端 feature development, UI 缺陷 fix, 关键 user 流程以及跨页面行为 change, 当风险必须 passed 真实浏览器, 真实 route, 网络边界 or 可见交互才能观察时使用. 使用 Playwright E2E 遵循 RED-GREEN-REFACTOR, 先 write 能证明 target 行为缺失的失败 test, 再以最小生产改动 passed test. 不要用于纯函数, 组件内部 implementation, 仅样式格式 or 不需要浏览器的单元 test; 此 skill and df-dev-tdd 配合, 由 this skill 补充前端 and Playwright 约束."
+  default_prompt: "使用 $df-dev-frontend-tdd-e2e-playwright 先 write 失败的真实浏览器 test, 再以最小前端改动达到 GREEN."
