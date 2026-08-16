@@ -6,6 +6,7 @@ const TASK_TYPES = new Set(['greenfield_feature', 'bug_fix', 'pure_refactor', 'c
 const WRONG_CONTRACT_PLANS = new Set(['none', 'characterize_only', 'fix_after_characterization'])
 const PHASES = new Set(['test_written', 'red_observed', 'green_reached', 'refactor_done'])
 const PHASE_ORDER = ['test_written', 'red_observed', 'green_reached', 'refactor_done']
+const BOUNDARY_DISPOSITIONS = new Set(['current_slice', 'next_slice', 'deferred'])
 
 function loadText(path?: string): string {
   if (path) {
@@ -24,27 +25,15 @@ function loadText(path?: string): string {
 
 function extractJsonlDocuments(text: string): Record<string, unknown>[] {
   const docs: Record<string, unknown>[] = []
-  const fencedRegex = /```jsonl\s*\n([\s\S]*?)```/gi
-  const fencedContents: string[] = []
-  let match: RegExpExecArray | null
-  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex iteration pattern
-  while ((match = fencedRegex.exec(text)) !== null) {
-    fencedContents.push(match[1])
-  }
-
-  const candidates = fencedContents.length ? fencedContents : [text]
-
-  for (const candidate of candidates) {
-    for (const line of candidate.split('\n')) {
-      if (!line.trim()) continue
-      try {
-        const doc = JSON.parse(line) as unknown
-        if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
-          docs.push(doc as Record<string, unknown>)
-        }
-      } catch {
-        // Ignore non-JSONL prose; validation reports missing protocol blocks.
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue
+    try {
+      const doc = JSON.parse(line) as unknown
+      if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
+        docs.push(doc as Record<string, unknown>)
       }
+    } catch {
+      // Ignore non-JSONL prose and fence markers; validation reports missing protocol blocks.
     }
   }
 
@@ -56,27 +45,168 @@ interface TddBlock {
 }
 
 function collectBlocks(docs: Record<string, unknown>[]): {
-  start: TddBlock | null
+  starts: TddBlock[]
   states: TddBlock[]
-  finish: TddBlock | null
+  finishes: TddBlock[]
 } {
-  let start: TddBlock | null = null
+  const starts: TddBlock[] = []
   const states: TddBlock[] = []
-  let finish: TddBlock | null = null
+  const finishes: TddBlock[] = []
 
   for (const doc of docs) {
     if (typeof doc.tdd_start === 'object' && doc.tdd_start && !Array.isArray(doc.tdd_start)) {
-      start = doc.tdd_start as TddBlock
+      starts.push(doc.tdd_start as TddBlock)
     }
     if (typeof doc.tdd_state === 'object' && doc.tdd_state && !Array.isArray(doc.tdd_state)) {
       states.push(doc.tdd_state as TddBlock)
     }
     if (typeof doc.tdd_finish === 'object' && doc.tdd_finish && !Array.isArray(doc.tdd_finish)) {
-      finish = doc.tdd_finish as TddBlock
+      finishes.push(doc.tdd_finish as TddBlock)
     }
   }
 
-  return { start, states, finish }
+  return { starts, states, finishes }
+}
+
+function validateAppendOnlyCardinality(starts: TddBlock[], finishes: TddBlock[], requireFinish: boolean): string[] {
+  const errors: string[] = []
+  if (starts.length > 1) {
+    errors.push(`tdd_start must appear exactly once; found ${starts.length} append-only records`)
+  }
+  if (finishes.length > 1 || (requireFinish && finishes.length !== 1)) {
+    errors.push(`tdd_finish must appear exactly once; found ${finishes.length} append-only records`)
+  }
+  return errors
+}
+
+interface IndexedTddBlock {
+  block: TddBlock
+  documentIndex: number
+}
+
+function collectBoundaryScans(docs: Record<string, unknown>[]): IndexedTddBlock[] {
+  const scans: IndexedTddBlock[] = []
+  docs.forEach((doc, documentIndex) => {
+    if (typeof doc.tdd_boundary_scan === 'object' && doc.tdd_boundary_scan && !Array.isArray(doc.tdd_boundary_scan)) {
+      scans.push({ block: doc.tdd_boundary_scan as TddBlock, documentIndex })
+    }
+  })
+  return scans
+}
+
+function stateDocumentIndices(docs: Record<string, unknown>[], phase: string): number[] {
+  const indices: number[] = []
+  docs.forEach((doc, documentIndex) => {
+    const state = doc.tdd_state
+    if (state && typeof state === 'object' && !Array.isArray(state) && (state as TddBlock).phase === phase) {
+      indices.push(documentIndex)
+    }
+  })
+  return indices
+}
+
+function currentSliceCount(scans: IndexedTddBlock[]): number {
+  return scans.reduce((total, { block }) => {
+    if (!Array.isArray(block.candidates)) return total
+    return (
+      total +
+      block.candidates.filter(
+        (candidate) => candidate && typeof candidate === 'object' && !Array.isArray(candidate) && (candidate as TddBlock).disposition === 'current_slice',
+      ).length
+    )
+  }, 0)
+}
+
+function validateBoundaryScans(docs: Record<string, unknown>[], requireScan: boolean): string[] {
+  const errors: string[] = []
+  const scans = collectBoundaryScans(docs)
+  const redIndices = stateDocumentIndices(docs, 'red_observed')
+  const greenIndices = stateDocumentIndices(docs, 'green_reached')
+
+  if ((requireScan || greenIndices.length > 0) && scans.length === 0) {
+    errors.push('tdd_boundary_scan is required after red_observed and before green_reached')
+  }
+
+  let previousGreenIndex = -1
+  for (const greenIndex of greenIndices) {
+    const redIndex = redIndices.find((index) => index > previousGreenIndex && index < greenIndex)
+    const intervalScans = redIndex === undefined ? [] : scans.filter((scan) => scan.documentIndex > redIndex && scan.documentIndex < greenIndex)
+    const hasScan = intervalScans.length > 0
+    if (!hasScan && scans.length > 0) {
+      errors.push('tdd_boundary_scan is required after red_observed and before green_reached')
+    }
+    if (currentSliceCount(intervalScans) > 1) {
+      errors.push('RED-to-GREEN boundary scans must contain at most one current_slice in total')
+    }
+    previousGreenIndex = greenIndex
+  }
+
+  const trailingRedIndex = redIndices.find((index) => index > previousGreenIndex)
+  if (trailingRedIndex !== undefined) {
+    const trailingScans = scans.filter((scan) => scan.documentIndex > trailingRedIndex)
+    if (currentSliceCount(trailingScans) > 1) {
+      errors.push('RED-to-GREEN boundary scans must contain at most one current_slice in total')
+    }
+    if (requireScan) {
+      errors.push('tdd_finish cannot follow an unfinished RED-to-GREEN boundary slice')
+    }
+  }
+
+  scans.forEach(({ block, documentIndex }, scanIndex) => {
+    const prefix = `tdd_boundary_scan[${scanIndex + 1}]`
+    const previousRedIndex = redIndices.filter((index) => index < documentIndex).at(-1) ?? -1
+    const previousCompletedGreenIndex = greenIndices.filter((index) => index < documentIndex).at(-1) ?? -1
+    if (previousRedIndex < 0 || previousRedIndex < previousCompletedGreenIndex) {
+      errors.push(`${prefix} must appear after red_observed and before green_reached`)
+    }
+
+    requireFields(block, ['trigger_test', 'stable_boundary', 'dimensions_considered', 'candidates'], prefix, errors)
+
+    const rawDimensions = Array.isArray(block.dimensions_considered) ? block.dimensions_considered : []
+    const dimensions = rawDimensions.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())).map((value) => value.trim())
+    if (!dimensions.length) {
+      errors.push(`${prefix}.dimensions_considered must be a non-empty list of boundary dimensions`)
+    }
+    if (rawDimensions.length !== dimensions.length) {
+      errors.push(`${prefix}.dimensions_considered must contain only non-blank strings`)
+    }
+
+    if (!Array.isArray(block.candidates)) {
+      errors.push(`${prefix}.candidates must be a list`)
+      return
+    }
+    if (!block.candidates.length && isBlank(block.none_found_reason)) {
+      errors.push(`${prefix}.none_found_reason is required when candidates is empty`)
+    }
+    if (!block.candidates.length && /^(?:none|n\/?a|not applicable|not_applicable|无|没有|不适用)$/i.test(String(block.none_found_reason).trim())) {
+      errors.push(`${prefix}.none_found_reason must describe the explored boundary evidence`)
+    }
+
+    let currentSliceCount = 0
+    block.candidates.forEach((candidate, candidateIndex) => {
+      const candidatePrefix = `${prefix}.candidates[${candidateIndex + 1}]`
+      if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
+        errors.push(`${candidatePrefix} must be an object`)
+        return
+      }
+
+      const item = candidate as TddBlock
+      requireFields(item, ['dimension', 'counterexample', 'risk', 'disposition', 'test_layer', 'rationale'], candidatePrefix, errors)
+      if (!BOUNDARY_DISPOSITIONS.has(String(item.disposition))) {
+        errors.push(`${candidatePrefix}.disposition must be one of ${[...BOUNDARY_DISPOSITIONS].sort().join(', ')}`)
+      }
+      if (item.disposition === 'current_slice') currentSliceCount++
+      if (!isBlank(item.dimension) && !dimensions.includes(String(item.dimension))) {
+        errors.push(`${candidatePrefix}.dimension must appear in ${prefix}.dimensions_considered`)
+      }
+    })
+
+    if (currentSliceCount > 1) {
+      errors.push(`${prefix}.candidates must contain at most one current_slice`)
+    }
+  })
+
+  return errors
 }
 
 function isBlank(value: unknown): boolean {
@@ -308,11 +438,30 @@ function validateFinish(finish: TddBlock | null): string[] {
 
 export function validate(stage: string, text: string): string[] {
   const docs = extractJsonlDocuments(text)
-  const { start, states, finish } = collectBlocks(docs)
+  const { starts, states, finishes } = collectBlocks(docs)
+  const start = starts[0] ?? null
+  const finish = finishes[0] ?? null
 
-  if (stage === 'before_edit') return validateStart(start)
-  if (stage === 'state') return [...validateStart(start), ...validateStates(states)]
-  if (stage === 'finish') return [...validateStart(start), ...validateStates(states, true), ...validateFinish(finish)]
+  if (stage === 'before_edit') {
+    return [...validateAppendOnlyCardinality(starts, finishes, false), ...validateStart(start), ...validateBoundaryScans(docs, false)]
+  }
+  if (stage === 'state') {
+    return [
+      ...validateAppendOnlyCardinality(starts, finishes, false),
+      ...validateStart(start),
+      ...validateStates(states),
+      ...validateBoundaryScans(docs, false),
+    ]
+  }
+  if (stage === 'finish') {
+    return [
+      ...validateAppendOnlyCardinality(starts, finishes, true),
+      ...validateStart(start),
+      ...validateStates(states, true),
+      ...validateBoundaryScans(docs, true),
+      ...validateFinish(finish),
+    ]
+  }
   throw new Error(`Unknown stage: ${stage}`)
 }
 

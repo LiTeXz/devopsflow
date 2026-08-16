@@ -25,9 +25,20 @@
 - 新测试在生产修改前是否真的会失败？
 - 如果移除或故意变异生产行为，测试是否会失败？
 
+## After Meaningful RED
+
+- 是否在生产行为 edit 前 run Boundary Discovery Burst?
+- `trigger_test` and `stable_boundary` 是否与当前 RED 一致?
+- 是否考虑了相关 input partition, state sequence, external failure, time/concurrency, invariant or representation boundary?
+- each candidate 是否 include concrete counterexample, observable risk and test layer?
+- `current_slice` 是否最多 1 个?
+- `next_slice` 是否已加入 todo list?
+- `deferred` 是否 write 明 rationale and residual risk?
+- 无 candidate 时是否 write 具体 `none_found_reason`?
+
 ## TDD Smells
 
-- 缺少 `tdd_start`、`tdd_state` 或 `tdd_finish`，导致流程不可检查。
+- 缺少 `tdd_start`,`tdd_state`,`tdd_boundary_scan` or `tdd_finish`, 导致流程不可 check.
 - 先完成生产代码重构，之后才添加测试。
 - 违反 TDD 后保留生产代码，却没有重新产生有意义的 RED 信号。
 - 使用“太小而不值得测试”“稍后补测试”“手工验证已足够”或“只是胶水代码”跳过 RED。
@@ -37,6 +48,7 @@
 - 生产行为会重复时，测试只覆盖第一个条目、页面或批次。
 - 没有观察到失败测试，或失败原因与目标风险无关。
 - 在 RED 状态中混入命名、提取类、格式化或其他结构清理。
+- 跳过 boundary scan, or 一次激活多个 `current_slice` 形成大跨度 GREEN.
 
 ## When Stuck
 
@@ -50,6 +62,7 @@
 
 - 是否已输出 `tdd_finish`？
 - 关键测试是否有 RED 证据，或有无法保留证据的说明？
+- each RED-to-GREEN slice 是否存在位于两者之间的 `tdd_boundary_scan`?
 - 最小相关测试是否通过？
 - 如果涉及公共契约、持久化、一致性、安全性或外部系统，是否已运行更广泛检查，或明确说明未运行？
 - 移动后的职责是否在新归属方受到行为测试保护？

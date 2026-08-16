@@ -12,6 +12,11 @@ interface SkillVersions {
   metadataVersion: string
 }
 
+interface ChangedSkill {
+  path: string
+  previousPath?: string
+}
+
 function git(root: string, args: string[]): Bun.ReadableSyncSubprocess {
   return Bun.spawnSync({
     cmd: ['git', ...args],
@@ -47,16 +52,27 @@ function stageFile(root: string, path: string): void {
   }
 }
 
-function changedSkills(root: string): string[] {
-  const paths = gitOutput(root, ['diff', '--cached', '--name-only', '--diff-filter=ACMR', 'HEAD', '--', 'skills'])
-  return [
-    ...new Set(
-      paths
-        .split(/\r?\n/)
-        .map((path) => path.match(SKILL_PATH_PATTERN)?.[1])
-        .filter((skill): skill is string => Boolean(skill)),
-    ),
-  ].sort()
+function changedSkills(root: string): ChangedSkill[] {
+  const changes = gitOutput(root, ['diff', '--cached', '--name-status', '--find-renames', '--diff-filter=ACMR', 'HEAD', '--', 'skills'])
+  const skills = new Map<string, ChangedSkill>()
+
+  for (const change of changes.split(/\r?\n/)) {
+    if (!change) continue
+    const [status, firstPath, secondPath] = change.split('\t')
+    const renamed = status.startsWith('R')
+    const currentPath = renamed ? secondPath : firstPath
+    const skill = currentPath?.match(SKILL_PATH_PATTERN)?.[1]
+    if (!skill) continue
+
+    const path = SKILL_MARKDOWN_PATH(skill)
+    const entry = skills.get(skill) ?? { path }
+    if (renamed && currentPath === path && firstPath?.endsWith('/SKILL.md')) {
+      entry.previousPath = firstPath
+    }
+    skills.set(skill, entry)
+  }
+
+  return [...skills.values()].sort((left, right) => left.path.localeCompare(right.path))
 }
 
 function parseVersions(path: string, content: string): SkillVersions {
@@ -92,10 +108,9 @@ function replaceVersions(content: string, version: string): string {
 
 export function checkStagedSkillVersions(root = process.cwd()): string[] {
   const checked: string[] = []
-  for (const skill of changedSkills(root)) {
-    const path = SKILL_MARKDOWN_PATH(skill)
+  for (const { path, previousPath } of changedSkills(root)) {
     const staged = parseVersions(path, readStagedFile(root, path))
-    const head = readHeadFile(root, path)
+    const head = readHeadFile(root, previousPath ?? path)
     if (head) {
       const previous = parseVersions(path, head).version
       const expected = incrementPatch(previous)

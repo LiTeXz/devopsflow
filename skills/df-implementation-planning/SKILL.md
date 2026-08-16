@@ -1,10 +1,10 @@
 ---
 name: df-implementation-planning
 description: "code 前 write 具体的小步实施计划. 适用于多步 feature, 缺陷 fix, refactor, DDD-to-TDD 交接, 风险行为 change, or 任何需要在 implementation 前明确 file, 命令, 预期 RED/GREEN result, 验证步骤 and 完成标准的工程 task."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # Implementation Planning
@@ -31,7 +31,7 @@ metadata:
    - 预期 RED, GREEN or 不变 result
    - 完成标准
 5. 每项 task 应足够小, 可独立完成并验证.
-6. 标记需要 `df-tdd-skill`,`df-spring-web-boundaries` or `df-systematic-debugging` 的步骤.
+6. 标记需要 `df-dev-tdd`,`df-spring-web-boundaries` or `df-systematic-debugging` 的步骤.
 7. 对 Glue 风格 work, if 存在选定的 style pack, 应 include 它, 并 write 明选定的 target pattern 及每项 task 允许 change 的精确差异.
 8. 对 refactor 类 Glue work, 分开 characterization, target pattern 迁移 and 清理步骤. 除非遗留结构被明确归类为 target pattern, 否则不要计划复制它.
 9. 说明 execution 前是否需要 user 确认.

@@ -90,7 +90,7 @@ export enum Skill {
   /** Executes an approved implementation plan step by step. */
   ExecutingImplementationPlan = 'df-executing-implementation-plan',
   /** Develops executable behavior with test-first feedback. */
-  Tdd = 'df-tdd-skill',
+  Tdd = 'df-dev-tdd',
   /** Applies Spring Web controller and service-boundary guardrails. */
   SpringWebBoundaries = 'df-spring-web-boundaries',
   /** Establishes evidence for the root cause before applying a fix. */

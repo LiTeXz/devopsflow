@@ -1,6 +1,5 @@
 node_modules/
 *.tsbuildinfo
 dist/
-.codex/
 .logs/
 .obsidian/

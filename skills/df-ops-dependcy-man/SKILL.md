@@ -1,10 +1,10 @@
 ---
 name: df-ops-dependcy-man
 description: "审计并安全清理 JavaScript, Gradle, Maven and GitHub 依赖, 识别无效, 传递, 重复, 作用域错误, 漂移 or 滥用的声明, 并审查 Dependabot rule."
-version: "0.2.29"
+version: "0.2.30"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.29"
+  version: "0.2.30"
 ---
 
 # Ops Dependcy Man
@@ -18,7 +18,7 @@ metadata:
 3. 以 scan 模式 run `scripts/` 中匹配的 script. 优先使用 repository wrapper(`pnpm`,`bun`,`gradlew.bat`,`mvnw.cmd`)and 既有验证 task.
 4. 区分确定发现 and 建议. 当 generate code, 反射, plugins, annotation processing, service loading, framework conventions or platform packaging 可能在没有文本 import 的情况下使用依赖时, 不要删除该依赖.
 5. 只有得到 user 明确授权时才使用 `--fix`. pre edit 记录 diff 并 create 临时备份; edit 后 run 最小且有意义的 build/test/lockfile 验证. verification error 时恢复备份.
-6. 记录新依赖的理由: 用途, call 位置, 拒绝的替代方案, scope, license/security 影响 and 移除证据. 行为 change 搭配 `df-tdd-skill`; 使用 `df-glue-coding` 复用 local 约定; 最后使用 `df-verification-before-completion`.
+6. 记录新依赖的理由: 用途, call 位置, 拒绝的替代方案, scope, license/security 影响 and 移除证据. 行为 change 搭配 `df-dev-tdd`; 使用 `df-glue-coding` 复用 local 约定; 最后使用 `df-verification-before-completion`.
 
 ## Script Contract
 

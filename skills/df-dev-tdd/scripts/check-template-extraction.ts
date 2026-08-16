@@ -21,6 +21,20 @@ const EXPECTED_TEMPLATES: Record<string, string[]> = {
     '"wrong_contract_plan":',
   ],
   'tdd_state.jsonl': ['"tdd_state":', '"phase":', '"command":', '"exit_code":', '"evidence":'],
+  'tdd_boundary_scan.jsonl': [
+    '"tdd_boundary_scan":',
+    '"trigger_test":',
+    '"stable_boundary":',
+    '"dimensions_considered":',
+    '"candidates":',
+    '"dimension":',
+    '"counterexample":',
+    '"risk":',
+    '"disposition":',
+    '"test_layer":',
+    '"rationale":',
+    '"none_found_reason":',
+  ],
   'tdd_finish.jsonl': [
     '"tdd_finish":',
     '"task_type":',
@@ -47,7 +61,7 @@ function fail(message: string): number {
 function main(): number {
   const skillText = readFileSync(SKILL, 'utf-8')
 
-  for (const blockName of ['tdd_start', 'tdd_state', 'tdd_finish']) {
+  for (const blockName of ['tdd_start', 'tdd_state', 'tdd_boundary_scan', 'tdd_finish']) {
     if (!new RegExp(`templates/${blockName}\\.jsonl`).test(skillText)) {
       return fail(`SKILL.md must reference templates/${blockName}.jsonl`)
     }

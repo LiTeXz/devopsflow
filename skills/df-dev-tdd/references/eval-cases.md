@@ -1,6 +1,6 @@
 # Eval Cases
 
-使用这些场景迭代 `df-tdd-skill`。当真实使用暴露出 agent 绕过 TDD、使用含糊证据或选择错误测试层的新方式时，在此添加场景。
+使用这些场景迭代 `df-dev-tdd`。当真实使用暴露出 agent 绕过 TDD、使用含糊证据或选择错误测试层的新方式时，在此添加场景。
 
 ## Case 1: Production Code First
 

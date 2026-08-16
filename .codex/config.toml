@@ -1,0 +1,8 @@
+[plugins."codex-security@openai-curated"]
+enabled = true
+[plugins."codex-security@openai-api-curated"]
+enabled = true
+[plugins."openai-developers@openai-curated"]
+enabled = true
+[plugins."openai-developers@openai-api-curated"]
+enabled = true

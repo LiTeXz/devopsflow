@@ -1,10 +1,10 @@
 ---
 name: df-receiving-code-review
 description: "安全处理 code 审查反馈. 当 Codex 收到 PR 评论, 审查线程, change 请求, 行内 code 审查反馈 or 维护者建议, 需要对评论 category, 决定 fix or 讨论, 应用聚焦 change, 验证每项 fix 并避免无关 refactor 时使用."
-version: "0.2.28"
+version: "0.2.29"
 license: "GPL-3.0-only"
 metadata:
-  version: "0.2.28"
+  version: "0.2.29"
 ---
 
 # Receiving Code Review
@@ -23,7 +23,7 @@ metadata:
    - `already_addressed`
    - `needs_more_context`
 3. 识别受影响的行为, file and tests 面.
-4. 判断 fix 是否需要 `df-tdd-skill`,`df-systematic-debugging` or `df-spring-web-boundaries`.
+4. 判断 fix 是否需要 `df-dev-tdd`,`df-systematic-debugging` or `df-spring-web-boundaries`.
 
 ## Fix Workflow
 

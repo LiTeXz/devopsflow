@@ -11,6 +11,10 @@
 ```
 
 ```jsonl
+{"tdd_boundary_scan":{"trigger_test":"list_givenExistingItems_shouldKeepSortOrder","stable_boundary":"公共查询契约","dimensions_considered":["input_partition"],"candidates":[{"dimension":"input_partition","counterexample":"相同排序键出现多次","risk":"排序结果不稳定","disposition":"current_slice","test_layer":"unit","rationale":"直接挑战当前排序契约"}]}}
+```
+
+```jsonl
 {"tdd_state":{"phase":"green_reached","command":"bun test tests/list.test.ts -t keeps-existing-sort-order","exit_code":0,"evidence":"恢复排序行为后，同一目标测试通过"}}
 ```
 
