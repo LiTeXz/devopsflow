@@ -41,6 +41,11 @@ codex plugin add devopsflow@devopsflow
 
 当前 Codex CLI 没有 `codex plugin update` 子命令；`plugin add` 是已配置 marketplace 中插件的安装/刷新入口。
 
+> hooks 需要用户显式打开，在 codex desktop 当中
+> `Settings` -> `Hooks`
+> ![settings](assets/screenshorts/codex-settings-entrance.png)
+> ![hooks](assets/screenshorts/codex-settings-hooks-entrance.png)
+
 ### OpenCode
 
 下载本仓库后，在项目的 `opencode.json` 中添加：
